@@ -105,7 +105,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                     onClick={() => onLangChange?.(l.code as LangCode)}
                     className={`px-3 py-0.5 text-[12px] ${
                       l.code === lang
-                        ? 'bg-orange-500 text-white font-semibold'
+                        ? 'bg-orange-700 text-white font-semibold'
                         : 'bg-white text-neutral-700 hover:text-orange-600'
                     }`}
                   >

@@ -92,7 +92,7 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
             {justAdded ? '✓ 已加入' : COPY.cta.addToCart}
           </button>
           <button
-            className="flex-1 bg-primary text-white text-[12.5px] font-semibold py-3 hover:bg-primary-dark"
+            className="flex-1 bg-orange-700 text-white text-[12.5px] font-semibold py-3 hover:bg-orange-800"
             onClick={handleBuy}
           >
             {COPY.cta.buyNow}

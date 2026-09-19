@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -78,6 +79,17 @@ export default function ShopDetailClient({ id }: { id: string }) {
   const sym = SYMBOLS[currency] || '$';
   const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
+  // Thumbnails: current + 3 related (or other products if no related) — rotates the main cover on click
+  const gallery = useMemo(() => {
+    const sameCat = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
+    const fillers = PRODUCTS.filter((p) => p.id !== product.id && !sameCat.includes(p)).slice(0, 3 - sameCat.length);
+    const candidates: Product[] = [product, ...sameCat, ...fillers];
+    return candidates.slice(0, 4);
+  }, [product]);
+
+  const [activeImg, setActiveImg] = useState<number>(0);
+  const activeImage = gallery[activeImg] ?? product;
+
   const onAdd = () => {
     addToCart({ id: product.id, name: product.name, price: Number(product.price), cover: product.cover }, qty);
     setAdded(true);
@@ -100,26 +112,76 @@ export default function ShopDetailClient({ id }: { id: string }) {
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <nav className="text-[12.5px] text-ink-500 mb-6">
-          <a onClick={() => router.push('/')} className="cursor-pointer hover:text-orange-700">首页</a>
-          <span className="mx-2">/</span>
-          <span>{product.category}</span>
-          <span className="mx-2">/</span>
-          <span className="text-ink-700">{product.name}</span>
+        {/* Breadcrumb — Link-based for SEO + Next prefetch */}
+        <nav aria-label="面包屑" className="text-[12.5px] text-ink-500 mb-6 flex items-center flex-wrap gap-x-1.5 gap-y-1">
+          <Link href="/" className="hover:text-orange-700 transition-colors">首页</Link>
+          <span aria-hidden="true" className="text-ink-300">/</span>
+          <Link
+            href={`/#recommended?cat=${encodeURIComponent(product.category)}`}
+            className="hover:text-orange-700 transition-colors"
+          >
+            {product.category}
+          </Link>
+          <span aria-hidden="true" className="text-ink-300">/</span>
+          <span className="text-ink-700 font-semibold truncate max-w-[280px]" aria-current="page">
+            {product.name}
+          </span>
         </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-16">
-          {/* Cover */}
-          <div className="aspect-square bg-ink-100 rounded-[14px] overflow-hidden flex items-center justify-center">
-            {product.cover?.startsWith('/') || product.cover?.startsWith('http') ? (
-              <img src={product.cover} alt={product.name} width="800" height="800" className="w-full h-full object-cover" />
+        <div className="grid grid-cols-1 md:grid-cols-[88px_1fr] gap-4 mb-16">
+          {/* Thumbnail rail (vertical on md+) */}
+          <div className="order-2 md:order-1 flex md:flex-col gap-2 md:gap-2.5 overflow-x-auto md:overflow-visible">
+            {gallery.map((g, i) => {
+              const isActive = i === activeImg;
+              return (
+                <button
+                  key={`${g.id}-${i}`}
+                  type="button"
+                  onClick={() => setActiveImg(i)}
+                  aria-label={`查看图片 ${i + 1} of ${gallery.length}`}
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`flex-shrink-0 w-[72px] h-[72px] md:w-[80px] md:h-[80px] rounded-[10px] overflow-hidden bg-ink-100 border-2 transition-all ${
+                    isActive
+                      ? 'border-orange-700 shadow-glow scale-[1.02]'
+                      : 'border-transparent hover:border-ink-300'
+                  }`}
+                >
+                  {g.cover?.startsWith('/') || g.cover?.startsWith('http') ? (
+                    <img
+                      src={g.cover}
+                      alt={g.name}
+                      width="80"
+                      height="80"
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[28px]">📦</div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Main image */}
+          <div className="order-1 md:order-2 aspect-square bg-ink-100 rounded-[14px] overflow-hidden flex items-center justify-center">
+            {activeImage.cover?.startsWith('/') || activeImage.cover?.startsWith('http') ? (
+              <img
+                key={activeImage.cover}
+                src={activeImage.cover}
+                alt={activeImage.name}
+                width="800"
+                height="800"
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="text-[140px]">📦</div>
             )}
           </div>
+        </div>
 
-          {/* Info */}
-          <div>
+        {/* Info below gallery */}
+        <div className="max-w-[640px] mb-16">
             <h1 className="text-[26px] md:text-[30px] font-extrabold text-ink-900 leading-tight mb-3">
               {product.name}
             </h1>
@@ -141,7 +203,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 <span className="text-ink-300 text-[15px] line-through">
                   {sym}{(Number(product.price || 0) * 2.5).toFixed(2)}
                 </span>
-                <span className="ml-auto bg-primary text-white text-[11.5px] font-extrabold px-2 py-0.5 rounded">-60%</span>
+                <span className="ml-auto bg-orange-700 text-white text-[11.5px] font-extrabold px-2 py-0.5 rounded">-60%</span>
               </div>
             </div>
 
@@ -171,7 +233,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
               </button>
               <button
                 onClick={() => router.push('/cart')}
-                className="flex-1 h-[48px] bg-primary hover:bg-primary-dark text-white text-[14.5px] font-bold tracking-wide rounded transition-colors"
+                className="flex-1 h-[48px] bg-orange-700 hover:bg-orange-800 text-white text-[14.5px] font-bold tracking-wide rounded transition-colors"
               >
                 {COPY.cta.buyNow}
               </button>
@@ -190,9 +252,8 @@ export default function ShopDetailClient({ id }: { id: string }) {
             </div>
 
             <div className="mt-3 text-[12px] text-ink-600">
-              id: #{product.id} · {COPY.label.createdAt} {product.created_at && new Date(product.created_at).toLocaleString()}
+              id: #{product.id} · {COPY.label.createdAt} {product.created_at ? new Date(product.created_at).toISOString().slice(0, 10) : '—'}
             </div>
-          </div>
         </div>
 
         {related.length > 0 && (
