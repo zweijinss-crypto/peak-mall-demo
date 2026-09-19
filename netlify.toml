@@ -1,0 +1,47 @@
+# Netlify 部署配置 · peak-mall-demo (Next.js 静态导出)
+# 使用方式:把这个仓库推到 GitHub → Netlify 选这个 repo → 自动检测 netlify.toml
+
+[build]
+  # 静态导出模式 — `next build` 产出 out/ 目录,所有页面预渲染为静态 HTML
+  # 不依赖 Netlify Functions(API 全部走客户端 mock)
+  command = "npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# ============ SPA fallback ============
+# 静态导出模式下,所有路由都是真实 HTML,不需要 fallback
+# 但 _redirects 处理 trailingSlash / 旧路径
+
+# ============ 静态资源缓存（1 年 immutable）============
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/covers/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML 不缓存,保证更新立即生效
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# 安全头
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

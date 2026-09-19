@@ -1,0 +1,92 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import type { FC } from 'react';
+import { COPY } from '@/lib/copy';
+
+/**
+ * Quality - 品质专区:双 banner 但加更多装饰元素 + hover 微动效 + 浮动装饰
+ */
+const Quality: FC = () => {
+  const router = useRouter();
+  const items = [
+    {
+      title: COPY.quality.b1Title,
+      subtitle: COPY.quality.b1Sub,
+      bullets: COPY.quality.b1Bullets,
+      cta: COPY.quality.b1Cta,
+      bg: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 60%, #4c1d95 100%)',
+      accent: '#60a5fa',
+      emoji: '💻',
+      path: '/?cat=' + encodeURIComponent('数码电子'),
+    },
+    {
+      title: COPY.quality.b2Title,
+      subtitle: COPY.quality.b2Sub,
+      bullets: COPY.quality.b2Bullets,
+      cta: COPY.quality.b2Cta,
+      bg: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #431407 100%)',
+      accent: '#fb923c',
+      emoji: '🤖',
+      path: '/?cat=' + encodeURIComponent('家用电器'),
+    },
+  ];
+
+  return (
+    <section className="max-w-shell mx-auto px-5 py-12">
+      <div className="flex items-end justify-between mb-7">
+        <div>
+          <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{COPY.quality.label}</div>
+          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.quality.title}</h2>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {items.map((it, idx) => (
+          <button
+            key={idx}
+            onClick={() => router.push(it.path)}
+            className="group relative h-[300px] md:h-[360px] rounded-2xl overflow-hidden text-left text-white shadow-soft hover:shadow-float hover:-translate-y-1 transition-all"
+            style={{ background: it.bg }}
+          >
+            <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+            <div
+              className="absolute -right-16 -bottom-16 w-[280px] h-[280px] rounded-full opacity-20 group-hover:scale-125 group-hover:opacity-40 transition-all duration-700"
+              style={{ background: it.accent }}
+            />
+
+            <div className="relative h-full flex flex-col justify-between p-7 md:p-9">
+              <div>
+                <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{COPY.quality.collection}</div>
+                <h3 className="text-[26px] md:text-[32px] font-extrabold leading-tight mb-2.5 max-w-[300px]">
+                  {it.title}
+                </h3>
+                <p className="text-[13.5px] opacity-85 leading-relaxed max-w-[340px] mb-4">{it.subtitle}</p>
+                <ul className="space-y-1.5">
+                  {it.bullets.map((b, i) => (
+                    <li key={i} className="flex items-center gap-2 text-[13px] opacity-95">
+                      <span className="w-1 h-1 bg-white rounded-full" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex items-end justify-between">
+                <div className="inline-flex items-center gap-2 bg-white text-ink-900 px-4 py-2 rounded-md text-[12.5px] font-bold tracking-wide group-hover:gap-3 transition-all">
+                  {it.cta}
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="text-[110px] opacity-30 group-hover:opacity-60 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">{it.emoji}</div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default Quality;
