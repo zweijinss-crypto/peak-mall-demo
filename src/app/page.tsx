@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -8,6 +8,7 @@ import {
   type CurrencyCode,
 } from '@/components/peak-mall';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
+import { usePeakStore, type Locale } from '@/lib/store';
 import Hero from '@/components/home/Hero';
 import TrustStrip from '@/components/home/TrustStrip';
 import FlashSale from '@/components/home/FlashSale';
@@ -78,21 +79,31 @@ const FOOTER_COLUMNS = [
 
 export default function HomePage() {
   const [currency, setCurrency] = useState<CurrencyCode>('USD');
-  const [lang, setLang] = useState<'zh' | 'en'>('zh');
+  const locale = usePeakStore((s) => s.locale);
+  const setLocale = usePeakStore((s) => s.setLocale);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const brand = mounted && locale === 'en'
+    ? { name: 'Peak Mall', slogan: 'PEAK MALL' }
+    : { name: '顶峰商城', slogan: 'PEAK MALL' };
+  const announcement = mounted && locale === 'en'
+    ? 'New customers save 20% on first order · Free shipping over $50'
+    : '新用户首单立享 8 折优惠 · 全场满 $50 包邮';
 
   return (
     <>
-      <AnnouncementBar tag="公告" text="新用户首单立享 8 折优惠 · 全场满 $50 包邮" duration={20} />
+      <AnnouncementBar tag={mounted && locale === 'en' ? 'Notice' : '公告'} text={announcement} duration={20} />
       <ShopHeader
-        brand={{ name: '顶峰商城', slogan: 'PEAK MALL' }}
+        brand={brand}
         navItems={NAV_ITEMS}
         active="home"
         currencyOptions={CURRENCY_OPTIONS}
         currency={currency}
         onCurrencyChange={(c) => setCurrency(c as CurrencyCode)}
         langOptions={LANG_OPTIONS}
-        lang={lang}
-        onLangChange={setLang}
+        lang={locale}
+        onLangChange={(l) => setLocale(l as Locale)}
       />
 
       <main>

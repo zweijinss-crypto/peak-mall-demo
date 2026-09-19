@@ -1,0 +1,282 @@
+/**
+ * COPY_EN — 英文文案 (peak-mall demo)
+ *
+ * 只翻译英文版需要的 keys;其他 keys 通过 useT() 缺失时自动 fallback 到中文 COPY。
+ * 3 个目标页面用到的 keys 必须全部在这里(供首屏 SSR + 客户端切换使用)。
+ *
+ * 设计原则:
+ * - 扁平结构与 COPY 对齐,缺啥补啥
+ * - 不留机翻痕迹,适合英文母语者阅读
+ * - 货币/符号不在 copy 中,渲染层按 locale 切换
+ */
+
+export const COPY_EN = {
+  brand: {
+    name: 'Peak Mall',
+    slogan: 'PEAK MALL',
+  },
+
+  cta: {
+    addToCart: 'Add to cart',
+    buyNow: 'Buy now',
+    backToHome: 'Back to home',
+    submit: 'Submit',
+    login: 'Sign in',
+    register: 'Create account',
+  },
+
+  nav: {
+    home: 'Home',
+    all: 'All',
+    new: 'New',
+    hot: 'Hot',
+    orders: 'My orders',
+  },
+
+  announcement: 'New customers save 20% on first order · Free shipping over $50',
+
+  hero: {
+    h1: 'Curated global goods',
+    h2: 'Quality living, one stop',
+    sub: 'Tech · Smart home · Ships to 28 countries · 7-day no-reason returns',
+    eyebrow: 'Limited time · Free shipping over $50',
+    ctaPrimary: 'Shop now',
+    ctaSecondary: 'See bestsellers',
+    socialProof: '100,000+ happy shoppers',
+    rating: '4.9 / 5.0',
+    floatingCard1: 'Shipped',
+    floatingCard1Sub: 'Arrives in 3 days',
+    floatingCard2: 'Great experience, fast support, on-time logistics.',
+    searchPlaceholder: 'Search 160k items · laptops / earbuds / vacuums …',
+    searchHint: 'Popular:',
+    searchTags: ['Business laptops', 'Wireless earbuds', 'Robot vacuums', 'Smart watches'],
+  },
+
+  home: {
+    browseByCat: 'Browse by category',
+    exploreCategories: 'Explore curated categories',
+    cat1Desc: 'From business laptops to smart wearables, covering every facet of digital life',
+    cat2Desc: 'Smart home upgrades that make everyday life easier',
+    catOfItems: (n: number) => `${n} items`,
+  },
+
+  flashSale: {
+    label: 'Flash sale',
+    title: '12-hour limited deal',
+    scope: 'Site-wide · Once only',
+    endsIn: 'Ends in',
+    stock: 'Stock left',
+    save: 'Save',
+  },
+
+  topSelling: {
+    label: 'Bestsellers this week',
+    title: 'TOP 5 user favorites',
+    viewAll: 'See full ranking',
+    sold: 'sold',
+  },
+
+  rec: {
+    label: 'Picked for you',
+    title: 'Curated picks',
+    sub: 'Smart picks based on your browsing and trending data',
+    sortBy: 'Sort',
+    sortDefault: 'Featured',
+    sortPriceAsc: 'Price: low to high',
+    sortPriceDesc: 'Price: high to low',
+    sortRating: 'Top rated',
+    empty: 'No items in this category, try another',
+  },
+
+  quality: {
+    label: 'Quality zone',
+    title: 'Two curated collections',
+    collection: 'Collection',
+    b1Title: 'Tech flagship zone',
+    b1Sub: 'From business to daily entertainment — flagship quality, global selection',
+    b1Bullets: ['Business laptops · flagship performance', 'Smart wearables · health tracking', 'Audio · immersive experience'],
+    b1Cta: 'Shop tech',
+    b2Title: 'Smart home zone',
+    b2Sub: 'Tech that lights up everyday life and makes housework lighter',
+    b2Bullets: ['Robot vacuums · LiDAR navigation', 'Smart speakers · voice control', 'Security cameras · 24h watch'],
+    b2Cta: 'Shop home',
+  },
+
+  newArrivals: {
+    label: 'New arrivals',
+    title: 'Just landed · Be first',
+    viewAll: 'See all new arrivals',
+    badge: 'NEW',
+    hot: 'Hot',
+  },
+
+  testimonial: {
+    label: 'Real reviews',
+    title: 'Hear what they say',
+    aggregate: '4.9 · from 10,000+ users',
+    q1: 'My first order from Peak Mall exceeded expectations. Sturdy packaging, fast shipping, quality that justifies the price.',
+    n1: 'Ms. Chen',
+    r1: 'Beijing · Tech enthusiast',
+    q2: 'Bought a business laptop and wireless earbuds, both authentic and cheaper than retail. Support was also professional.',
+    n2: 'Mr. Li',
+    r2: 'Shanghai · Business user',
+    q3: 'The smart home gear is solid — the vacuum is smart and the app control is smooth. Already my third order.',
+    n3: 'Ms. Wang',
+    r3: 'Shenzhen · Designer',
+  },
+
+  promise: {
+    label: 'Our promise',
+    title: 'Four guarantees, shop with confidence',
+  },
+
+  cart: {
+    title: 'My cart',
+    empty: 'Your cart is empty',
+    emptyDesc: 'Go find something nice',
+    total: 'Total',
+    checkout: 'Checkout',
+    clear: 'Clear cart',
+    continue: 'Continue shopping',
+    qty: 'Qty',
+    subtotal: 'Subtotal',
+    orderPlaced: 'Order placed',
+    orderPlacedDesc: 'Check status in My Orders',
+    removed: 'Removed',
+    freeShippingNote: 'Free shipping',
+    shippingFee: '$5.00',
+  },
+
+  orders: {
+    title: 'My orders',
+    empty: 'No orders yet',
+    emptyDesc: 'Place an order from cart to see it here',
+    continueShopping: 'Browse products',
+    startShopping: 'Browse products',
+    itemCount: (n: number) => `${n} items`,
+    orderId: 'Order ID',
+    placedAt: 'Placed',
+    items: 'items',
+    amount: 'Total',
+    viewDetail: 'View detail',
+    status: {
+      pending: 'Pending',
+      paid: 'Paid',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+    },
+    statusPending: 'Pending',
+    statusPaid: 'Paid',
+    statusShipped: 'Shipped',
+    statusDelivered: 'Delivered',
+  },
+
+  wishlist: {
+    title: 'My wishlist',
+    empty: 'No saved items yet',
+    emptyDesc: 'Tap the heart button to add items you love',
+    addToCart: 'Add to cart',
+    removeAll: 'Clear wishlist',
+    addedAt: 'Saved',
+  },
+
+  profile: {
+    title: 'Account',
+    welcome: 'Welcome back',
+    notLoggedIn: 'Not signed in',
+    loginPrompt: 'Sign in to view your account',
+    nickname: 'Nickname',
+    email: 'Email',
+    edit: 'Edit',
+    quickLinks: 'Quick links',
+    myOrders: 'My orders',
+    myWishlist: 'My wishlist',
+    cart: 'Cart',
+    settings: 'Settings',
+    logout: 'Sign out',
+    memberSince: 'Member since',
+  },
+
+  auth: {
+    loginTitle: 'Sign in to Peak Mall',
+    loginSub: 'Use any email & password (demo mode)',
+    registerTitle: 'Create your account',
+    registerSub: 'Join 100k+ happy shoppers',
+    emailLabel: 'Email',
+    passwordLabel: 'Password',
+    nicknameLabel: 'Nickname',
+    submitLogin: 'Sign in',
+    submitRegister: 'Create account',
+    switchToRegister: 'No account? Sign up',
+    switchToLogin: 'Have an account? Sign in',
+    welcomeBack: (name: string) => `Welcome, ${name}`,
+    rememberMe: 'Remember me',
+    forgotPassword: 'Forgot password?',
+  },
+
+  label: {
+    price: 'Price',
+    category: 'Category',
+    stock: 'Stock',
+    pcs: 'pcs',
+    inStock: 'In stock',
+    outOfStock: 'Out of stock',
+    createdAt: 'Listed',
+    noDescription: 'No description provided.',
+  },
+
+  product: {
+    spec: 'Specs',
+    rating: 'Rating',
+    related: 'You may also like',
+    qty: 'Quantity',
+    addSuccess: 'Added to cart',
+    loginRequired: 'Please sign in first',
+  },
+
+  cookie: {
+    title: 'We use cookies',
+    desc: 'For a better browsing experience, we use cookies to remember your preferences (cart, wishlist, language). Continuing means you agree.',
+    accept: 'Got it',
+    settings: 'Learn more',
+  },
+
+  notFound: {
+    eyebrow: '404',
+    title: 'Got lost?',
+    desc: "The page you're looking for doesn't exist — it may have been removed or the link is mistyped. Head home or check the bestsellers.",
+    home: 'Back to home',
+    hot: 'See bestsellers',
+    code: 'Error code',
+    quote: 'Got lost? No items here, but the 12-hour flash sale next door is worth a look.',
+    quoteBy: '— Peak Mall curator',
+  },
+
+  shop: {
+    notFoundTitle: 'Product not found',
+    notFoundDesc: 'The product may be removed or the link is wrong.',
+  },
+
+  footer: {
+    service: 'Customer service',
+    about: 'About us',
+    business: 'Business cooperation',
+    policy: 'Privacy policy',
+    terms: 'Terms of service',
+    contactUs: 'Contact us',
+    followUs: 'Follow us',
+    helpCenter: 'Help center',
+    shipping: 'Shipping policy',
+    returns: 'Returns & exchanges',
+    payment: 'Payment methods',
+    aboutUs: 'About Peak Mall',
+    careers: 'Careers',
+    press: 'Press',
+    blog: 'Blog',
+    wholesale: 'Wholesale',
+    oem: 'OEM/ODM',
+    affiliate: 'Affiliate',
+    copyright: 'All rights reserved',
+    privacy: 'Privacy policy',
+  },
+} as const;

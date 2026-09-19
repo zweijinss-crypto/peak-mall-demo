@@ -30,16 +30,20 @@ export interface WishItem {
   addedAt: number;
 }
 
+export type Locale = 'zh' | 'en';
+
 interface PeakStore {
   cart: CartItem[];
   orders: Order[];
   wishlist: WishItem[];
+  locale: Locale;
   addToCart: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
   updateQty: (id: number, qty: number) => void;
   removeFromCart: (id: number) => void;
   clearCart: () => void;
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
+  setLocale: (l: Locale) => void;
 }
 
 export const usePeakStore = create<PeakStore>()(
@@ -48,6 +52,7 @@ export const usePeakStore = create<PeakStore>()(
       cart: [],
       orders: [],
       wishlist: [],
+      locale: 'zh',
 
       addToCart: (item, qty = 1) =>
         set((s) => {
@@ -103,6 +108,8 @@ export const usePeakStore = create<PeakStore>()(
         set({ orders: [order, ...s.orders], cart: [] });
         return order;
       },
+
+      setLocale: (locale) => set({ locale }),
     }),
     {
       name: 'peak-mall-store',
@@ -111,6 +118,7 @@ export const usePeakStore = create<PeakStore>()(
         cart: s.cart,
         orders: s.orders,
         wishlist: s.wishlist,
+        locale: s.locale,
       }),
     }
   )

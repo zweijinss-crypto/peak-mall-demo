@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 /**
  * Hero - 重设计:左侧大字 + 双 CTA + 装饰徽章,右侧浮动商品预览
@@ -12,6 +12,7 @@ import { COPY } from '@/lib/copy';
  */
 const Hero: FC = () => {
   const router = useRouter();
+  const t = useT();
   const [mounted, setMounted] = useState(false);
   const [q, setQ] = useState('');
   useEffect(() => setMounted(true), []);
@@ -39,16 +40,16 @@ const Hero: FC = () => {
           <div className={`${mounted ? 'animate-fade-up' : 'opacity-0'}`}>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/40 rounded-full text-[12px] font-semibold tracking-wide mb-6">
               <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse-slow" />
-              {COPY.hero.eyebrow}
+              {t.hero.eyebrow}
             </div>
 
             <h1 className="text-[44px] md:text-[64px] lg:text-[72px] leading-[1.02] font-extrabold tracking-tight mb-6">
-              <span className="block">{COPY.hero.h1}</span>
-              <span className="block text-gradient-orange">{COPY.hero.h2}</span>
+              <span className="block">{t.hero.h1}</span>
+              <span className="block text-gradient-orange">{t.hero.h2}</span>
             </h1>
 
             <p className="text-[16px] md:text-[18px] text-white/70 leading-[1.7] max-w-[520px] mb-8">
-              {COPY.hero.sub}
+              {t.hero.sub}
             </p>
 
             <div className="flex flex-wrap gap-3 mb-8">
@@ -56,7 +57,7 @@ const Hero: FC = () => {
                 href="#recommended"
                 className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md shadow-glow transition-all hover:-translate-y-0.5"
               >
-                {COPY.hero.ctaPrimary}
+                {t.hero.ctaPrimary}
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -65,7 +66,7 @@ const Hero: FC = () => {
                 href="/shop/49"
                 className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md transition-all hover:-translate-y-0.5"
               >
-                {COPY.hero.ctaSecondary}
+                {t.hero.ctaSecondary}
               </Link>
             </div>
 
@@ -87,7 +88,7 @@ const Hero: FC = () => {
                   type="search"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder={COPY.hero.searchPlaceholder}
+                  placeholder={t.hero.searchPlaceholder}
                   aria-label="搜索商品"
                   className="flex-1 min-w-0 bg-transparent text-ink-900 placeholder:text-ink-500 text-[14px] px-1 py-3 outline-none"
                 />
@@ -99,8 +100,8 @@ const Hero: FC = () => {
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px] text-white/70">
-                <span className="font-semibold text-white/85">{COPY.hero.searchHint}</span>
-                {COPY.hero.searchTags.map((t) => (
+                <span className="font-semibold text-white/85">{t.hero.searchHint}</span>
+                {t.hero.searchTags.map((t) => (
                   <button
                     key={t}
                     type="button"
@@ -121,12 +122,12 @@ const Hero: FC = () => {
                     <span key={i} className="w-6 h-6 rounded-full bg-white/15 border-2 border-ink-900 flex items-center justify-center text-[11px]">{e}</span>
                   ))}
                 </span>
-                <span><b className="text-white font-bold">{COPY.hero.socialProof}</b></span>
+                <span><b className="text-white font-bold">{t.hero.socialProof}</b></span>
               </div>
               <span className="hidden sm:block w-1 h-1 bg-white/30 rounded-full" />
               <div className="flex items-center gap-1.5">
                 <span className="text-accent-gold tracking-wider text-[14px]">★★★★★</span>
-                <span><b className="text-white font-bold">{COPY.hero.rating}</b></span>
+                <span><b className="text-white font-bold">{t.hero.rating}</b></span>
               </div>
             </div>
           </div>
@@ -151,8 +152,8 @@ const Hero: FC = () => {
                   <div className="w-8 h-8 rounded-md bg-accent-teal/15 text-accent-teal flex items-center justify-center text-[14px]">📦</div>
                   <div className="text-[10px] text-ink-500">订单状态</div>
                 </div>
-                <div className="text-[13px] font-bold text-ink-900">{COPY.hero.floatingCard1}</div>
-                <div className="text-[10px] text-ink-500 mt-0.5">{COPY.hero.floatingCard1Sub}</div>
+                <div className="text-[13px] font-bold text-ink-900">{t.hero.floatingCard1}</div>
+                <div className="text-[10px] text-ink-500 mt-0.5">{t.hero.floatingCard1Sub}</div>
               </div>
 
               <div className="absolute -right-4 bottom-16 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-float w-[200px] animate-float-delayed-2">
@@ -160,7 +161,7 @@ const Hero: FC = () => {
                   <span className="text-accent-gold text-[12px]">★★★★★</span>
                   <span className="text-[10px] text-ink-500">5.0</span>
                 </div>
-                <div className="text-[11px] text-ink-700 leading-snug">{COPY.hero.floatingCard2}</div>
+                <div className="text-[11px] text-ink-700 leading-snug">{t.hero.floatingCard2}</div>
               </div>
             </div>
           </div>
