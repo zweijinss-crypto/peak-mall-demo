@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { COPY } from '@/lib/copy';
@@ -10,8 +11,20 @@ import { COPY } from '@/lib/copy';
  * 渐变背景 + 两个 blurred orbs + 网格 pattern
  */
 const Hero: FC = () => {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [q, setQ] = useState('');
   useEffect(() => setMounted(true), []);
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = q.trim();
+    if (!term) {
+      router.push('/#recommended');
+      return;
+    }
+    router.push(`/#recommended?q=${encodeURIComponent(term)}`);
+  };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 text-white">
@@ -38,7 +51,7 @@ const Hero: FC = () => {
               {COPY.hero.sub}
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-10">
+            <div className="flex flex-wrap gap-3 mb-8">
               <Link
                 href="#recommended"
                 className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md shadow-glow transition-all hover:-translate-y-0.5"
@@ -55,6 +68,50 @@ const Hero: FC = () => {
                 {COPY.hero.ctaSecondary}
               </Link>
             </div>
+
+            {/* Search */}
+            <form
+              onSubmit={onSearch}
+              role="search"
+              aria-label="站内搜索"
+              className="mb-4 max-w-[560px]"
+            >
+              <div className="flex items-stretch gap-0 bg-white/95 backdrop-blur-md rounded-lg shadow-float overflow-hidden border border-white/40">
+                <div className="flex items-center justify-center pl-4 pr-2 text-ink-500">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                    <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <input
+                  type="search"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={COPY.hero.searchPlaceholder}
+                  aria-label="搜索商品"
+                  className="flex-1 min-w-0 bg-transparent text-ink-900 placeholder:text-ink-500 text-[14px] px-1 py-3 outline-none"
+                />
+                <button
+                  type="submit"
+                  className="bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold px-5 py-3 transition-colors"
+                >
+                  搜索
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[12px] text-white/70">
+                <span className="font-semibold text-white/85">{COPY.hero.searchHint}</span>
+                {COPY.hero.searchTags.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => router.push(`/#recommended?q=${encodeURIComponent(t)}`)}
+                    className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/85 text-[11.5px] transition-colors cursor-pointer"
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </form>
 
             {/* Trust strip */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[12.5px] text-white/60">

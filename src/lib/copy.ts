@@ -104,6 +104,9 @@ export const COPY = {
     floatingCard1: '已发货',
     floatingCard1Sub: '预计 3 天到达',
     floatingCard2: '购买体验非常好,客服响应快,物流准时!',
+    searchPlaceholder: '搜索 16 万件好物 · 笔记本 / 耳机 / 扫地机 …',
+    searchHint: '热门:',
+    searchTags: ['商务本', '真无线耳机', '扫地机器人', '智能手表'],
     trust: {
       countries: '覆盖国家',
       countryUnit: '+',
@@ -243,5 +246,21 @@ export const COPY = {
     addToCart: '加入购物车',
     removeAll: '清空收藏',
     addedAt: '收藏于',
+  },
+  cookie: {
+    title: '我们使用 Cookie',
+    desc: '为了提供更好的浏览体验,我们使用 Cookie 记住你的偏好(如购物车、收藏、语言)。继续浏览即表示你同意这一点。',
+    accept: '知道了',
+    settings: '了解更多',
+  },
+  notFound: {
+    eyebrow: '404',
+    title: '迷路了?',
+    desc: '你访问的页面不存在,可能已下架或链接拼错了。回到首页或看看热卖榜也不错。',
+    home: '回到首页',
+    hot: '看看热卖榜',
+    code: '错误代码',
+    quote: '迷路了?这里没有商品,但隔壁街区有个 12 小时限时折扣,值得一看。',
+    quoteBy: '— Peak Mall 站长',
   },
 } as const;

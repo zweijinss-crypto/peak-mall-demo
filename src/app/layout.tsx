@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import CookieBanner from '@/components/peak-mall/CookieBanner';
 
 export const metadata: Metadata = {
   title: 'Peak Mall · Demo',
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh">
       <body className="bg-[var(--color-bg-page)] text-ink-900 font-sans">
         {children}
+        <CookieBanner />
       </body>
     </html>
   );
