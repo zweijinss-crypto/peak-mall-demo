@@ -8,6 +8,7 @@ import { usePeakStore, type Locale, type Order, type PaymentRecord } from '@/lib
 import { useT } from '@/lib/use-t';
 import { buildDemoOrders } from '@/lib/pay-fixtures';
 import { aggregateByBrand, aggregateByStatus, classifyBin } from '@/lib/bin-classify';
+import { buildPayCSVRows, toCSV, downloadCSV } from '@/lib/pay-csv';
 
 const NAV_ITEMS_ZH = [
   { key: 'home', label: '首页' },
@@ -51,6 +52,7 @@ const PayRecordsClient: FC = () => {
   const setLocale = usePeakStore((s) => s.setLocale);
   const ordersInStore = usePeakStore((s) => s.orders);
   const [mounted, setMounted] = useState(false);
+  const [exported, setExported] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const isEn = mounted && locale === 'en';
@@ -100,6 +102,15 @@ const PayRecordsClient: FC = () => {
   }, [records]);
 
   const maxDayTotal = Math.max(1, ...dayAgg.map((d) => d.total));
+
+  function handleExport() {
+    const rows = buildPayCSVRows(orders);
+    const csv = toCSV(rows);
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCSV(`pay-records-${stamp}.csv`, csv);
+    setExported(true);
+    window.setTimeout(() => setExported(false), 1800);
+  }
 
   return (
     <>
@@ -222,9 +233,9 @@ const PayRecordsClient: FC = () => {
 
         {/* 记录表格 */}
         <section className="bg-white border border-ink-100 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-ink-100">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-ink-100 gap-3 flex-wrap">
             <h2 className="text-[14px] font-bold text-ink-900">{t.payRecords.title}</h2>
-            <div className="flex items-center gap-3 text-[11px] text-ink-500">
+            <div className="flex items-center gap-3 text-[11px] text-ink-500 flex-wrap">
               <span className="inline-flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {t.payRecords.legend.test}
@@ -233,7 +244,20 @@ const PayRecordsClient: FC = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-ink-400" />
                 {t.payRecords.legend.live}
               </span>
+              <button
+                type="button"
+                onClick={handleExport}
+                title={t.payRecords.exportNote}
+                aria-label={t.payRecords.export}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-700 text-[12px] font-bold transition-colors"
+              >
+                <span aria-hidden>↓</span>
+                {exported ? t.payRecords.exportDone : t.payRecords.export}
+              </button>
             </div>
+          </div>
+          <div className="px-5 py-1.5 bg-ink-50/40 border-b border-ink-100 text-[11px] text-ink-500">
+            {t.payRecords.exportNote}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[12.5px]">

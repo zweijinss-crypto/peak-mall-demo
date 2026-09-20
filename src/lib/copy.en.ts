@@ -295,6 +295,9 @@ export const COPY_EN = {
       test: 'Test card BIN',
       live: 'Live BIN (demo)',
     },
+    export: 'Export CSV',
+    exportNote: 'Public fields only: BIN / brand / last4 / amount / status / timestamp. Real card number, CVV, address and email are never exported.',
+    exportDone: 'Exported',
   },
 
   footer: {

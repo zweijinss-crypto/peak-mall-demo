@@ -301,5 +301,8 @@ export const COPY = {
       test: '测试卡 BIN',
       live: '真实 BIN(演示)',
     },
+    export: '导出 CSV',
+    exportNote: '仅含公开字段:BIN / 品牌 / 末四位 / 金额 / 状态 / 时间,不导出真实卡号 / CVV / 地址 / 邮箱。',
+    exportDone: '已导出',
   },
 } as const;
