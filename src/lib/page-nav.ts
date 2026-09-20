@@ -49,6 +49,9 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
     { key: 'wishlist', label: '我的收藏' },
     { key: 'address', label: '我的地址' },
     { key: 'aftersale', label: '我的售后' },
+    { key: 'commissions', label: '佣金明细' },
+    { key: 'withdraw', label: '提现中心' },
+    { key: 'withdraw-address', label: '提现地址' },
     { key: 'profile', label: '个人中心' },
   ],
   en: [
@@ -58,6 +61,9 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
     { key: 'wishlist', label: 'Wishlist' },
     { key: 'address', label: 'Addresses' },
     { key: 'aftersale', label: 'After-sales' },
+    { key: 'commissions', label: 'Commissions' },
+    { key: 'withdraw', label: 'Withdraw' },
+    { key: 'withdraw-address', label: 'Payout address' },
     { key: 'profile', label: 'Account' },
   ],
 };
@@ -101,6 +107,9 @@ export type PageKey =
   | 'wishlist'
   | 'address'
   | 'aftersale'
+  | 'commissions'
+  | 'withdraw'
+  | 'withdraw-address'
   | 'profile'
   | 'pay-records'
   | 'search';
