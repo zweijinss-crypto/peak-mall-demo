@@ -86,7 +86,7 @@ const Footer: FC<FooterProps> = ({
                 <span
                   key={s}
                   aria-label={`社交媒体 ${s} (未配置链接)`}
-                  className="w-[34px] h-[34px] rounded-full bg-white/10 flex items-center justify-center text-[13px] opacity-60"
+                  className="w-[34px] h-[34px] rounded-full bg-white/15 flex items-center justify-center text-[13px] text-white font-bold border border-white/20"
                   title="社交媒体链接未配置"
                 >
                   {s}

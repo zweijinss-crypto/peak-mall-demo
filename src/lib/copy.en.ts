@@ -48,6 +48,8 @@ export const COPY_EN = {
     inputAria: 'Search products',
     submit: 'Go',
     orderStatus: 'Order status',
+    logout: 'Sign out',
+    logoutAria: 'Sign out',
   },
 
   announcement: {

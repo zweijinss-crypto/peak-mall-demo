@@ -48,6 +48,8 @@ export const COPY = {
     inputAria: '搜索商品',
     submit: '搜索',
     orderStatus: '订单状态',
+    logout: '退出',
+    logoutAria: '退出登录',
   },
 
   announcement: {

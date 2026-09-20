@@ -14,6 +14,7 @@ import type {
 import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
+import { getCurrentUser, logout } from '@/lib/auth';
 
 export interface ShopHeaderProps {
   brand?: BrandInfo;
@@ -57,6 +58,10 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   const wishCount = usePeakStore((s) => s.wishlist.length);
   const [q, setQ] = useState(initialQuery);
   useEffect(() => setQ(initialQuery), [initialQuery]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  useEffect(() => {
+    setUserEmail(getCurrentUser()?.email ?? null);
+  }, []);
 
   const finalBrand: BrandInfo = brand ?? { name: t.brand.name, slogan: t.brand.slogan };
 
@@ -147,7 +152,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
       {/* Main header */}
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-5 h-[68px] md:h-[76px] flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity" aria-label={finalBrand.name}>
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
             <div className="w-10 h-10 md:w-[42px] md:h-[42px] rounded-[11px] bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center text-[17px] font-extrabold tracking-wide shadow-[0_6px_16px_rgba(253,86,15,0.3)]">
               {finalBrand.name.slice(0, 2)}
             </div>
@@ -218,6 +223,26 @@ const ShopHeader: FC<ShopHeaderProps> = ({
 
           {/* Cart + Wish icons */}
           <div className="flex items-center gap-1 ml-auto">
+            {userEmail && (
+              <div className="hidden md:flex items-center gap-2 mr-1 pl-3 pr-1 h-9 rounded-full border border-neutral-200 bg-white/80 text-[12px] text-neutral-700">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
+                <span className="max-w-[160px] truncate" title={userEmail}>
+                  {userEmail}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setUserEmail(null);
+                    window.location.href = finalLang === 'en' ? '/en/login' : '/login';
+                  }}
+                  className="px-2 py-1 text-[11.5px] font-medium text-neutral-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                  aria-label={`${t.header.logoutAria} (${userEmail})`}
+                >
+                  ⎋ {t.header.logout}
+                </button>
+              </div>
+            )}
             <button
               onClick={() => router.push('/wishlist')}
               aria-label={`${t.footer.wishlist} (${wishCount})`}
