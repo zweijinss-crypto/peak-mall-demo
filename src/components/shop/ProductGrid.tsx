@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
@@ -28,9 +29,9 @@ const DISCOUNT = 0.6; // -60% (mirrors the source-SPA product card)
  * optional and can be hidden via `showCategory`.
  */
 export default function ProductGrid({ products, mode, showCategory = true }: ProductGridProps) {
-  const router = useRouter();
   const t = useT();
   const copy = t.shop.shopAll;
+  const searchParams = useSearchParams();
 
   const [activeCat, setActiveCat] = useState<string>(copy.catAll);
   const [search, setSearch] = useState('');
@@ -62,6 +63,16 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
   } else if (mode === 'hot') {
     sorted = [...products].sort((a, b) => Number(b.stock) - Number(a.stock));
   }
+
+  // URL ?cat=... wins over local state on first paint (CategoryGrid 立即选购 link)
+  useEffect(() => {
+    const urlCat = searchParams.get('cat');
+    if (!urlCat) return;
+    const labels = [copy.catAll, copy.catElectronics, copy.catAppliances];
+    const matched = labels.find((l) => encodeURIComponent(l) === urlCat || l === urlCat);
+    if (matched && matched !== activeCat) setActiveCat(matched);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // category filter — when label switches due to locale, reset to "All"
   if (showCategory && activeCat !== copy.catAll) {
@@ -133,31 +144,35 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
           {sorted.map((p) => (
             <article
               key={p.id}
-              className="group bg-white rounded-xl overflow-hidden border border-ink-100 hover:shadow-float hover:-translate-y-1 transition-all"
+              className="group bg-white rounded-xl overflow-hidden border border-ink-100 hover:shadow-float hover:-translate-y-1 transition-all relative"
             >
-              <button
-                onClick={() => router.push(`/shop/${p.id}`)}
-                className="block w-full aspect-square bg-ink-100 relative overflow-hidden"
+              <Link
+                href={`/shop/${p.id}`}
                 aria-label={p.name}
+                className="block w-full aspect-square bg-ink-100 relative overflow-hidden"
               >
                 {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
                   <Image src={p.cover} alt={p.name} width={320} height={320} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                 )}
-                <span className="absolute top-2 left-2 bg-accent-rose text-white text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded">
+                <span className="absolute top-2 left-2 bg-accent-rose text-white text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded pointer-events-none">
                   {copy.discountBadge}
                 </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleWish(p.id); }}
-                  aria-label={copy.wishAria}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-ink-700 hover:text-accent-rose hover:bg-white text-[14px]"
-                >
-                  ♡
-                </button>
+              </Link>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleWish(p.id); }}
+                aria-label={copy.wishAria}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-ink-700 hover:text-accent-rose hover:bg-white text-[14px] z-[2]"
+              >
+                ♡
               </button>
               <div className="p-3.5">
-                <h3 className="text-[13px] font-semibold text-ink-900 line-clamp-2 leading-snug mb-2 min-h-[34px]">{p.name}</h3>
+                <h3 className="text-[13px] font-semibold text-ink-900 line-clamp-2 leading-snug mb-2 min-h-[34px]">
+                  <Link href={`/shop/${p.id}`} className="hover:text-orange-700 transition-colors">
+                    {p.name}
+                  </Link>
+                </h3>
                 <div className="text-[11px] text-ink-500 mb-1.5">{productLabels[p.category] ?? p.category}</div>
                 <div className="flex items-baseline gap-1.5 mb-3">
                   <span className="text-orange-700 text-[18px] font-extrabold">${Number(p.price).toFixed(2)}</span>

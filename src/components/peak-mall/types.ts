@@ -28,6 +28,8 @@ export interface LangOption {
 export interface NavItem {
   key: string;
   label: string;
+  /** href for the nav link. When set, ShopHeader renders a Next Link. */
+  href?: string;
   /** 显示在顶部细条 */
   top?: boolean;
   onClick?: () => void;

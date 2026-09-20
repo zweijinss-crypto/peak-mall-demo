@@ -52,7 +52,7 @@ const CategoryGrid: FC = () => {
           return (
             <button
               key={c.key}
-              onClick={() => router.push(`/?cat=${encodeURIComponent(c.key)}`)}
+              onClick={() => router.push(`/shop-all?cat=${encodeURIComponent(c.key)}`)}
               className="group relative h-[280px] md:h-[340px] rounded-2xl overflow-hidden text-left text-white shadow-soft hover:shadow-float hover:-translate-y-1 transition-all"
               style={{ background: c.bg }}
             >

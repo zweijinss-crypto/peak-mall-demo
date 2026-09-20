@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { AnnouncementBar, ShopHeader, Footer } from '@/components/peak-mall';
 import { PRODUCTS } from '@/data/products';
 import ProductGrid from '@/components/shop/ProductGrid';
@@ -24,7 +25,9 @@ export default function ShopHotPage() {
       />
 
       <main>
-        <ProductGrid products={PRODUCTS} mode="hot" />
+        <Suspense fallback={<div className="max-w-shell mx-auto px-5 py-8 text-ink-500">加载中…</div>}>
+          <ProductGrid products={PRODUCTS} mode="hot" />
+        </Suspense>
       </main>
 
       <Footer />

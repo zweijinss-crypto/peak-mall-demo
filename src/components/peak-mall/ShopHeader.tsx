@@ -107,9 +107,9 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             {finalNavItems
               .filter((n) => n.top)
               .map((n) => (
-                <a key={n.key} className="cursor-pointer hover:text-orange-500" onClick={n.onClick}>
+                <Link key={n.key} href={(n as { href?: string }).href || '#'} className="cursor-pointer hover:text-orange-500" onClick={n.onClick}>
                   {n.label}
-                </a>
+                </Link>
               ))}
             {finalCurrencyOptions.length > 0 && (
               <select
@@ -147,7 +147,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
       {/* Main header */}
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-5 h-[68px] md:h-[76px] flex items-center gap-6">
-          <div className="flex items-center gap-3 flex-shrink-0 cursor-pointer">
+          <Link href="/" className="flex items-center gap-3 flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity" aria-label={finalBrand.name}>
             <div className="w-10 h-10 md:w-[42px] md:h-[42px] rounded-[11px] bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center text-[17px] font-extrabold tracking-wide shadow-[0_6px_16px_rgba(253,86,15,0.3)]">
               {finalBrand.name.slice(0, 2)}
             </div>
@@ -159,7 +159,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 {finalBrand.slogan}
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Search */}
           <form
@@ -195,9 +195,11 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               .filter((n) => !n.top)
               .map((n) => {
                 const on = n.key === active;
+                const href = (n as { href?: string }).href || '/';
                 return (
-                  <a
+                  <Link
                     key={n.key}
+                    href={href}
                     onClick={n.onClick}
                     className={`relative px-4 py-2 text-[14.5px] font-medium rounded-lg cursor-pointer whitespace-nowrap transition-all duration-200 ${
                       on
@@ -209,7 +211,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                     {on && (
                       <span className="absolute left-1/2 -translate-x-1/2 bottom-1 w-1 h-1 rounded-full bg-orange-600" aria-hidden />
                     )}
-                  </a>
+                  </Link>
                 );
               })}
           </nav>

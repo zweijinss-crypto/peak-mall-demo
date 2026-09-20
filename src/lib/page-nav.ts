@@ -42,30 +42,30 @@ export const LANG_OPTIONS: Array<{ code: Locale; label: string }> = [
 ];
 
 /** Nav items for the secondary (account-area) pages. */
-const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
+const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string; href: string }>> = {
   zh: [
-    { key: 'home', label: '首页' },
-    { key: 'cart', label: '购物车' },
-    { key: 'orders', label: '我的订单' },
-    { key: 'wishlist', label: '我的收藏' },
-    { key: 'address', label: '我的地址' },
-    { key: 'aftersale', label: '我的售后' },
-    { key: 'commissions', label: '佣金明细' },
-    { key: 'withdraw', label: '提现中心' },
-    { key: 'withdraw-address', label: '提现地址' },
-    { key: 'profile', label: '个人中心' },
+    { key: 'home', label: '首页', href: '/' },
+    { key: 'cart', label: '购物车', href: '/cart' },
+    { key: 'orders', label: '我的订单', href: '/orders' },
+    { key: 'wishlist', label: '我的收藏', href: '/wishlist' },
+    { key: 'address', label: '我的地址', href: '/address' },
+    { key: 'aftersale', label: '我的售后', href: '/aftersale' },
+    { key: 'commissions', label: '佣金明细', href: '/commissions' },
+    { key: 'withdraw', label: '提现中心', href: '/withdraw' },
+    { key: 'withdraw-address', label: '提现地址', href: '/withdraw-address' },
+    { key: 'profile', label: '个人中心', href: '/profile' },
   ],
   en: [
-    { key: 'home', label: 'Home' },
-    { key: 'cart', label: 'Cart' },
-    { key: 'orders', label: 'My orders' },
-    { key: 'wishlist', label: 'Wishlist' },
-    { key: 'address', label: 'Addresses' },
-    { key: 'aftersale', label: 'After-sales' },
-    { key: 'commissions', label: 'Commissions' },
-    { key: 'withdraw', label: 'Withdraw' },
-    { key: 'withdraw-address', label: 'Payout address' },
-    { key: 'profile', label: 'Account' },
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'cart', label: 'Cart', href: '/cart' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'wishlist', label: 'Wishlist', href: '/wishlist' },
+    { key: 'address', label: 'Addresses', href: '/address' },
+    { key: 'aftersale', label: 'After-sales', href: '/aftersale' },
+    { key: 'commissions', label: 'Commissions', href: '/commissions' },
+    { key: 'withdraw', label: 'Withdraw', href: '/withdraw' },
+    { key: 'withdraw-address', label: 'Payout address', href: '/withdraw-address' },
+    { key: 'profile', label: 'Account', href: '/profile' },
   ],
 };
 
@@ -74,24 +74,24 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
  * Mirrors HOME_NAV in src/app/page.tsx — kept here so the helper stays
  * the single source of truth for chrome wiring.
  */
-const HOME_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
+const HOME_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string; href: string }>> = {
   zh: [
-    { key: 'home', label: '首页' },
-    { key: 'all', label: '全部' },
-    { key: 'new', label: '新品' },
-    { key: 'hot', label: '热卖' },
-    { key: 'orders', label: '我的订单' },
-    { key: 'after', label: '售后' },
-    { key: 'about', label: '关于' },
+    { key: 'home', label: '首页', href: '/' },
+    { key: 'all', label: '全部', href: '/shop-all' },
+    { key: 'new', label: '新品', href: '/shop-new' },
+    { key: 'hot', label: '热卖', href: '/shop-hot' },
+    { key: 'orders', label: '我的订单', href: '/orders' },
+    { key: 'after', label: '售后', href: '/aftersale' },
+    { key: 'about', label: '关于', href: '/about' },
   ],
   en: [
-    { key: 'home', label: 'Home' },
-    { key: 'all', label: 'All' },
-    { key: 'new', label: 'New' },
-    { key: 'hot', label: 'Hot' },
-    { key: 'orders', label: 'My orders' },
-    { key: 'after', label: 'After-sales' },
-    { key: 'about', label: 'About' },
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'all', label: 'All', href: '/shop-all' },
+    { key: 'new', label: 'New', href: '/shop-new' },
+    { key: 'hot', label: 'Hot', href: '/shop-hot' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'after', label: 'After-sales', href: '/aftersale' },
+    { key: 'about', label: 'About', href: '/about' },
   ],
 };
 
@@ -129,7 +129,7 @@ export interface PageChrome {
   /** Localized brand {name, slogan}. */
   brand: { name: string; slogan: string };
   /** Localized nav items, ready to pass to <ShopHeader navItems>. */
-  navItems: Array<{ key: string; label: string }>;
+  navItems: Array<{ key: string; label: string; href: string }>;
   /** 'mounted' gates locale-dependent rendering to avoid hydration mismatch. */
   mounted: boolean;
   isEn: boolean;
