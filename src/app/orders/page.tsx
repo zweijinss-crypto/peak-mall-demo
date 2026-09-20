@@ -23,11 +23,65 @@ export default function OrdersPage() {
     delivered: { label: t.orders.statusDelivered, color: 'bg-emerald-100 text-emerald-700' },
   };
 
+  const totalCount = orders.length;
+  const totalSpend = orders.reduce((s, o) => s + o.total, 0);
+  const statusCounts = orders.reduce<Record<Order['status'], number>>(
+    (acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc; },
+    { pending: 0, paid: 0, shipped: 0, delivered: 0 },
+  );
+
   return (
     <>
 
       <UserShell>
-        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.orders.title}</h1>
+        {/* Top banner — status at a glance */}
+        <section className="bg-white border border-ink-100 overflow-hidden mb-5">
+          <div className="h-1 bg-orange-700" aria-hidden="true" />
+          <div className="px-5 py-4 md:px-6 md:py-5 flex items-center gap-5">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[20px] md:text-[22px] font-bold text-ink-900 leading-tight">
+                {t.orders.title}
+              </h1>
+              <div className="mt-1 text-[12px] text-ink-500">
+                {chrome.isEn
+                  ? 'Track and manage every order in one place'
+                  : '查看和管理你的所有订单'}
+              </div>
+            </div>
+            <div className="flex divide-x divide-ink-100 border border-ink-100 flex-shrink-0">
+              <div className="px-4 py-2 text-center min-w-[64px]">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-0.5">
+                  {chrome.isEn ? 'Total' : '订单数'}
+                </div>
+                <div className="text-[18px] font-bold text-ink-900 leading-none tabular-nums">
+                  {totalCount}
+                </div>
+              </div>
+              <div className="px-4 py-2 text-center min-w-[80px]">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-0.5">
+                  {chrome.isEn ? 'Spend' : '总金额'}
+                </div>
+                <div className="text-[18px] font-bold text-orange-700 leading-none tabular-nums">
+                  ${totalSpend.toFixed(2)}
+                </div>
+              </div>
+            </div>
+          </div>
+          {totalCount > 0 && (
+            <div className="grid grid-cols-4 border-t border-ink-100 divide-x divide-ink-100">
+              {(['pending', 'paid', 'shipped', 'delivered'] as Order['status'][]).map((s) => (
+                <div key={s} className="px-4 py-2.5">
+                  <div className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-bold mb-1 ${STATUS_MAP[s].color}`}>
+                    {STATUS_MAP[s].label}
+                  </div>
+                  <div className="text-[16px] font-bold text-ink-900 leading-none tabular-nums">
+                    {statusCounts[s]}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
