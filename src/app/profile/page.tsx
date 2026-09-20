@@ -21,10 +21,9 @@ type QuickItem = {
 
 function buildQuickItems(t: ReturnType<typeof useT>): QuickItem[] {
   return [
-    { group: 'orders', labelZh: t.profile.myOrders, labelEn: 'My orders', path: '/orders', emoji: '📦', countKey: 'orders' },
     { group: 'orders', labelZh: t.profile.cart, labelEn: 'Cart', path: '/cart', emoji: '🛒', countKey: 'cart' },
     { group: 'orders', labelZh: t.profile.myWishlist, labelEn: 'Wishlist', path: '/wishlist', emoji: '♡', countKey: 'wishlist' },
-    { group: 'orders', labelZh: '售后记录', labelEn: 'After-sales', path: '/ref-peak-mall', emoji: '🛠' },
+    { group: 'orders', labelZh: '售后记录', labelEn: 'After-sales', path: '/aftersale', emoji: '🛠' },
     { group: 'account', labelZh: t.security.changePassword, labelEn: 'Change password', path: '/security/password', emoji: '🔑' },
     { group: 'account', labelZh: t.security.changeFundPassword, labelEn: 'Fund password', path: '/security/fund-password', emoji: '🔒' },
     { group: 'account', labelZh: '收货地址', labelEn: 'Addresses', path: '/address', emoji: '📍' },
