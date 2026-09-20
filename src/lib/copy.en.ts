@@ -516,7 +516,6 @@ export const COPY_EN = {
     nickname: 'Nickname',
     email: 'Email',
     edit: 'Edit',
-    quickLinks: 'Quick links',
     myOrders: 'My orders',
     myWishlist: 'My wishlist',
     cart: 'Cart',

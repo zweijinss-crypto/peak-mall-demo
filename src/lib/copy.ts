@@ -358,7 +358,6 @@ export const COPY = {
     nickname: '昵称',
     email: '邮箱',
     edit: '编辑',
-    quickLinks: '快捷入口',
     myOrders: '我的订单',
     myWishlist: '我的收藏',
     cart: '购物车',
