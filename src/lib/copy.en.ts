@@ -280,8 +280,10 @@ export const COPY_EN = {
     /** A4: cancel / buy again */
     cancel: 'Cancel order',
     cancelConfirm: 'Cancel this order?',
+    cancelHint: 'This will mark the order as cancelled. This cannot be undone.',
     cancelled: 'Cancelled',
     buyAgain: 'Buy again',
+    buyAgainOk: 'Added to cart — redirecting…',
     cancelledTag: 'Cancelled',
   },
 

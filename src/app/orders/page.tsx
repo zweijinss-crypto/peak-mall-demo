@@ -29,6 +29,9 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
+  /** A4: cancel modal — pendingId = 待取消订单 id, null = 关闭 */
+  const [pendingCancel, setPendingCancel] = useState<string | null>(null);
+
   const STATUS_MAP: Record<Order['status'], { label: string; color: string }> = {
     pending: { label: t.orders.statusPending, color: 'bg-amber-100 text-amber-700' },
     paid: { label: t.orders.statusPaid, color: 'bg-blue-100 text-blue-700' },
@@ -76,15 +79,20 @@ export default function OrdersPage() {
   };
 
   const handleCancel = (id: string) => {
-    if (!confirm(t.orders.cancelConfirm)) return;
-    const ok = cancelOrder(id);
+    setPendingCancel(id);
+  };
+
+  const confirmCancel = () => {
+    if (!pendingCancel) return;
+    const ok = cancelOrder(pendingCancel);
+    setPendingCancel(null);
     if (ok) flashToast(t.orders.cancelled);
   };
 
   const handleReorder = (id: string) => {
     const ok = reorder(id);
     if (ok) {
-      flashToast('🛒');
+      flashToast(t.orders.buyAgainOk);
       window.setTimeout(() => router.push('/cart/'), 600);
     }
   };
@@ -148,6 +156,41 @@ export default function OrdersPage() {
             className="mb-4 px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]"
           >
             ✓ {toast}
+          </div>
+        )}
+
+        {/* A4: cancel confirm modal */}
+        {pendingCancel && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancelOrderTitle"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+            onClick={(e) => { if (e.target === e.currentTarget) setPendingCancel(null); }}
+          >
+            <div className="bg-white rounded-2xl w-full max-w-[420px] p-6 shadow-float">
+              <div className="text-[28px] mb-2" aria-hidden="true">⚠️</div>
+              <h3 id="cancelOrderTitle" className="text-[18px] font-extrabold text-ink-900 mb-1.5">
+                {t.orders.cancelConfirm}
+              </h3>
+              <p className="text-[12.5px] text-ink-500 mb-5">
+                {t.orders.cancelHint}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPendingCancel(null)}
+                  className="flex-1 py-2.5 border border-ink-200 text-ink-700 hover:bg-ink-50 text-[13.5px] font-bold rounded-md transition-colors"
+                >
+                  {chrome.isEn ? 'Keep order' : '不取消'}
+                </button>
+                <button
+                  onClick={confirmCancel}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[13.5px] font-bold rounded-md transition-colors"
+                >
+                  {t.orders.cancel}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

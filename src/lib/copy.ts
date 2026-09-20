@@ -378,8 +378,10 @@ export const COPY = {
     /** A4: cancel / buy again */
     cancel: '取消订单',
     cancelConfirm: '确定取消该订单?',
+    cancelHint: '取消后该订单状态会变为「已取消」,此操作不可撤销。',
     cancelled: '已取消',
     buyAgain: '再买一次',
+    buyAgainOk: '已加入购物车,跳转到购物车…',
     cancelledTag: '已取消',
   },
   profile: {
