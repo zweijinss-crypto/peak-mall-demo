@@ -38,3 +38,5 @@ demo/screenshots/
 playwright-report/
 test-results/
 .tsplaywright/
+# Local Netlify folder
+.netlify

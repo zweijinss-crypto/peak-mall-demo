@@ -191,8 +191,18 @@ cd /tmp/lh && ./node_modules/.bin/lighthouse \
 
 ```
 crawls/ref-i18n-screenshots/   # 4 张全尺寸 + 4 张 thumbs + README.md
-crawls/lighthouse/             # ref-peak-mall-desktop.html / .json
+crawls/lighthouse/             # ref-peak-mall-desktop.html / .json (dev + prod + 2 张 prod 截图)
 ```
+
+## 🚀 Netlify 部署
+
+**Production URL**: https://peak-mall-demo.netlify.app
+
+🔴 **当前状态: Edge Access 锁站**,HTTP 401,需手动解锁。
+
+详细记录 + 解锁步骤见 `NETLIFY_DEPLOY.md`。
+- Admin: https://app.netlify.com/projects/peak-mall-demo
+- 解锁: https://app.netlify.com/projects/peak-mall-demo/configuration/access (关 Visitor access)
 
 ### Commits
 
