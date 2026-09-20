@@ -31,6 +31,14 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
     window.location.href = isEn ? '/en/admin/login' : '/admin/login';
   };
 
+  const handleBackToShop = () => {
+    const msg = isEn ? 'Leave the admin and go back to the shop?' : '确认离开管理后台,返回前台商城?';
+    if (typeof window === 'undefined') return;
+    if (window.confirm(msg)) {
+      window.location.href = isEn ? '/en' : '/';
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-120px)] flex flex-col md:flex-row">
       <aside className="w-full md:w-[236px] md:min-h-[calc(100vh-120px)] bg-[#1c1c1c] text-neutral-100 md:flex-shrink-0">
@@ -72,12 +80,13 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
             <span>{t.admin.roleAdmin}</span>
           </span>
           <div className="flex items-center gap-2">
-            <Link
-              href="/"
+            <button
+              type="button"
+              onClick={handleBackToShop}
               className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
             >
               ← {t.admin.backToShop}
-            </Link>
+            </button>
             <button
               type="button"
               onClick={handleReset}
