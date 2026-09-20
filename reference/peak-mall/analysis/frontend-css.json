@@ -1,0 +1,234 @@
+{
+  "$schema": "openclaw/reference/frontend-css.v1",
+  "source": "https://peak-mall.com/ (single inline <style>, 227KB total HTML)",
+  "extractedAt": "2026-09-20",
+  "redLines": "已剔除任何 invite/agent/withdraw/commission 相关样式(本包不实现这些功能)",
+
+  "tokens": {
+    "colors": {
+      "primary": "#fd560f",
+      "primary-d": "#dc4a0c",
+      "success": "#16a34a",
+      "danger": "#e54545",
+      "gray-50": "#f8fafc",
+      "gray-100": "#f1f5f9",
+      "gray-200": "#e2e8f0",
+      "gray-300": "#cbd5e1",
+      "gray-500": "#64748b",
+      "gray-700": "#334155",
+      "gray-900": "#0f172a",
+      "blue-50": "#eff6ff",
+      "blue-100": "#dbeafe",
+      "blue-200": "#bfdbfe",
+      "blue-700": "#1d4ed8",
+      "yellow-100": "#fef9c3",
+      "yellow-700": "#a16207",
+      "red-50": "#fee2e2",
+      "red-700": "#dc2626",
+      "green-50": "#dcfce7",
+      "green-700": "#1a7f37"
+    },
+    "font": {
+      "family": "-apple-system,\"Segoe UI\",Roboto,\"PingFang SC\",\"Microsoft YaHei\",sans-serif",
+      "size": {
+        "xs": "11px",
+        "sm": "12px",
+        "base": "13px",
+        "md": "14px",
+        "lg": "17px",
+        "xl": "21px",
+        "h1": "25px",
+        "h2-strong": "23px"
+      },
+      "weight": { "normal": 400, "semibold": 600, "bold": 700 }
+    },
+    "radius": {
+      "sm": "8px",
+      "md": "9px",
+      "lg": "10px",
+      "xl": "12px",
+      "2xl": "16px",
+      "chip": "20px"
+    },
+    "spacing": {
+      "field-gap": "16px",
+      "card-pad": "28px 30px",
+      "section-pad": "36px 18px",
+      "grid-gap": "16px",
+      "btn-px": "11px 18px",
+      "btn-sm-px": "6px 12px"
+    },
+    "shadow": {
+      "card": "0 20px 60px rgba(0,0,0,.28)",
+      "hover": "0 8px 20px rgba(0,0,0,.09)",
+      "focus": "0 0 0 3px rgba(37,99,235,.12)"
+    },
+    "breakpoint": {
+      "mobile": "520px",
+      "tablet": "780px",
+      "desktop": "860px",
+      "wide": "1100px"
+    }
+  },
+
+  "classNames": {
+    "extractedCount": 133,
+    "byDomain": {
+      "auth": [".auth-wrap", ".auth-brand", ".auth-split", ".auth-card", ".auth-head", ".auth-hero", ".auth-body", ".auth-panel", ".auth-vr", ".auth-btn"],
+      "form": [".field", ".chk", ".tabs", ".tabs2", ".msg", ".msg.err", ".msg.ok"],
+      "button": [".btn", ".btn-primary", ".btn-ghost", ".btn-danger", ".btn-success", ".btn-sm"],
+      "shop": [".shop-bar", ".shop-search", ".cats", ".cat", ".catbar", ".prods", ".prod", ".prod .cover", ".prod .info", ".prod .nm", ".prod .pr", ".prod .stx", ".prod .op"],
+      "cart": [".line", ".line .cv", ".line .tx", ".qty", ".sumbox"],
+      "order": [".tabs2", ".badge", ".tag", ".tag-a", ".tag-f", ".tag-p", ".tag-paid"],
+      "layout": [".layout", ".sidebar", ".side-mask", ".side-foot", ".nav", ".nav-item", ".nav-group", ".main", ".topbar", ".title", ".menu-btn", ".content", ".who"],
+      "misc": [".brand", ".hero", ".dbl", ".bx", ".bxbg", ".roll", ".wrap", ".tg", ".tx", ".sec", ".sec-hd", ".ln", ".toolbar", ".srch", ".cnt", ".breadcrumb", ".crumb", ".auth-hero", ".auth-vr"]
+    }
+  },
+
+  "rules": [
+    {
+      "selector": ".prod",
+      "props": {
+        "background": "#fff",
+        "border": "1px solid var(--gray-200)",
+        "border-radius": "12px",
+        "overflow": "hidden",
+        "cursor": "pointer",
+        "transition": ".15s",
+        "display": "flex",
+        "flex-direction": "column"
+      }
+    },
+    {
+      "selector": ".prod:hover",
+      "props": {
+        "transform": "translateY(-3px)",
+        "box-shadow": "0 8px 20px rgba(0,0,0,.09)",
+        "border-color": "var(--primary)"
+      }
+    },
+    {
+      "selector": ".cat.active",
+      "props": {
+        "background": "var(--primary)",
+        "border-color": "var(--primary)",
+        "color": "#fff"
+      }
+    },
+    {
+      "selector": ".btn-primary",
+      "props": {
+        "background": "var(--primary)",
+        "color": "#fff",
+        "width": "100%"
+      }
+    },
+    {
+      "selector": ".btn-primary:hover",
+      "props": { "background": "var(--primary-d)" }
+    },
+    {
+      "selector": ".field input:focus, .field select:focus",
+      "props": {
+        "border-color": "var(--primary)",
+        "box-shadow": "0 0 0 3px rgba(37,99,235,.12)"
+      }
+    },
+    {
+      "selector": ".prods",
+      "props": {
+        "display": "grid",
+        "grid-template-columns": "repeat(auto-fill,minmax(176px,1fr))",
+        "gap": "16px"
+      }
+    }
+  ],
+
+  "mediaQueries": [
+    {
+      "max-width": "1100px",
+      "applies": "桌面布局兜底(防止过大屏幕过散)"
+    },
+    {
+      "max-width": "860px",
+      "applies": "侧边栏折叠 + 列表网格调整"
+    },
+    {
+      "max-width": "780px",
+      "applies": "auth-card 宽度收紧到 max-width 380px,移动端堆叠"
+    },
+    {
+      "max-width": "520px",
+      "applies": "字号进一步缩小,padding 收紧"
+    }
+  ],
+
+  "layouts": [
+    {
+      "name": "auth",
+      "structure": ".auth-wrap > .auth-brand + .auth-split > .auth-card × 2",
+      "background": "linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#2563eb 100%)"
+    },
+    {
+      "name": "shop-grid",
+      "structure": ".sec > .sec-hd + .toolbar + .catbar + .prods",
+      "grid": "repeat(auto-fill,minmax(176px,1fr))"
+    },
+    {
+      "name": "cart-list",
+      "structure": ".line × N + .sumbox",
+      "grid": "flex column"
+    },
+    {
+      "name": "app-shell",
+      "structure": ".layout > .sidebar + .main(topbar + content)",
+      "sidebar-width": "220px"
+    },
+    {
+      "name": "product-detail",
+      "structure": "modal(.cover + .info + actions)",
+      "overlay": "rgba(0,0,0,0.5)"
+    }
+  ],
+
+  "redLinesRemoved": [
+    {
+      "selector": ".invite-tip",
+      "props": { "background": "#eff6ff", "color": "#1d4ed8" },
+      "note": "邀请码提示蓝框 — 合规版删除"
+    },
+    {
+      "selector": ".auth-card input[name=rg-ref]",
+      "note": "注册邀请码 input — 合规版删除"
+    },
+    {
+      "selector": ".bw-funds, .fd-new, .fd-old",
+      "note": "资金密码 6 位 input — 合规版删除"
+    },
+    {
+      "selector": ".bw-addr (USDT-TRC20 地址 input)",
+      "note": "加密地址输入框 — 合规版删除"
+    },
+    {
+      "selector": ".admin-*",
+      "note": "后台 8 页所有专属样式 — 合规版不实现后台"
+    }
+  ],
+
+  "shadows": {
+    "card": "0 20px 60px rgba(0,0,0,.28)",
+    "hover": "0 8px 20px rgba(0,0,0,.09)",
+    "focus": "0 0 0 3px rgba(37,99,235,.12)"
+  },
+
+  "fonts": {
+    "primary": "-apple-system, Segoe UI, Roboto, PingFang SC, Microsoft YaHei, sans-serif",
+    "note": "系统字体栈,无网络字体请求,Lighthouse perf 友好"
+  },
+
+  "images": {
+    "external": 0,
+    "internal": ["/uploads/banner1.jpg", "/uploads/banner2.jpg"],
+    "note": "源站只用 2 张 banner 图(本地 /uploads/),其余全 emoji 占位或 CSS 渐变"
+  }
+}

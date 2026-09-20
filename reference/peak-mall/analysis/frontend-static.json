@@ -1,0 +1,186 @@
+{
+  "$schema": "openclaw/reference/frontend-static.v1",
+  "source": "https://peak-mall.com/",
+  "extractedAt": "2026-09-20",
+  "redLines": [
+    "USDT/TRC20/加密支付 — 完全剔除",
+    "邀请码/多级分销/佣金 — 完全剔除",
+    "agent/fx 后台 — 完全剔除"
+  ],
+
+  "routes": {
+    "public": [
+      { "hash": "/", "redirect": "#shop" },
+      { "hash": "#shop", "page": "shop" },
+      { "hash": "#shop-all", "page": "shop-all" },
+      { "hash": "#shop-new", "page": "shop-new" },
+      { "hash": "#shop-hot", "page": "shop-hot" },
+      { "hash": "#product/:id", "page": "product-detail" },
+      { "hash": "#cart", "page": "cart" },
+      { "hash": "#login", "page": "auth" },
+      { "hash": "#profile", "page": "profile" },
+      { "hash": "#my-orders", "page": "orders" },
+      { "hash": "#addresses", "page": "addresses" },
+      { "hash": "#wishlist", "page": "wishlist" },
+      { "hash": "#about", "page": "about" }
+    ],
+    "excluded_admin": [
+      "#admin-dash", "#admin-products", "#admin-orders", "#admin-users",
+      "#admin-agents", "#admin-comm", "#admin-rules", "#admin-wd",
+      "#admin-wd-center", "#admin-demo", "#admin-home", "#admin-support",
+      "#admin-tickets", "#admin-invite"
+    ],
+    "excluded_agent_fx": [
+      "#agent-dash", "#agent-team", "#agent-comm", "#agent-rates", "#agent-wd",
+      "#fx-dash", "#fx-team", "#fx-comm", "#fx-wd", "#bind-wd", "#funds"
+    ]
+  },
+
+  "forms": {
+    "auth_login": {
+      "fields": [
+        { "name": "lg_u", "type": "email", "label": "邮箱", "required": true, "autocomplete": "username" },
+        { "name": "lg_p", "type": "password", "label": "密码", "required": true, "autocomplete": "current-password" },
+        { "name": "lg_rem", "type": "checkbox", "label": "记住我", "defaultChecked": true }
+      ],
+      "submit": "/api/auth/login"
+    },
+    "auth_register": {
+      "fields": [
+        { "name": "rg_u", "type": "email", "label": "邮箱", "required": true, "autocomplete": "email" },
+        { "name": "rg_n", "type": "text", "label": "昵称", "required": false, "placeholder": "展示名称(可留空)" },
+        { "name": "rg_p", "type": "password", "label": "密码", "required": true, "minLength": 6, "autocomplete": "new-password" },
+        { "name": "rg_p2", "type": "password", "label": "确认密码", "required": true, "minLength": 6, "autocomplete": "new-password" }
+      ],
+      "submit": "/api/auth/register",
+      "redLinesRemoved": ["invite_code (强制)"],
+      "note": "已剔除邀请码字段,合规版只接收 {email, nickname, password}"
+    },
+    "address_create": {
+      "fields": [
+        { "name": "ship_name", "type": "text", "label": "姓名", "required": true },
+        { "name": "ship_phone", "type": "tel", "label": "手机号", "required": true },
+        { "name": "ship_country", "type": "select", "label": "国家/地区", "options": "COUNTRIES" },
+        { "name": "ship_state", "type": "text", "label": "州/省/地区", "required": false },
+        { "name": "ship_city", "type": "text", "label": "城市", "required": true },
+        { "name": "ship_postal", "type": "text", "label": "邮编", "required": false },
+        { "name": "ship_detail", "type": "text", "label": "街道/门牌号", "required": true },
+        { "name": "ship_email", "type": "email", "label": "邮箱", "required": false, "placeholder": "name@example.com" },
+        { "name": "is_default", "type": "checkbox", "label": "设为默认地址", "defaultChecked": true }
+      ]
+    },
+    "product_search": {
+      "fields": [
+        { "name": "shop-kw", "type": "text", "label": "搜索商品", "placeholder": "搜索商品名称" }
+      ],
+      "submit": "GET /api/products?keyword="
+    }
+  },
+
+  "i18n": {
+    "languages": ["zh-CN", "en"],
+    "switcher": "data-l (zh|en)",
+    "translationKeys": "~250 (源站实现 t(key) 全文替换)",
+    "extractedSample": {
+      "zh": {
+        "登录": "Sign In",
+        "注册": "Sign Up",
+        "邮箱": "Email",
+        "密码": "Password",
+        "确认密码": "Confirm",
+        "昵称": "Nickname",
+        "首页": "Home",
+        "全部": "All",
+        "搜索": "Search",
+        "商品名称": "Product name",
+        "新用户注册即享专属礼遇 · 全场正品保障": "New members enjoy exclusive perks · Authenticity guaranteed",
+        "推荐商品": "Featured",
+        "品质专区": "Quality",
+        "数码电子": "Electronics",
+        "家用电器": "Home Appliances",
+        "去逛逛": "Browse",
+        "立即抢购": "Shop Now",
+        "正品保障": "Genuine",
+        "官方直采,假一赔十": "Direct sourcing, 10x compensation for fakes"
+      }
+    }
+  },
+
+  "currencies": {
+    "supported": [
+      { "code": "USD", "name": "美元", "en": "US Dollar" },
+      { "code": "EUR", "name": "欧元", "en": "Euro" },
+      { "code": "CNY", "name": "人民币", "en": "CNY" },
+      { "code": "JPY", "name": "日元", "en": "JPY" },
+      { "code": "KRW", "name": "韩元", "en": "KRW" }
+    ],
+    "note": "合规版资金类(USD)仅展示汇率,不绑定结算。结算货币由支付网关决定。"
+  },
+
+  "api": {
+    "baseUrl": "/api",
+    "public": [
+      "POST /api/auth/login",
+      "POST /api/auth/register",
+      "GET  /api/categories",
+      "GET  /api/products",
+      "GET  /api/products/:id",
+      "GET  /api/cart",
+      "POST /api/cart",
+      "PUT  /api/cart/:id",
+      "DELETE /api/cart/:id",
+      "GET  /api/me",
+      "GET  /api/me/profile",
+      "GET  /api/config/home",
+      "GET  /api/config/support"
+    ],
+    "excluded": "30 条 admin/agent/fx/withdraw/invite 路由(见 api-routes.md)"
+  },
+
+  "errorCodes": {
+    "auth": {
+      "AUTH_INVALID_CREDENTIALS": "邮箱或密码错误",
+      "AUTH_USER_NOT_FOUND": "用户不存在",
+      "AUTH_USER_BANNED": "账号已停用",
+      "AUTH_EMAIL_TAKEN": "邮箱已被注册",
+      "AUTH_PASSWORD_TOO_SHORT": "密码至少 6 位",
+      "AUTH_PASSWORD_MISMATCH": "两次密码不一致"
+    },
+    "redLinesRemoved": {
+      "AUTH_INVITE_REQUIRED": "【已剔除】邀请码必填",
+      "AUTH_INVITE_INVALID": "【已剔除】邀请码无效",
+      "AUTH_INVITE_USER_BLOCKED": "【已剔除】邀请人账号异常"
+    },
+    "cart": {
+      "CART_PRODUCT_NOT_FOUND": "商品不存在",
+      "CART_PRODUCT_INACTIVE": "商品已下架",
+      "CART_STOCK_INSUFFICIENT": "库存不足",
+      "CART_QUANTITY_INVALID": "数量必须在 1-100 之间"
+    },
+    "product": {
+      "PRODUCT_NOT_FOUND": "商品不存在",
+      "PRODUCT_INACTIVE": "商品已下架"
+    },
+    "validation": {
+      "VALIDATION_EMAIL_FORMAT": "邮箱格式不正确",
+      "VALIDATION_PHONE_FORMAT": "手机号格式不正确"
+    }
+  },
+
+  "i18n_zh_en_full": "见源站 HTML 内联 t() 函数 + 字典(本包未抽取全部 250 keys — 仅保留设计 token + 占位符)",
+  "excluded_from_zip": [
+    "/api/admin/*",
+    "/api/agent/*",
+    "/api/fx/*",
+    "/api/me/withdraw-address",
+    "/api/me/funds",
+    "/api/me/funds-password",
+    "/api/me/tickets",
+    "/api/admin/tickets",
+    "/api/admin/commissions",
+    "/api/admin/withdrawals",
+    "/api/admin/invite-codes",
+    "/api/admin/rules",
+    "/api/admin/agents"
+  ]
+}
