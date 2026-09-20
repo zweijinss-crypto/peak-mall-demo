@@ -4,7 +4,6 @@ import type {
   ContactInfo,
   FooterColumn,
 } from './types';
-import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 
 export interface FooterProps {
@@ -27,35 +26,35 @@ const Footer: FC<FooterProps> = ({
   const DEFAULT_BRAND: BrandInfo = {
     name: t.brand.name,
     slogan: t.brand.slogan,
-    intro: t.brand.intro ?? COPY.brand.intro,
+    intro: t.brand.intro ?? '',
   };
 
   const DEFAULT_COLUMNS: FooterColumn[] = [
     {
-      title: COPY.footer.col1,
+      title: t.footer.col1,
       links: [
-        { label: COPY.footer.all },
-        { label: COPY.footer.new },
-        { label: COPY.footer.hot },
-        { label: COPY.footer.about },
+        { label: t.footer.all },
+        { label: t.footer.new },
+        { label: t.footer.hot },
+        { label: t.footer.about },
       ],
     },
     {
-      title: COPY.footer.col2,
+      title: t.footer.col2,
       links: [
         { label: t.footer.account },
-        { label: COPY.footer.orders },
-        { label: COPY.footer.wishlist },
-        { label: COPY.footer.address },
+        { label: t.footer.orders },
+        { label: t.footer.wishlist },
+        { label: t.footer.address },
       ],
     },
     {
-      title: COPY.footer.col3,
+      title: t.footer.col3,
       links: [
-        { label: COPY.footer.aftersales },
-        { label: COPY.footer.shipping },
-        { label: COPY.footer.terms },
-        { label: COPY.footer.privacy },
+        { label: t.footer.aftersales },
+        { label: t.footer.shipping },
+        { label: t.footer.terms },
+        { label: t.footer.privacy },
       ],
     },
   ];
@@ -69,7 +68,7 @@ const Footer: FC<FooterProps> = ({
   const finalBrand = brand ?? DEFAULT_BRAND;
   const finalColumns = columns ?? DEFAULT_COLUMNS;
   const finalContact = contact ?? DEFAULT_CONTACT;
-  const intro = brand?.intro ?? t.brand.intro ?? COPY.brand.intro;
+  const intro = brand?.intro ?? t.brand.intro ?? '';
 
   return (
     <footer className="bg-neutral-900 text-neutral-400 pt-12">
@@ -109,7 +108,7 @@ const Footer: FC<FooterProps> = ({
 
           <div>
             <h3 className="text-white text-[15px] font-bold mb-5 tracking-[-0.01em] relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
-              {COPY.footer.col4}
+              {t.footer.col4}
             </h3>
             <ul className="space-y-2.5">
               <li><a className="text-[13px] hover:text-orange-500 cursor-pointer">{finalContact.telegram}</a></li>

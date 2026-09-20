@@ -41,6 +41,26 @@ export default function LoginPage() {
         )}
         <AuthSplit
           requireInvite={false}
+          i18n={{
+            hero: t.auth.hero,
+            loginTitle: t.auth.loginTitle,
+            registerTitle: t.auth.registerTitle,
+            email: t.auth.email,
+            emailPh: t.auth.emailPh,
+            password: t.auth.password,
+            passwordPh: t.auth.passwordPh,
+            password2: t.auth.password2,
+            password2Ph: t.auth.password2Ph,
+            nickname: t.auth.nickname,
+            nicknamePh: t.auth.nicknamePh,
+            invite: t.auth.invite,
+            invitePh: t.auth.invitePh,
+            remember: t.auth.remember,
+            login: t.auth.login,
+            register: t.auth.register,
+            pwMismatch: t.auth.pwMismatch,
+            errGeneric: t.auth.errGeneric,
+          }}
           onLogin={async (p) => {
             setError(null);
             const r = fakeLogin(p.email, p.password);

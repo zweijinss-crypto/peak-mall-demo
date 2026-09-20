@@ -68,6 +68,10 @@ export const COPY = {
   },
 
   auth: {
+    loginTitle: '登录顶峰',
+    loginSub: '使用任意邮箱与密码(演示模式)',
+    registerTitle: '注册新账户',
+    registerSub: '加入 10 万+ 满意用户',
     hero: '欢迎来到顶峰',
     login: '登录账户',
     register: '注册新账户',
