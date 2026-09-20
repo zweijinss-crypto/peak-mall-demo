@@ -321,6 +321,22 @@ export const COPY = {
     shippingLabel: '运费',
     qtyDecLabel: '减少数量',
     qtyIncLabel: '增加数量',
+    /** A1: 单品勾选 */
+    selectAll: '全选',
+    selectedCount: (n: number, total: number) => `已选 ${n}/${total} 件`,
+    selectedEmpty: '请勾选要结算的商品',
+    /** A2: 优惠券 */
+    couponTitle: '优惠码',
+    couponPlaceholder: '输入优惠码',
+    couponApply: '使用',
+    couponRemove: '移除',
+    couponApplied: (code: string) => `已使用 ${code}`,
+    couponInvalid: '优惠码无效或已过期',
+    couponInvalidMin: '满 $200 可用',
+    /** 折扣明细行 */
+    discountLabel: '优惠折扣',
+    /** 可用优惠码提示 */
+    couponHints: '试试 SAVE10 (9 折) / FREESHIP (免运费) / VIP20 (满 $200 减 $20)',
   },
 
   search: {

@@ -7,6 +7,23 @@ export interface CartItem {
   price: number;
   cover?: string;
   qty: number;
+  /** 是否计入结算 — 默认 true,用户可在购物车手动勾选/取消 */
+  selected?: boolean;
+}
+
+/**
+ * Coupon — 演示用,3 张优惠码固定:
+ *   SAVE10  → 9 折
+ *   FREESHIP → 免运费
+ *   VIP20    → 立减 $20(满 $200)
+ * 写在 cart 里,不持久化到用户订单(下单后清掉)
+ */
+export type CouponCode = 'SAVE10' | 'FREESHIP' | 'VIP20';
+
+export interface CartCoupon {
+  code: CouponCode;
+  /** 应用时间,用于在 cart UI 显示「应用了多久」 */
+  appliedAt: number;
 }
 
 export interface OrderItem {
@@ -68,10 +85,20 @@ interface PeakStore {
   wishlist: WishItem[];
   locale: Locale;
   currency: CurrencyCode;
+  /** 当前生效的优惠券(只对 cart 页面生效,下单后清掉) */
+  coupon: CartCoupon | null;
   addToCart: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
   updateQty: (id: number, qty: number) => void;
   removeFromCart: (id: number) => void;
   clearCart: () => void;
+  /** 勾选 / 取消勾选单个商品 */
+  toggleSelect: (id: number) => void;
+  /** 全选 / 取消全选 */
+  setAllSelected: (selected: boolean) => void;
+  /** 应用优惠券 */
+  applyCoupon: (code: CouponCode) => boolean;
+  /** 移除优惠券 */
+  removeCoupon: () => void;
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
   setLocale: (l: Locale) => void;
@@ -86,6 +113,7 @@ export const usePeakStore = create<PeakStore>()(
       wishlist: [],
       locale: 'zh',
       currency: 'USD',
+      coupon: null,
 
       addToCart: (item, qty = 1) =>
         set((s) => {
@@ -93,11 +121,11 @@ export const usePeakStore = create<PeakStore>()(
           if (existing) {
             return {
               cart: s.cart.map((c) =>
-                c.id === item.id ? { ...c, qty: c.qty + qty } : c
+                c.id === item.id ? { ...c, qty: c.qty + qty, selected: true } : c
               ),
             };
           }
-          return { cart: [...s.cart, { ...item, qty }] };
+          return { cart: [...s.cart, { ...item, qty, selected: true }] };
         }),
 
       updateQty: (id, qty) =>
@@ -110,7 +138,28 @@ export const usePeakStore = create<PeakStore>()(
       removeFromCart: (id) =>
         set((s) => ({ cart: s.cart.filter((c) => c.id !== id) })),
 
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], coupon: null }),
+
+      toggleSelect: (id) =>
+        set((s) => ({
+          cart: s.cart.map((c) =>
+            c.id === id ? { ...c, selected: c.selected === false ? true : false } : c
+          ),
+        })),
+
+      setAllSelected: (selected) =>
+        set((s) => ({
+          cart: s.cart.map((c) => ({ ...c, selected })),
+        })),
+
+      applyCoupon: (code) => {
+        const valid: CouponCode[] = ['SAVE10', 'FREESHIP', 'VIP20'];
+        if (!valid.includes(code)) return false;
+        set({ coupon: { code, appliedAt: Date.now() } });
+        return true;
+      },
+
+      removeCoupon: () => set({ coupon: null }),
 
       toggleWish: (id) =>
         set((s) => {
@@ -138,7 +187,7 @@ export const usePeakStore = create<PeakStore>()(
           total: s.cart.reduce((sum, c) => sum + c.price * c.qty, 0),
           status: 'pending',
         };
-        set({ orders: [order, ...s.orders], cart: [] });
+        set({ orders: [order, ...s.orders], cart: [], coupon: null });
         return order;
       },
 
@@ -154,6 +203,7 @@ export const usePeakStore = create<PeakStore>()(
         wishlist: s.wishlist,
         locale: s.locale,
         currency: s.currency,
+        coupon: s.coupon,
       }),
     }
   )

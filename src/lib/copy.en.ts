@@ -220,6 +220,22 @@ export const COPY_EN = {
     shippingLabel: 'Shipping',
     qtyDecLabel: 'Decrease quantity',
     qtyIncLabel: 'Increase quantity',
+    /** A1: per-item selection */
+    selectAll: 'Select all',
+    selectedCount: (n: number, total: number) => `${n} of ${total} selected`,
+    selectedEmpty: 'Pick at least one item to check out',
+    /** A2: coupon */
+    couponTitle: 'Promo code',
+    couponPlaceholder: 'Enter promo code',
+    couponApply: 'Apply',
+    couponRemove: 'Remove',
+    couponApplied: (code: string) => `${code} applied`,
+    couponInvalid: 'Invalid or expired code',
+    couponInvalidMin: 'Requires $200 minimum',
+    /** Discount breakdown line */
+    discountLabel: 'Discount',
+    /** Available hints */
+    couponHints: 'Try SAVE10 (10% off) / FREESHIP (free shipping) / VIP20 ($20 off $200+)',
   },
 
   search: {
