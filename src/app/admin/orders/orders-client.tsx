@@ -73,7 +73,7 @@ export function OrdersClient() {
               filtered.map((o: any) => (
                 <tr key={o.id} className="border-t border-neutral-100">
                   <td className="px-3 py-2 font-mono text-[11.5px]">{o.order_no}</td>
-                  <td className="px-3 py-2">{o.nickname} <span className="text-neutral-400">@{o.username}</span></td>
+                  <td className="px-3 py-2">{o.nickname} <span className="text-neutral-700">@{o.username}</span></td>
                   <td className="px-3 py-2 font-bold">{usd(o.amount)}</td>
                   <td className="px-3 py-2">
                     <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${STATUS_CLASS[o.status as OrderStatus]}`}>
@@ -87,10 +87,10 @@ export function OrdersClient() {
                   <td className="px-3 py-2 text-[11px] text-neutral-500">{o.created_at}</td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     {o.status === 'paid' && (
-                      <button onClick={() => ship(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-600 text-white hover:bg-emerald-700">{t.admin.orders.ship}</button>
+                      <button onClick={() => ship(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.orders.ship}</button>
                     )}
                     {o.status === 'shipped' && (
-                      <button onClick={() => complete(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-600 text-white hover:bg-emerald-700">{t.admin.orders.complete}</button>
+                      <button onClick={() => complete(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.orders.complete}</button>
                     )}
                   </td>
                 </tr>

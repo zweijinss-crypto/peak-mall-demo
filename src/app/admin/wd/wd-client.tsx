@@ -65,21 +65,21 @@ export function WdClient() {
                     </td>
                     <td className="px-3 py-2 text-[11px] text-neutral-500">{w.created_at}</td>
                     <td className="px-3 py-2 max-w-[180px] truncate text-[11px]">
-                      {w.bound_address ? w.bound_address : <span className="text-neutral-400">{t.admin.wd.unbound}</span>}
+                      {w.bound_address ? w.bound_address : <span className="text-neutral-700">{t.admin.wd.unbound}</span>}
                       {mismatch && <div className="text-rose-600 font-semibold mt-1">{t.admin.wd.addrMismatch}</div>}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       {w.status === 'pending' && (
                         <>
-                          <button onClick={() => approve(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-600 text-white hover:bg-emerald-700 mr-1">{t.admin.wd.approve}</button>
+                          <button onClick={() => approve(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700 mr-1">{t.admin.wd.approve}</button>
                           <button onClick={() => reject(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-rose-600 text-white hover:bg-rose-700">{t.admin.wd.reject}</button>
                         </>
                       )}
                       {w.status === 'approved' && (
-                        <button onClick={() => markPaid(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-600 text-white hover:bg-emerald-700">{t.admin.wd.markPaid}</button>
+                        <button onClick={() => markPaid(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.wd.markPaid}</button>
                       )}
                       {(w.status === 'paid' || w.status === 'rejected') && (
-                        <span className="text-neutral-400 text-[11px]">{t.admin.wd.view}</span>
+                        <span className="text-neutral-700 text-[11px]">{t.admin.wd.view}</span>
                       )}
                     </td>
                   </tr>

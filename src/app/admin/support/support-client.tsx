@@ -41,7 +41,7 @@ export function SupportClient() {
           <input value={local.hours} onChange={(e) => setLocal({ ...local, hours: e.target.value })} placeholder={t.admin.support.phHours} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
           <div className="text-[11.5px] text-neutral-500 mt-1">{t.admin.support.hintHours}</div>
         </div>
-        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-600 text-white font-bold text-[13px] hover:bg-orange-700">{t.admin.support.save}</button>
+        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">{t.admin.support.save}</button>
         {msg && <div className="text-emerald-600 text-[12.5px]">{msg}</div>}
       </div>
       <h2 className="text-[14px] font-bold text-neutral-900 mt-5 mb-2">{t.admin.support.preview}</h2>

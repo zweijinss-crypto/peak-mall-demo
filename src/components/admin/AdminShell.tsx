@@ -30,12 +30,12 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
       <aside className="w-full md:w-[236px] md:min-h-[calc(100vh-120px)] bg-[#1c1c1c] text-neutral-100 md:flex-shrink-0">
         <div className="px-[22px] py-5 border-b border-white/10">
           <div className="text-[17px] font-bold leading-tight">{t.admin.roleAdmin}</div>
-          <small className="block text-[11px] font-normal text-neutral-400 mt-1">{t.admin.roleSwitchHint}</small>
+          <small className="block text-[11px] font-normal text-neutral-200 mt-1">{t.admin.roleSwitchHint}</small>
         </div>
         <nav className="py-2">
           {ADMIN_GROUPS.map((g, gi) => (
             <div key={gi} className="mb-1">
-              <div className="px-[22px] py-2 text-[11px] uppercase tracking-wider text-neutral-500 font-semibold">
+              <div className="px-[22px] py-2 text-[11px] uppercase tracking-wider text-neutral-300 font-semibold">
                 {t.admin[g.labelKey]}
               </div>
               {g.items.map((item) => {

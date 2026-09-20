@@ -36,7 +36,7 @@ export function DemoClient() {
       <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.demo.title}</h1>
       <div className="bg-white rounded-xl border border-neutral-200 p-5">
         <p className="text-[13px] text-neutral-700 mb-4 leading-relaxed">{t.admin.demo.hint}</p>
-        <button onClick={trigger} className="px-4 py-2 rounded-md bg-orange-600 text-white font-bold text-[13px] hover:bg-orange-700">
+        <button onClick={trigger} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">
           🧪 {t.admin.demo.trigger}
         </button>
         <div className="mt-4 text-[12.5px] text-neutral-500">

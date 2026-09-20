@@ -20,7 +20,7 @@ export function InviteClient() {
     <div>
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <h1 className="text-[20px] font-extrabold text-neutral-900">{t.admin.invite.title}</h1>
-        <button onClick={add} className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-600 text-white hover:bg-orange-700">
+        <button onClick={add} className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-700 text-white hover:bg-orange-700">
           + {t.admin.invite.add}
         </button>
       </div>

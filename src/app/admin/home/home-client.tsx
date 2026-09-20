@@ -40,7 +40,7 @@ export function HomeClient() {
           <input value={local.notice} onChange={(e) => setLocal({ ...local, notice: e.target.value })} placeholder={t.admin.home.phNotice} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
         </div>
         <p className="text-[12px] text-neutral-500">{t.admin.home.hint}</p>
-        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-600 text-white font-bold text-[13px] hover:bg-orange-700">{t.admin.home.save}</button>
+        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">{t.admin.home.save}</button>
         {msg && <div className="text-emerald-600 text-[12.5px]">{msg}</div>}
       </div>
       <h2 className="text-[14px] font-bold text-neutral-900 mt-5 mb-2">{t.admin.home.preview}</h2>

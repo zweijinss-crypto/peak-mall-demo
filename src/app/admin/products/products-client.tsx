@@ -35,7 +35,7 @@ export function ProductsClient() {
           {t.admin.products.title}
           {t.admin.products.count(products.length)}
         </h1>
-        <button onClick={add} className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-600 text-white hover:bg-orange-700">
+        <button onClick={add} className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-700 text-white hover:bg-orange-700">
           + {t.admin.products.add}
         </button>
       </div>
@@ -75,7 +75,7 @@ export function ProductsClient() {
                     )}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <button onClick={() => save(p.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-600 text-white hover:bg-emerald-700 mr-1">{t.admin.products.save}</button>
+                    <button onClick={() => save(p.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700 mr-1">{t.admin.products.save}</button>
                     <button onClick={() => toggle(p.id, p.status)} className="px-2 py-0.5 text-[11px] rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50">
                       {p.status ? t.admin.products.off : t.admin.products.on}
                     </button>

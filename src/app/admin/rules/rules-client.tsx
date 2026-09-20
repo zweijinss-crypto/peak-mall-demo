@@ -69,7 +69,7 @@ export function RulesClient() {
           </label>
         </div>
         <p className="text-[12px] text-neutral-500">{t.admin.rules.hint}</p>
-        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-600 text-white font-bold text-[13px] hover:bg-orange-700">
+        <button onClick={save} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">
           {t.admin.rules.saveAll}
         </button>
         {msg && <div className="text-emerald-600 text-[12.5px]">{msg}</div>}

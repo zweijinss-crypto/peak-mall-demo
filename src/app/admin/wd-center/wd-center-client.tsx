@@ -59,7 +59,7 @@ export function WdCenterClient() {
             <option value="card">Card</option>
           </select>
           <p className="text-[11.5px] text-neutral-500 mb-3">{t.admin.wdCenter.min}: $10</p>
-          <button onClick={submit} className="w-full py-2 rounded-md bg-orange-600 text-white font-bold text-[13px] hover:bg-orange-700">
+          <button onClick={submit} className="w-full py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">
             {t.admin.wdCenter.apply}
           </button>
           {msg && <div className="mt-2 text-emerald-600 text-[12.5px]">{msg}</div>}
