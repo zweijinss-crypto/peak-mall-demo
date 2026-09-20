@@ -463,6 +463,33 @@ export const COPY_EN = {
   shop: {
     notFoundTitle: 'Product not found',
     notFoundDesc: 'The product may be removed or the link is wrong.',
+    shopAll: {
+      title: 'All products',
+      subtitle: 'Browse everything in the catalog',
+      catAll: 'All',
+      catElectronics: 'Electronics',
+      catAppliances: 'Home appliances',
+      sortDefault: 'Default',
+      sortPriceAsc: 'Price ↑',
+      sortPriceDesc: 'Price ↓',
+      count: (n: number) => `${n} items`,
+      searchPlaceholder: 'Search products',
+      searchAria: 'Search products',
+      sortAria: 'Sort by price',
+      emptyTitle: 'No matching products',
+      emptyDesc: 'Try a different keyword or category',
+      discountBadge: '-60%',
+      addToCart: 'Add to cart',
+      wishAria: 'Add to wishlist',
+    },
+    shopNew: {
+      title: 'New arrivals',
+      subtitle: 'The latest additions to the catalog',
+    },
+    shopHot: {
+      title: 'Hot sellers',
+      subtitle: 'Best-selling picks this month',
+    },
   },
 
   payRecords: {

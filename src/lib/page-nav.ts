@@ -102,6 +102,9 @@ const ANNOUNCE: Record<Locale, { tag: string; text: string }> = {
 
 export type PageKey =
   | 'home'
+  | 'all'
+  | 'new'
+  | 'hot'
   | 'cart'
   | 'orders'
   | 'wishlist'

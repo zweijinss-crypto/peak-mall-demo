@@ -257,6 +257,33 @@ export const COPY = {
   shop: {
     notFoundTitle: '商品不存在',
     notFoundDesc: '商品可能已下架,或链接有误。',
+    shopAll: {
+      title: '全部商品',
+      subtitle: '浏览商城全部上架好物',
+      catAll: '全部',
+      catElectronics: '数码电子',
+      catAppliances: '家用电器',
+      sortDefault: '默认排序',
+      sortPriceAsc: '价格 ↑',
+      sortPriceDesc: '价格 ↓',
+      count: (n: number) => `共 ${n} 件商品`,
+      searchPlaceholder: '搜索商品名称',
+      searchAria: '搜索商品',
+      sortAria: '价格排序',
+      emptyTitle: '没有匹配的商品',
+      emptyDesc: '换个关键词或分类试试',
+      discountBadge: '-60%',
+      addToCart: '加入购物车',
+      wishAria: '加入收藏',
+    },
+    shopNew: {
+      title: '新品上架',
+      subtitle: '最新上架的商品一览',
+    },
+    shopHot: {
+      title: '人气热卖',
+      subtitle: '本月销量最高的爆款好物',
+    },
   },
   cart: {
     title: '我的购物车',
