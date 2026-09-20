@@ -17,6 +17,21 @@ type StatusTab = 'all' | Order['status'];
  * A3: status tab filter + search by ID/name
  * A4: cancel pending order + buy again (reorder to cart)
  */
+function TimelineRow({ done, label, time, danger }: { done: boolean; label: string; time?: number; danger?: boolean }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span
+        className={`w-3 h-3 rounded-full flex-shrink-0 ${
+          done ? (danger ? 'bg-rose-500' : 'bg-emerald-500') : 'bg-ink-200'
+        }`}
+        aria-hidden="true"
+      />
+      <span className={`flex-1 ${done ? 'text-ink-900' : 'text-ink-400'}`}>{label}</span>
+      {time ? <span className="text-[11px] text-ink-500 tabular-nums">{new Date(time).toLocaleString()}</span> : null}
+    </li>
+  );
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const t = useT();
@@ -31,6 +46,12 @@ export default function OrdersPage() {
 
   /** A4: cancel modal — pendingId = 待取消订单 id, null = 关闭 */
   const [pendingCancel, setPendingCancel] = useState<string | null>(null);
+
+  /** A5: 详情展开 — expandedId = 当前展开的订单 id, null = 收起 */
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) =>
+    setExpandedId((cur) => (cur === id ? null : id));
 
   const STATUS_MAP: Record<Order['status'], { label: string; color: string }> = {
     pending: { label: t.orders.statusPending, color: 'bg-amber-100 text-amber-700' },
@@ -310,6 +331,61 @@ export default function OrdersPage() {
                     ))}
                   </div>
 
+                  {/* A5: detail panel */}
+                  {expandedId === o.id && (
+                    <section
+                      aria-label={t.orders.viewDetail}
+                      className="px-5 py-4 bg-ink-50/40 border-t border-ink-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-[12.5px]"
+                    >
+                      <div className="bg-white rounded-md border border-ink-100 p-4">
+                        <div className="text-[11px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-2">
+                          {t.orders.payment}
+                        </div>
+                        {o.payment ? (
+                          <div className="space-y-1">
+                            <div className="text-ink-900 font-semibold">
+                              {t.orders.paymentBrand(o.payment.brand)}
+                              {o.payment.last4 ? ` ${t.orders.paymentLast4(o.payment.last4)}` : ''}
+                            </div>
+                            {o.payment.authCode && (
+                              <div className="text-[11px] text-ink-500 font-mono">
+                                {t.orders.paymentAuth(o.payment.authCode)}
+                              </div>
+                            )}
+                            <div className="text-[11px] text-ink-500">
+                              {o.payment.status === 'success' ? '✓' : o.payment.status === 'pending' ? '⏱' : '✗'} {o.payment.paidAt
+                                ? new Date(o.payment.paidAt).toLocaleString()
+                                : '—'}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-ink-500 italic">{t.orders.paymentNone}</div>
+                        )}
+                      </div>
+
+                      <div className="bg-white rounded-md border border-ink-100 p-4">
+                        <div className="text-[11px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-2">
+                          {t.orders.timeline}
+                        </div>
+                        <ol className="space-y-1.5">
+                          <TimelineRow done label={t.orders.timelinePlaced} time={o.createdAt} />
+                          <TimelineRow done={o.status !== 'pending' && o.status !== 'cancelled'} label={t.orders.timelinePaid} time={o.payment?.paidAt} />
+                          <TimelineRow done={o.status === 'shipped' || o.status === 'delivered'} label={t.orders.timelineShipped} />
+                          <TimelineRow done={o.status === 'delivered'} label={t.orders.timelineDelivered} />
+                          {o.status === 'cancelled' && (
+                            <TimelineRow done label={t.orders.timelineCancelled} time={o.cancelledAt} danger />
+                          )}
+                        </ol>
+                      </div>
+
+                      {o.status === 'cancelled' && o.cancelledAt && (
+                        <div className="md:col-span-2 text-[11.5px] text-rose-700 bg-rose-50 border border-rose-200 rounded-md px-3 py-2">
+                          ⚠ {t.orders.cancelledAt}: {new Date(o.cancelledAt).toLocaleString()}
+                        </div>
+                      )}
+                    </section>
+                  )}
+
                   <footer className="flex flex-wrap justify-between items-center gap-3 px-5 py-3.5 bg-ink-50 border-t border-ink-100">
                     <span className="text-[12.5px] text-ink-500">
                       {t.orders.itemCount(o.items.reduce((s, i) => s + i.qty, 0))}
@@ -319,10 +395,11 @@ export default function OrdersPage() {
                         {t.orders.amount}: <b className="text-orange-700 text-[16px]">${o.total.toFixed(2)}</b>
                       </span>
                       <button
-                        onClick={() => router.push(`/shop/${o.items[0].productId}`)}
+                        onClick={() => toggleExpand(o.id)}
+                        aria-expanded={expandedId === o.id}
                         className="text-[12.5px] font-semibold text-orange-700 hover:text-primary-dark transition-colors"
                       >
-                        {t.orders.viewDetail} →
+                        {expandedId === o.id ? t.orders.hideDetail : `${t.orders.viewDetail} →`}
                       </button>
                       <button
                         onClick={() => handleReorder(o.id)}

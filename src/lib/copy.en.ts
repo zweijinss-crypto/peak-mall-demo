@@ -285,6 +285,20 @@ export const COPY_EN = {
     buyAgain: 'Buy again',
     buyAgainOk: 'Added to cart — redirecting…',
     cancelledTag: 'Cancelled',
+    /** A5: order detail expand */
+    hideDetail: 'Hide details',
+    payment: 'Payment',
+    paymentNone: 'Not paid',
+    paymentBrand: (b: string) => `${b}`,
+    paymentLast4: (n: string) => `•••• ${n}`,
+    paymentAuth: (a: string) => `Auth ${a}`,
+    cancelledAt: 'Cancelled at',
+    timeline: 'Timeline',
+    timelinePlaced: 'Placed',
+    timelinePaid: 'Paid',
+    timelineShipped: 'Shipped',
+    timelineDelivered: 'Delivered',
+    timelineCancelled: 'Cancelled',
   },
 
   wishlist: {
