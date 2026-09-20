@@ -152,13 +152,13 @@ const LoginPanel: FC<LoginPanelProps> = ({ onLogin, i18n }) => {
             className={inputCls}
           />
         </Field>
-        <label className="flex items-center gap-2 text-[13px] text-neutral-700 -mt-1 mb-4 cursor-pointer">
-          <input type="checkbox" checked={rem} onChange={(e) => setRem(e.target.checked)} />
+        <label className="flex items-center gap-3 text-[13px] text-neutral-700 -mt-1 mb-4 cursor-pointer min-h-[28px] py-1">
+          <input type="checkbox" checked={rem} onChange={(e) => setRem(e.target.checked)} className="w-6 h-6 accent-orange-700 cursor-pointer shrink-0 m-1" />
           {i18n.remember}
         </label>
         <button
           type="submit" disabled={busy}
-          className="w-full py-3 bg-neutral-900 hover:bg-orange-500 text-white border border-neutral-900 hover:border-orange-500 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60"
+          className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white border border-orange-700 hover:border-orange-800 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60"
         >
           {busy ? '...' : i18n.login}
         </button>
@@ -228,7 +228,7 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
             <input value={invite} onChange={(e) => setInvite(e.target.value)} placeholder={i18n.invitePh} className={inputCls} />
           </Field>
         )}
-        <button type="submit" disabled={busy} className="w-full py-3 bg-neutral-900 hover:bg-orange-500 text-white border border-neutral-900 hover:border-orange-500 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60">
+        <button type="submit" disabled={busy} className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white border border-orange-700 hover:border-orange-800 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60">
           {busy ? '...' : i18n.register}
         </button>
         {msg && <div className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}

@@ -36,14 +36,14 @@ const METHOD_LABEL: Record<PaymentRecord['method'], { zh: string; en: string }> 
 };
 
 const BRAND_COLORS: Record<string, string> = {
-  Visa: 'bg-blue-600',
-  Mastercard: 'bg-orange-600',
-  Amex: 'bg-cyan-600',
-  Discover: 'bg-amber-500',
-  JCB: 'bg-emerald-600',
-  Diners: 'bg-violet-600',
-  UnionPay: 'bg-red-600',
-  Unknown: 'bg-neutral-500',
+  Visa: 'bg-blue-700',
+  Mastercard: 'bg-orange-700',
+  Amex: 'bg-cyan-700',
+  Discover: 'bg-amber-700',
+  JCB: 'bg-emerald-700',
+  Diners: 'bg-violet-700',
+  UnionPay: 'bg-red-700',
+  Unknown: 'bg-neutral-700',
 };
 
 const PayRecordsClient: FC = () => {
@@ -301,7 +301,7 @@ const PayRecordsClient: FC = () => {
                     <span className={`w-2.5 h-2.5 rounded-full ${BRAND_COLORS[b.brand] ?? BRAND_COLORS.Unknown}`} aria-hidden />
                     <span className="flex-1 text-ink-900 font-semibold">{b.brand}</span>
                     <span className="text-ink-500 tabular-nums">{b.count}</span>
-                    <span className="text-ink-400 tabular-nums w-9 text-right">{pct}%</span>
+                    <span className="text-ink-600 tabular-nums w-9 text-right">{pct}%</span>
                   </li>
                 );
               })}
@@ -326,7 +326,7 @@ const PayRecordsClient: FC = () => {
                       {style?.label[isEn ? 'en' : 'zh'] ?? s.status}
                     </span>
                     <span className="text-ink-500 tabular-nums">{s.count}</span>
-                    <span className="text-ink-400 tabular-nums w-9 text-right">{pct}%</span>
+                    <span className="text-ink-600 tabular-nums w-9 text-right">{pct}%</span>
                   </li>
                 );
               })}
@@ -352,12 +352,12 @@ const PayRecordsClient: FC = () => {
                         title={`${d.day}: $${d.total.toFixed(2)} (${d.count})`}
                       />
                     </div>
-                    <span className="text-[10px] text-ink-400 tabular-nums">{day}</span>
+                    <span className="text-[10px] text-ink-600 tabular-nums">{day}</span>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-2 text-[11px] text-ink-400 text-right tabular-nums">
+            <div className="mt-2 text-[11px] text-ink-600 text-right tabular-nums">
               max ${maxDayTotal.toFixed(2)}
             </div>
           </div>
@@ -437,25 +437,24 @@ const PayRecordsClient: FC = () => {
                 {filteredRecords.map(({ order, payment }) => {
                   const info = classifyBin(payment.bin);
                   const st = STATUS_STYLES[payment.status];
-                  const ts = new Date(payment.paidAt ?? order.createdAt).toLocaleString();
+                  const ts = new Date(payment.paidAt ?? order.createdAt).toLocaleString(isEn ? 'en-US' : 'zh-CN', { timeZone: 'UTC' });
                   const errText = payment.errorCode
                     ? ` · ${(t.payRecords.errorCode as Record<string, string>)[payment.errorCode] ?? payment.errorCode}`
                     : '';
                   return (
                     <tr
                       key={order.id}
-                      onClick={() => setDetailOrder(order)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailOrder(order); } }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={t.payRecords.detail.title + ' · ' + order.id}
-                      className="border-t border-ink-100 hover:bg-orange-50/40 focus:bg-orange-50/60 focus:outline-none focus:ring-2 focus:ring-orange-300 cursor-pointer transition-colors"
+                      className="border-t border-ink-100 hover:bg-orange-50/40 transition-colors"
                     >
-                      <td className="px-3 py-2.5 text-ink-700 tabular-nums whitespace-nowrap">{ts}</td>
-                      <td className="px-3 py-2.5">
-                        <span className="font-mono text-ink-900 hover:text-orange-700 transition-colors">
-                          {order.id}
-                        </span>
+                      <td className="px-3 py-2.5 text-ink-700 tabular-nums whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => setDetailOrder(order)}
+                          className="text-left font-mono text-ink-900 hover:text-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 rounded-sm"
+                          suppressHydrationWarning
+                        >
+                          {ts} · {order.id}
+                        </button>
                       </td>
                       <td className="px-3 py-2.5 text-ink-700">{METHOD_LABEL[payment.method][isEn ? 'en' : 'zh']}</td>
                       <td className="px-3 py-2.5">

@@ -35,7 +35,7 @@ export default function LoginPage() {
         {currentUser && (
           <div className="max-w-shell mx-auto px-5 pt-6">
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-md text-[13px]">
-              {t.auth.loggedInAs(currentUser.email, new Date(currentUser.loggedInAt).toLocaleString())}
+              {t.auth.loggedInAs(currentUser.email, new Date(currentUser.loggedInAt).toLocaleString('en-US', { timeZone: 'UTC' }))}
             </div>
           </div>
         )}
