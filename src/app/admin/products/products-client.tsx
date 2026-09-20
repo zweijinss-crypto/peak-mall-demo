@@ -62,11 +62,11 @@ export function ProductsClient() {
                 <tr key={p.id} className="border-t border-neutral-100">
                   <td className="px-3 py-2">{p.id}</td>
                   <td className="px-3 py-2 text-[18px]">{p.cover}</td>
-                  <td className="px-3 py-2"><input id={`pn_${p.id}`} defaultValue={p.name} className="border border-neutral-200 rounded px-1.5 py-1 w-[140px]" /></td>
-                  <td className="px-3 py-2"><input id={`pc_${p.id}`} defaultValue={p.category} className="border border-neutral-200 rounded px-1.5 py-1 w-[80px]" /></td>
-                  <td className="px-3 py-2"><input id={`pp_${p.id}`} defaultValue={p.price} className="border border-neutral-200 rounded px-1.5 py-1 w-[70px]" /></td>
-                  <td className="px-3 py-2"><input id={`ps_${p.id}`} defaultValue={p.stock} className="border border-neutral-200 rounded px-1.5 py-1 w-[60px]" /></td>
-                  <td className="px-3 py-2"><input id={`pd_${p.id}`} defaultValue={p.description} className="border border-neutral-200 rounded px-1.5 py-1 w-[150px]" /></td>
+                  <td className="px-3 py-2"><input id={`pn_${p.id}`} aria-label={`${t.admin.products.colName} ${p.name}`} defaultValue={p.name} className="border border-neutral-200 rounded px-1.5 py-1 w-[140px]" /></td>
+                  <td className="px-3 py-2"><input id={`pc_${p.id}`} aria-label={`${t.admin.products.colCat} ${p.name}`} defaultValue={p.category} className="border border-neutral-200 rounded px-1.5 py-1 w-[80px]" /></td>
+                  <td className="px-3 py-2"><input id={`pp_${p.id}`} aria-label={`${t.admin.products.colPrice} ${p.name}`} defaultValue={p.price} className="border border-neutral-200 rounded px-1.5 py-1 w-[70px]" /></td>
+                  <td className="px-3 py-2"><input id={`ps_${p.id}`} aria-label={`${t.admin.products.colStock} ${p.name}`} defaultValue={p.stock} className="border border-neutral-200 rounded px-1.5 py-1 w-[60px]" /></td>
+                  <td className="px-3 py-2"><input id={`pd_${p.id}`} aria-label={`${t.admin.products.colDesc} ${p.name}`} defaultValue={p.description} className="border border-neutral-200 rounded px-1.5 py-1 w-[150px]" /></td>
                   <td className="px-3 py-2">
                     {p.status ? (
                       <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-700">{t.admin.products.on}</span>
