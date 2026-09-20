@@ -47,17 +47,16 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <section className="relative bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 py-12 overflow-hidden">
-      <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+    <section className="relative bg-white py-12">
       <div className="relative max-w-shell mx-auto px-5">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose">⚡ {cp.flashSale.label}</span>
+              <span className="text-[12px] font-semibold tracking-[3px] uppercase text-rose-700">⚡ {cp.flashSale.label}</span>
               <span className="text-[12px] text-ink-500">{cp.flashSale.scope}</span>
             </div>
-            <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">
+            <h2 className="text-[28px] md:text-[32px] font-bold text-ink-900 leading-tight">
               {cp.flashSale.title}
             </h2>
           </div>
@@ -84,7 +83,7 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
               <button
                 key={p.id}
                 onClick={() => router.push(`/shop/${p.id}`)}
-                className="group bg-white rounded-xl overflow-hidden text-left shadow-soft hover:shadow-float hover:-translate-y-1 transition-all"
+                className="group bg-white rounded-xl overflow-hidden text-left border border-ink-100 hover:border-ink-300 transition-colors"
               >
                 <div className="relative aspect-square bg-ink-100">
                   {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
@@ -102,10 +101,10 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
                 <div className="p-3.5">
                   <div className="text-[12.5px] font-semibold text-ink-900 line-clamp-2 leading-snug mb-2 min-h-[34px]">{p.name}</div>
                   <div className="flex items-baseline gap-1.5 mb-1.5">
-                    <span className="text-accent-rose text-[20px] font-extrabold">${salePrice}</span>
+                    <span className="text-rose-700 text-[20px] font-extrabold">${salePrice}</span>
                     <span className="text-ink-600 text-[12px] line-through">${p.price}</span>
                   </div>
-                  <div className="text-[11px] text-accent-rose font-semibold">{cp.flashSale.save} ${savings}</div>
+                  <div className="text-[11px] text-rose-700 font-semibold">{cp.flashSale.save} ${savings}</div>
                 </div>
               </button>
             );

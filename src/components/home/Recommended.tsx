@@ -65,10 +65,10 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary-light rounded-full" />
-            <span className="text-[11px] font-extrabold tracking-[3px] uppercase text-ink-500">{t.rec.label}</span>
+            <div className="h-1 w-12 bg-primary rounded-full" />
+            <span className="text-[11px] font-semibold tracking-[3px] uppercase text-ink-500">{t.rec.label}</span>
           </div>
-          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{t.rec.title}</h2>
+          <h2 className="text-[28px] md:text-[32px] font-bold text-ink-900 leading-tight">{t.rec.title}</h2>
           <p className="text-[13.5px] text-ink-500 mt-1.5 max-w-[520px]">{t.rec.sub}</p>
         </div>
 

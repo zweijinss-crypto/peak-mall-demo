@@ -31,10 +31,10 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
       <div className="max-w-shell mx-auto px-5">
         <div className="flex items-end justify-between mb-7">
           <div>
-            <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose mb-2">🏆 {cp.topSelling.label}</div>
+            <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-rose-700 mb-2">🏆 {cp.topSelling.label}</div>
             <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.topSelling.title}</h2>
           </div>
-          <Link href="/shop-hot" className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">
+          <Link href="/shop-hot" className="text-[13px] font-semibold text-orange-700 hover:text-ink-900 cursor-pointer">
             {cp.topSelling.viewAll} →
           </Link>
         </div>
@@ -51,7 +51,7 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
               >
                 {/* Rank */}
                 <div
-                  className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-[20px] font-extrabold ${isPodium ? 'text-white shadow-md' : 'bg-white text-ink-700 border border-ink-200'}`}
+                  className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-[20px] font-bold ${isPodium ? 'text-white' : 'bg-white text-ink-700 border border-ink-200'}`}
                   style={isPodium ? { background: color } : undefined}
                 >
                   {i + 1}
@@ -78,11 +78,11 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
 
                 {/* Price + reviews */}
                 <div className="hidden sm:flex flex-col items-end flex-shrink-0">
-                  <div className="text-[16px] font-extrabold text-orange-700">${p.price}</div>
+                  <div className="text-[16px] font-bold text-orange-700">${p.price}</div>
                   <div className="text-[11px] text-accent-gold mt-0.5">★★★★★ <span className="text-ink-500">{(4.5 + i * 0.1).toFixed(1)}</span></div>
                 </div>
 
-                <div className="text-ink-300 group-hover:text-primary group-hover:translate-x-1 transition-all">
+                <div className="text-ink-300 group-hover:text-primary">
                   <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
                     <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>

@@ -17,9 +17,8 @@ const Hero: FC = () => {
   useEffect(() => setMounted(true), []);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-ink-900 via-ink-800 to-ink-900 text-white">
+    <section className="relative overflow-hidden bg-ink-900 text-white">
       {/* Background layers */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
       <div className="hero-orb bg-primary w-[420px] h-[420px] top-[-100px] right-[-80px]" />
       <div className="hero-orb bg-accent-violet w-[360px] h-[360px] bottom-[-100px] left-[-80px]" />
 
@@ -34,7 +33,7 @@ const Hero: FC = () => {
 
             <h1 className="text-[40px] md:text-[56px] lg:text-[64px] leading-[1.05] font-extrabold tracking-[-0.02em] mb-6">
               <span className="block">{t.hero.h1}</span>
-              <span className="block text-gradient-orange">{t.hero.h2}</span>
+              <span className="block text-primary-light">{t.hero.h2}</span>
             </h1>
 
             <p className="text-[16px] md:text-[18px] text-white/70 leading-[1.7] max-w-[520px] mb-8">
@@ -44,7 +43,7 @@ const Hero: FC = () => {
             <div className="flex flex-wrap gap-3 mb-8">
               <Link
                 href="#recommended"
-                className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md shadow-glow transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md"
               >
                 {t.hero.ctaPrimary}
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -53,7 +52,7 @@ const Hero: FC = () => {
               </Link>
               <Link
                 href="/shop/49"
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-7 py-3.5 text-[14px] font-bold tracking-wide rounded-md"
               >
                 {t.hero.ctaSecondary}
               </Link>
@@ -81,27 +80,26 @@ const Hero: FC = () => {
           <div className={`relative hidden lg:block ${mounted ? 'animate-fade-up' : 'opacity-0'}`} style={{ animationDelay: '0.15s' }}>
             <div className="relative w-full aspect-square max-w-[480px] mx-auto">
               {/* Center hero card */}
-              <div className="absolute inset-x-8 inset-y-12 bg-gradient-to-br from-primary to-primary-dark rounded-2xl shadow-float overflow-hidden animate-float">
-                <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+              <div className="absolute inset-x-8 inset-y-12 bg-orange-700 rounded-2xl overflow-hidden">
                 <div className="relative h-full flex flex-col items-center justify-center text-white p-8 text-center">
                   <div className="text-[140px] mb-4">💻</div>
-                  <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-2">PEAK MALL</div>
+                  <div className="text-[14px] tracking-[3px] uppercase text-white mb-2 font-semibold">PEAK MALL</div>
                   <div className="text-[24px] font-extrabold leading-tight">Ultra-Slim<br/>Business Laptop</div>
                   <div className="mt-4 text-[28px] font-bold">$499.00</div>
                 </div>
               </div>
 
               {/* Floating mini cards */}
-              <div className="absolute -left-4 top-8 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-float w-[180px] animate-float-delayed">
+              <div className="absolute -left-4 top-8 bg-white rounded-xl p-3 shadow-soft w-[180px]">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-8 h-8 rounded-md bg-accent-teal/15 text-accent-teal flex items-center justify-center text-[14px]">📦</div>
+                  <div className="w-8 h-8 rounded-md bg-teal-700/15 text-teal-700 flex items-center justify-center text-[14px]">📦</div>
                   <div className="text-[10px] text-ink-500">{t.header.orderStatus}</div>
                 </div>
                 <div className="text-[13px] font-bold text-ink-900">{t.hero.floatingCard1}</div>
                 <div className="text-[10px] text-ink-500 mt-0.5">{t.hero.floatingCard1Sub}</div>
               </div>
 
-              <div className="absolute -right-4 bottom-16 bg-white/95 backdrop-blur-md rounded-xl p-3 shadow-float w-[200px] animate-float-delayed-2">
+              <div className="absolute -right-4 bottom-16 bg-white rounded-xl p-3 shadow-soft w-[200px]">
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-accent-gold text-[12px]">★★★★★</span>
                   <span className="text-[10px] text-ink-500">5.0</span>

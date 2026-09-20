@@ -20,7 +20,7 @@ const TrustStrip: FC = () => {
       <div className="max-w-shell mx-auto px-5 py-7 grid grid-cols-2 md:grid-cols-4 gap-5">
         {items.map((it, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary flex items-center justify-center text-[18px] font-extrabold flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-primary-50 text-orange-700 flex items-center justify-center text-[18px] font-bold flex-shrink-0">
               {it.value.slice(0, 1)}
             </div>
             <div>

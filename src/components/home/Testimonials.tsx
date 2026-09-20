@@ -38,8 +38,8 @@ const Testimonials: FC = () => {
   return (
     <section className="max-w-shell mx-auto px-5 py-12">
       <div className="text-center mb-10">
-        <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{cp.testimonial.label}</div>
-        <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.testimonial.title}</h2>
+        <div className="text-[12px] font-semibold tracking-[3px] uppercase text-ink-500 mb-2">{cp.testimonial.label}</div>
+        <h2 className="text-[28px] md:text-[32px] font-bold text-ink-900 leading-tight">{cp.testimonial.title}</h2>
         <div className="flex items-center justify-center gap-1 mt-3">
           {[1,2,3,4,5].map((i) => <span key={i} className="text-accent-gold text-[20px]">★</span>)}
           <span className="text-[14px] font-bold text-ink-700 ml-2">{cp.testimonial.aggregate}</span>
@@ -50,7 +50,7 @@ const Testimonials: FC = () => {
         {items.map((t, i) => (
           <article
             key={i}
-            className={`relative bg-gradient-to-br ${t.bg} rounded-2xl p-7 border border-white shadow-soft hover:shadow-float hover:-translate-y-1 transition-all`}
+            className={`relative bg-white rounded-2xl p-7 border border-ink-100`}
           >
             <div className="absolute -top-3 -left-3 text-[40px] text-primary/20 font-serif leading-none">&ldquo;</div>
             <div className="text-accent-gold text-[14px] tracking-wider mb-3">★★★★★</div>
