@@ -17,12 +17,41 @@ export interface OrderItem {
   cover?: string;
 }
 
+/**
+ * PaymentRecord — 演示用,字段只到 BIN + last4,绝不写真实卡号。
+ * 真实生产:支付网关 tokenize,前端只持有 brand + last4 + expMonth/expYear。
+ */
+export interface PaymentRecord {
+  /** 支付方式 */
+  method: 'card' | 'wallet' | 'bank';
+  /** 卡品牌 (公开 test BIN 池,见 pay-fixtures.ts) */
+  brand: 'Visa' | 'Mastercard' | 'Amex' | 'Discover' | 'JCB' | 'Diners' | 'UnionPay';
+  /** BIN 前 6 位 — 仅来自公开 test BIN 表,绝不写真卡 BIN */
+  bin: string;
+  /** 末四位 — demo 用随机数,绝不写真卡 */
+  last4: string;
+  /** 金额(分) — 演示用,跟 Order.total 对齐 */
+  amount: number;
+  /** 货币 */
+  currency: 'USD' | 'CNY' | 'EUR';
+  /** 支付状态 */
+  status: 'success' | 'failed' | 'pending' | 'refunded';
+  /** 授权码 — demo 用占位 */
+  authCode?: string;
+  /** 错误码 — 仅失败时有 */
+  errorCode?: 'INSUFFICIENT_FUNDS' | 'CARD_DECLINED' | 'EXPIRED' | 'CVV_MISMATCH' | 'NETWORK';
+  /** 支付完成时间 */
+  paidAt?: number;
+}
+
 export interface Order {
   id: string;
   createdAt: number;
   items: OrderItem[];
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'delivered';
+  /** 支付明细(可选,放空就当作未支付) */
+  payment?: PaymentRecord;
 }
 
 export interface WishItem {
