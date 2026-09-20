@@ -12,7 +12,7 @@ import {
   AuthSplit,
 } from '@/components/reference';
 import type { ProductWithText } from '@/components/reference/types';
-import { useT, RefI18nProvider, useMockProducts, useMockCart, useMockCategories, type Lang } from '@/lib/ref-translations.tsx';
+import { useT, RefI18nProvider, useMockProducts, useMockCart, useMockCategories, type Lang } from '@/lib/ref-translations';
 
 interface MockProductSeed {
   id: number;

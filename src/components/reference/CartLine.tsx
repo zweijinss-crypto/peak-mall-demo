@@ -1,4 +1,4 @@
-import { useT } from '@/lib/ref-translations.tsx';
+import { useT } from '@/lib/ref-translations';
 import type { CartLineItem, CurrencyCode } from './types';
 
 export interface CartLineProps {
@@ -8,7 +8,7 @@ export interface CartLineProps {
   onRemove?: (id: CartLineItem['id']) => void;
 }
 
-export default function CartLine({ item, onRemove, currency = 'USD' }: CartLineProps) {
+export default function CartLine({ item, onChangeQty, onRemove, currency = 'USD' }: CartLineProps) {
   const { t } = useT();
   const { id, name, price, qty = 1, coverEmoji, cover, subtitle } = item;
   const dec = () => onChangeQty?.(id, Math.max(1, qty - 1));

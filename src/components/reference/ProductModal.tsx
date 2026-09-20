@@ -1,4 +1,4 @@
-import { useT } from '@/lib/ref-translations.tsx';
+import { useT } from '@/lib/ref-translations';
 
 // 商品详情弹窗 — i18n via useT()
 // 红线: 不含 USDT/分销/邀请码任何痕迹。无「支付」「提现」「佣金」字段。

@@ -1,4 +1,4 @@
-import { useT } from '@/lib/ref-translations.tsx';
+import { useT } from '@/lib/ref-translations';
 import type { Category } from './types';
 
 export interface CategoryBarProps {

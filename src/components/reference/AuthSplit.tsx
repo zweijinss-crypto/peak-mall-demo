@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useT } from '@/lib/ref-translations.tsx';
+import { useT } from '@/lib/ref-translations';
 // 红线: 已剔除「强制邀请码」字段。注册只剩 email/nickname/password/confirmPassword。
 import type { AuthHandlers } from './types';
 
