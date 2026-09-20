@@ -49,7 +49,7 @@ export default function OrdersPage() {
             <div className="text-[13.5px] text-ink-500 mb-6">{t.orders.emptyDesc}</div>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-primary hover:bg-primary-dark text-white text-[14px] font-bold rounded-md transition-colors"
+              className="px-6 py-3 bg-orange-700 hover:bg-orange-800 text-white text-[14px] font-bold rounded-md transition-colors"
             >
               {t.orders.startShopping}
             </button>

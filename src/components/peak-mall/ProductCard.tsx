@@ -3,7 +3,6 @@
 import { useState, type FC } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CurrencyCode, Product } from './types';
-import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
 
@@ -92,13 +91,13 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
             className="flex-1 bg-neutral-900 text-white text-[12.5px] font-semibold py-3 border-r border-neutral-700 hover:bg-neutral-700 transition-colors duration-150"
             onClick={handleAdd}
           >
-            {justAdded ? t.card.addedToCart : COPY.cta.addToCart}
+            {justAdded ? t.card.addedToCart : t.cta.addToCart}
           </button>
           <button
             className="flex-1 bg-orange-700 text-white text-[12.5px] font-semibold py-3 hover:bg-orange-800 transition-colors duration-150"
             onClick={handleBuy}
           >
-            {COPY.cta.buyNow}
+            {t.cta.buyNow}
           </button>
         </div>
       </div>
@@ -133,11 +132,11 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
             }`}
           >
             {Number(product.stock) > 0
-              ? COPY.label.inStock
-              : COPY.label.outOfStock}
+              ? t.label.inStock
+              : t.label.outOfStock}
           </span>
           <span>
-            {product.stock} {COPY.label.pcs}
+            {product.stock} {t.label.pcs}
           </span>
         </div>
       </div>

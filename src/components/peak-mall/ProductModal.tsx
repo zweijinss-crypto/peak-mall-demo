@@ -1,6 +1,5 @@
 import { useState, type FC, type MouseEvent } from 'react';
 import type { CurrencyCode, Product } from './types';
-import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 
 export interface ProductModalProps {
@@ -64,28 +63,28 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
 
         <div className="flex gap-3.5 mb-3.5">
           <div>
-            <div className="text-[11px] text-ink-600">{COPY.label.price}</div>
+            <div className="text-[11px] text-ink-600">{t.label.price}</div>
             <div className="text-[24px] font-extrabold text-orange-700">
               {currencySymbol(currency)}
               {Number(product.price || 0).toFixed(2)}
             </div>
           </div>
           <div>
-            <div className="text-[11px] text-ink-600">{COPY.label.category}</div>
+            <div className="text-[11px] text-ink-600">{t.label.category}</div>
             <div className="text-[14px]">{product.category}</div>
           </div>
           <div>
-            <div className="text-[11px] text-ink-600">{COPY.label.stock}</div>
-            <div className="text-[14px]">{product.stock} {COPY.label.pcs}</div>
+            <div className="text-[11px] text-ink-600">{t.label.stock}</div>
+            <div className="text-[14px]">{product.stock} {t.label.pcs}</div>
           </div>
         </div>
 
         <div className="text-[13px] text-neutral-600 leading-[1.7] p-3 bg-neutral-50 rounded-lg">
-          {product.description || COPY.label.noDescription}
+          {product.description || t.label.noDescription}
         </div>
 
         <div className="mt-2.5 text-[11.5px] text-neutral-400">
-          id: #{product.id} · {COPY.label.createdAt}{' '}
+          id: #{product.id} · {t.label.createdAt}{' '}
           {product.created_at && new Date(product.created_at).toLocaleString()}
         </div>
       </div>

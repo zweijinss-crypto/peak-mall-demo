@@ -64,7 +64,7 @@ export default function WishlistPage() {
             <div className="text-[13.5px] text-ink-500 mb-6">{t.wishlist.emptyDesc}</div>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-primary hover:bg-primary-dark text-white text-[14px] font-bold rounded-md transition-colors"
+              className="px-6 py-3 bg-orange-700 hover:bg-orange-800 text-white text-[14px] font-bold rounded-md transition-colors"
             >
               {t.cart.continue}
             </button>
@@ -95,7 +95,7 @@ export default function WishlistPage() {
                     <span className="text-primary text-[17px] font-extrabold">${p.price}</span>
                     <button
                       onClick={() => addToCart({ id: p.id, name: p.name, price: Number(p.price), cover: p.cover })}
-                      className="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white text-[11.5px] font-bold rounded-md transition-colors"
+                      className="px-3 py-1.5 bg-orange-700 hover:bg-orange-800 text-white text-[11.5px] font-bold rounded-md transition-colors"
                     >
                       {t.wishlist.addToCart}
                     </button>
