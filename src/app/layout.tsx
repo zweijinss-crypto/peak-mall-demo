@@ -4,8 +4,39 @@ import CookieBanner from '@/components/peak-mall/CookieBanner';
 import SupportWidget from '@/components/peak-mall/SupportWidget';
 
 export const metadata: Metadata = {
-  title: 'Peak Mall · Demo',
-  description: '参考改写 — components-ts demo',
+  metadataBase: new URL('https://peak-mall-demo.netlify.app'),
+  title: {
+    default: 'Peak Mall · 顶峰商城 Demo',
+    template: '%s · Peak Mall',
+  },
+  description: 'Static e-commerce demo — 16 SKUs across categories, zh + en bilingual, dark/light aware.',
+  applicationName: 'Peak Mall',
+  keywords: ['peak mall', 'demo', 'next.js', '静态导出', 'bilingual', 'ecommerce'],
+  authors: [{ name: 'Peak Mall Demo' }],
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Peak Mall',
+    title: 'Peak Mall · 顶峰商城 Demo',
+    description: 'Static e-commerce demo — 16 SKUs, zh + en bilingual.',
+    locale: 'zh_CN',
+    alternateLocale: 'en_US',
+    url: 'https://peak-mall-demo.netlify.app',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Peak Mall · 顶峰商城 Demo',
+    description: 'Static e-commerce demo — 16 SKUs, zh + en bilingual.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import {
   AnnouncementBar,
@@ -11,6 +12,7 @@ import {
   ServiceStrip,
   type Product,
 } from '@/components/peak-mall';
+import { useCategoryLabel } from '@/lib/use-category-label';
 import { PRODUCTS } from '@/data/products';
 import { usePeakStore, type CurrencyCode } from '@/lib/store';
 import { useT } from '@/lib/use-t';
@@ -26,6 +28,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
   const chrome = usePageChrome('home', 'home');
   const productId = Number(id);
   const product: Product | undefined = PRODUCTS.find((p) => p.id === productId);
+  const categoryLabel = useCategoryLabel(product?.category ?? '');
 
   // Hooks must run unconditionally — call them all before any early-return.
   const currency = chrome.currency;
@@ -116,7 +119,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
             href={`/#recommended?cat=${encodeURIComponent(product.category)}`}
             className="hover:text-orange-700 transition-colors"
           >
-            {product.category}
+            {categoryLabel}
           </Link>
           <span aria-hidden="true" className="text-ink-300">/</span>
           <span className="text-ink-700 font-semibold truncate max-w-[280px]" aria-current="page">
@@ -143,12 +146,11 @@ export default function ShopDetailClient({ id }: { id: string }) {
                   }`}
                 >
                   {g.cover?.startsWith('/') || g.cover?.startsWith('http') ? (
-                    <img
+                    <Image
                       src={g.cover}
                       alt={g.name}
-                      width="80"
-                      height="80"
-                      loading="lazy"
+                      width={80}
+                      height={80}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -162,12 +164,12 @@ export default function ShopDetailClient({ id }: { id: string }) {
           {/* Main image */}
           <div className="order-1 md:order-2 aspect-square bg-ink-100 rounded-[14px] overflow-hidden flex items-center justify-center">
             {activeImage.cover?.startsWith('/') || activeImage.cover?.startsWith('http') ? (
-              <img
+              <Image
                 key={activeImage.cover}
                 src={activeImage.cover}
                 alt={activeImage.name}
-                width="800"
-                height="800"
+                width={800}
+                height={800}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -185,7 +187,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
               <span className="text-accent-gold tracking-wider">★★★★★</span>
               <span className="text-orange-700 font-bold">4.9</span>
               <span className="text-ink-300">|</span>
-              <span className="bg-ink-100 text-ink-600 px-2 py-0.5 rounded-full">{product.category}</span>
+              <span className="bg-ink-100 text-ink-600 px-2 py-0.5 rounded-full">{categoryLabel}</span>
               <span className="text-ink-300">|</span>
               <span className="text-emerald-700 font-semibold">{t.label.inStock} {product.stock} {t.label.pcs}</span>
             </div>

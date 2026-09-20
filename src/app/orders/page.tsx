@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { FC } from 'react';
 import {
   AnnouncementBar,
@@ -79,7 +80,7 @@ export default function OrdersPage() {
                       <div key={it.productId} className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-lg bg-ink-100 overflow-hidden flex-shrink-0">
                           {it.cover?.startsWith('/') || it.cover?.startsWith('http') ? (
-                            <img src={it.cover} alt={it.name} width="80" height="80" className="w-full h-full object-cover" />
+                            <Image src={it.cover} alt={it.name} width={80} height={80} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[24px]">📦</div>
                           )}

@@ -20,6 +20,11 @@ const CATEGORY_THEMES = [
   },
 ] as const;
 
+/** Map the i18n label back to the underlying category key (stored on products). */
+function labelFromKey(home: Record<string, unknown>, k: '数码电子' | '家用电器'): string {
+  return k === '数码电子' ? ((home.cat1 as string) ?? k) : ((home.cat2 as string) ?? k);
+}
+
 /**
  * CategoryGrid - 大卡片分类入口,每个分类一张大图 + 商品数 + hover 微动效
  */
@@ -42,6 +47,7 @@ const CategoryGrid: FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {CATEGORY_THEMES.map((c) => {
+          const label = labelFromKey(home, c.key);
           const count = PRODUCTS.filter((p) => p.category === c.key).length;
           return (
             <button
@@ -58,7 +64,7 @@ const CategoryGrid: FC = () => {
               <div className="relative h-full flex flex-col justify-between p-7 md:p-9">
                 <div>
                   <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{home.catOfItems ? home.catOfItems(count) : `${count} items`}</div>
-                  <div className="text-[36px] md:text-[44px] font-extrabold leading-none mb-3">{c.key}</div>
+                  <div className="text-[36px] md:text-[44px] font-extrabold leading-none mb-3">{label}</div>
                   <div className="text-[14px] opacity-85 max-w-[280px] leading-relaxed">{descMap[c.key] ?? ''}</div>
                 </div>
                 <div className="flex items-center justify-between">

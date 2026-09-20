@@ -1,6 +1,8 @@
 import { useState, type FC, type MouseEvent } from 'react';
+import Image from 'next/image';
 import type { CurrencyCode, Product } from './types';
 import { useT } from '@/lib/use-t';
+import { useCategoryLabel } from '@/lib/use-category-label';
 
 export interface ProductModalProps {
   product: Product | null;
@@ -22,6 +24,7 @@ function currencySymbol(c: CurrencyCode): string {
 const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD' }) => {
   const t = useT();
   const [imgErr, setImgErr] = useState(false);
+  const categoryLabel = useCategoryLabel(product?.category ?? '');
   if (!product) return null;
 
   const isCoverUrl =
@@ -50,9 +53,11 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
 
         <div className="w-full aspect-square bg-neutral-100 rounded-[10px] flex items-center justify-center text-[120px] overflow-hidden mb-3.5">
           {isCoverUrl && !imgErr ? (
-            <img
+            <Image
               src={product.cover}
               alt={product.name}
+              width={800}
+              height={800}
               onError={() => setImgErr(true)}
               className="w-full h-full object-cover"
             />
@@ -71,7 +76,7 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
           </div>
           <div>
             <div className="text-[11px] text-ink-600">{t.label.category}</div>
-            <div className="text-[14px]">{product.category}</div>
+            <div className="text-[14px]">{categoryLabel}</div>
           </div>
           <div>
             <div className="text-[11px] text-ink-600">{t.label.stock}</div>

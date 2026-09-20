@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
+import { useCategoryLabel } from '@/lib/use-category-label';
 import type { Product } from '@/components/peak-mall/types';
 
 export type ProductGridMode = 'all' | 'new' | 'hot';
@@ -46,6 +48,12 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
       : copy.subtitle;
 
   const categoryLabels = [copy.catAll, copy.catElectronics, copy.catAppliances];
+  const electronicsLabel = useCategoryLabel('数码电子');
+  const appliancesLabel = useCategoryLabel('家用电器');
+  const productLabels: Record<string, string> = {
+    '数码电子': electronicsLabel,
+    '家用电器': appliancesLabel,
+  };
 
   // sort by mode
   let sorted = [...products];
@@ -133,7 +141,7 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
                 aria-label={p.name}
               >
                 {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
-                  <img src={p.cover} alt={p.name} width="320" height="320" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image src={p.cover} alt={p.name} width={320} height={320} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                 )}
@@ -150,7 +158,7 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
               </button>
               <div className="p-3.5">
                 <h3 className="text-[13px] font-semibold text-ink-900 line-clamp-2 leading-snug mb-2 min-h-[34px]">{p.name}</h3>
-                <div className="text-[11px] text-ink-500 mb-1.5">{p.category}</div>
+                <div className="text-[11px] text-ink-500 mb-1.5">{productLabels[p.category] ?? p.category}</div>
                 <div className="flex items-baseline gap-1.5 mb-3">
                   <span className="text-orange-700 text-[18px] font-extrabold">${Number(p.price).toFixed(2)}</span>
                   <span className="text-ink-600 text-[11.5px] line-through">${(Number(p.price) / (1 - DISCOUNT)).toFixed(2)}</span>

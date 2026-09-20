@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -263,11 +264,11 @@ export default function CheckoutPage() {
                   <li key={item.id} className="flex gap-3 items-center">
                     <div className="w-14 h-14 rounded-md bg-ink-100 overflow-hidden flex-shrink-0">
                       {item.cover?.startsWith('/') || item.cover?.startsWith('http') ? (
-                        <img
+                        <Image
                           src={item.cover}
                           alt={item.name}
-                          width="56"
-                          height="56"
+                          width={56}
+                          height={56}
                           className="w-full h-full object-cover"
                         />
                       ) : (

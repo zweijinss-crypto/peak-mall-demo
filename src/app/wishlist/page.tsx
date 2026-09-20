@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { FC } from 'react';
 import {
   AnnouncementBar,
@@ -78,7 +79,7 @@ export default function WishlistPage() {
                   className="block w-full aspect-square bg-ink-100"
                 >
                   {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
-                    <img src={p.cover} alt={p.name} width="300" height="300" className="w-full h-full object-cover" />
+                    <Image src={p.cover} alt={p.name} width={300} height={300} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                   )}

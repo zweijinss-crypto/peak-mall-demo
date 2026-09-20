@@ -188,6 +188,8 @@ export const COPY = {
     cat1Desc: '从商务本到智能穿戴,覆盖数字生活每一面',
     cat2Desc: '智能家居升级,让日常更轻松更高效',
     catOfItems: (n: number) => `${n} 件好物`,
+    cat1: '数码电子',
+    cat2: '家用电器',
   },
   flashSale: {
     label: '限时秒杀',

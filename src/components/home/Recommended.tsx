@@ -11,6 +11,7 @@ import {
 } from '@/components/peak-mall';
 import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
+import { useCategoryLabel } from '@/lib/use-category-label';
 
 export interface RecommendedProps {
   products: Product[];
@@ -34,6 +35,15 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
     { key: 'rating', label: t.rec.sortRating },
   ];
   const [active, setActive] = useState(categories[0] ?? allLabel);
+  // Localize category chip labels — keep the canonical zh key for filter
+  // logic, but render the locale-appropriate display string.
+  const labelElec = useCategoryLabel('数码电子');
+  const labelAppl = useCategoryLabel('家用电器');
+  const displayCategories: string[] = [];
+  const localLabels: Record<string, string> = { '数码电子': labelElec, '家用电器': labelAppl };
+  for (const c of categories) {
+    displayCategories.push(localLabels[c] ?? c);
+  }
   const [sort, setSort] = useState<SortKey>('default');
 
   const filtered = useMemo(() => {
@@ -80,7 +90,12 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
 
       {/* Category bar */}
       <div className="mb-6">
-        <CategoryBar categories={categories} active={active} onChange={setActive} />
+        <CategoryBar categories={displayCategories} active={localLabels[active] ?? active} onChange={(v) => {
+          // Reverse-map: when the user clicks a localized label, resolve
+          // back to the canonical zh key so filtering keeps working.
+          const reverse = Object.entries(localLabels).find(([, l]) => l === v);
+          setActive(reverse ? reverse[0] : v);
+        }} />
       </div>
 
       {/* Grid */}

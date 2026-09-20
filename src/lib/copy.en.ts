@@ -118,6 +118,8 @@ export const COPY_EN = {
     cat1Desc: 'From business laptops to smart wearables, covering every facet of digital life',
     cat2Desc: 'Smart home upgrades that make everyday life easier',
     catOfItems: (n: number) => `${n} items`,
+    cat1: 'Electronics',
+    cat2: 'Home appliances',
   },
 
   flashSale: {

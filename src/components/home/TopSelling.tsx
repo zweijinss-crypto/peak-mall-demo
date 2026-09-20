@@ -1,9 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { FC } from 'react';
 import type { Product } from '@/components/peak-mall/types';
 import { useT } from '@/lib/use-t';
+import { useCategoryLabel } from '@/lib/use-category-label';
 
 export interface TopSellingProps {
   products: Product[];
@@ -17,6 +19,11 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
   const cp = useT();
   const top = [...products].sort((a, b) => Number(b.stock) - Number(a.stock)).slice(0, 5);
   const podiumColors = ['#fbbf24', '#cbd5e1', '#d97706']; // gold / silver / bronze
+  // Pre-compute localized labels for each unique category (top-level hook
+  // calls only — map callbacks must not call hooks).
+  const labelElec = useCategoryLabel('数码电子');
+  const labelAppl = useCategoryLabel('家用电器');
+  const labels: Record<string, string> = { '数码电子': labelElec, '家用电器': labelAppl };
 
   return (
     <section className="bg-white py-12 border-y border-ink-100">
@@ -52,7 +59,7 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
                 {/* Cover */}
                 <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-ink-100 overflow-hidden">
                   {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
-                    <img src={p.cover} alt={p.name} loading="lazy" width="80" height="80" className="w-full h-full object-cover" />
+                    <Image src={p.cover} alt={p.name} width={80} height={80} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[24px]">📦</div>
                   )}
@@ -62,7 +69,7 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-bold text-ink-900 truncate group-hover:text-primary transition-colors">{p.name}</div>
                   <div className="text-[11.5px] text-ink-500 mt-0.5 flex items-center gap-2">
-                    <span>{p.category}</span>
+                    <span>{labels[p.category] ?? p.category}</span>
                     <span className="w-1 h-1 bg-ink-300 rounded-full" />
                     <span>{cp.topSelling.sold} {Math.floor(Number(p.stock) * 1.3)}</span>
                   </div>

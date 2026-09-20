@@ -2,9 +2,11 @@
 
 import { useState, type FC } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { CurrencyCode, Product } from './types';
 import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
+import { useCategoryLabel } from '@/lib/use-category-label';
 
 export interface ProductCardProps {
   product: Product;
@@ -26,6 +28,7 @@ function currencySymbol(c: CurrencyCode): string {
 const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' }) => {
   const t = useT();
   const router = useRouter();
+  const categoryLabel = useCategoryLabel(product.category);
   const [imgErr, setImgErr] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const addToCart = usePeakStore((s) => s.addToCart);
@@ -63,12 +66,11 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
     >
       <div className="relative aspect-square bg-neutral-100 flex items-center justify-center overflow-hidden">
         {isCoverUrl && !imgErr ? (
-          <img
+          <Image
             src={product.cover}
             alt={product.name}
-            loading="lazy"
-            width="400"
-            height="400"
+            width={400}
+            height={400}
             onError={() => setImgErr(true)}
             className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500"
           />
@@ -108,7 +110,7 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
           <span className="text-orange-700 font-bold">4.9</span>
           <span className="flex-1" />
           <span className="text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-full text-[11px] max-w-[96px] truncate">
-            {product.category}
+            {categoryLabel}
           </span>
         </div>
         <h3 className="text-[14.5px] font-semibold text-neutral-900 mb-2.5 leading-snug line-clamp-2 min-h-[42px] tracking-[-0.005em]">

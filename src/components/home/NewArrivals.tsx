@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { FC } from 'react';
 import type { Product } from '@/components/peak-mall/types';
 import { useT } from '@/lib/use-t';
@@ -41,7 +42,7 @@ const NewArrivals: FC<NewArrivalsProps> = ({ products }) => {
               >
                 <div className="relative aspect-square bg-ink-100">
                   {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
-                    <img src={p.cover} alt={p.name} loading="lazy" width="320" height="320" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image src={p.cover} alt={p.name} width={320} height={320} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                   )}

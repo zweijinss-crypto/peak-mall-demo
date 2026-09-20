@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -103,11 +104,11 @@ export default function OrderDetailClient({ demoOrder }: Props) {
                     className="w-20 h-20 rounded-lg bg-ink-100 overflow-hidden flex-shrink-0"
                   >
                     {it.cover?.startsWith('/') || it.cover?.startsWith('http') ? (
-                      <img
+                      <Image
                         src={it.cover}
                         alt={it.name}
-                        width="80"
-                        height="80"
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
                       />
                     ) : (
