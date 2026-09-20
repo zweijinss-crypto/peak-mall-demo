@@ -49,7 +49,7 @@ const Testimonials: FC = () => {
             key={i}
             className={`relative bg-gradient-to-br ${t.bg} rounded-2xl p-7 border border-white shadow-soft hover:shadow-float hover:-translate-y-1 transition-all`}
           >
-            <div className="absolute -top-3 -left-3 text-[40px] text-primary/20 font-serif leading-none">"</div>
+            <div className="absolute -top-3 -left-3 text-[40px] text-primary/20 font-serif leading-none">&ldquo;</div>
             <div className="text-accent-gold text-[14px] tracking-wider mb-3">★★★★★</div>
             <p className="text-[14px] text-ink-700 leading-[1.75] mb-5">{t.quote}</p>
             <div className="flex items-center gap-3 pt-4 border-t border-white/60">

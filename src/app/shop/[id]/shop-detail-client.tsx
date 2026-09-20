@@ -38,12 +38,30 @@ export default function ShopDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const productId = Number(id);
   const product: Product | undefined = PRODUCTS.find((p) => p.id === productId);
+
+  // Hooks must run unconditionally — call them all before any early-return.
   const [currency, setCurrency] = useState<CurrencyCode>('USD');
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeImg, setActiveImg] = useState<number>(0);
   const addToCart = usePeakStore((s) => s.addToCart);
   const toggleWish = usePeakStore((s) => s.toggleWish);
   const isWished = usePeakStore((s) => s.wishlist.some((w) => w.id === productId));
+
+  // Gallery: current + 3 related (or filler products) — stable when product changes.
+  const gallery = useMemo(() => {
+    if (!product) return [] as Product[];
+    const sameCat = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
+    const fillers = PRODUCTS.filter((p) => p.id !== product.id && !sameCat.includes(p)).slice(0, 3 - sameCat.length);
+    return ([product, ...sameCat, ...fillers] as Product[]).slice(0, 4);
+  }, [product]);
+
+  const onAdd = () => {
+    if (!product) return;
+    addToCart({ id: product.id, name: product.name, price: Number(product.price), cover: product.cover }, qty);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   if (!product) {
     return (
@@ -78,23 +96,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
 
   const sym = SYMBOLS[currency] || '$';
   const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
-
-  // Thumbnails: current + 3 related (or other products if no related) — rotates the main cover on click
-  const gallery = useMemo(() => {
-    const sameCat = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
-    const fillers = PRODUCTS.filter((p) => p.id !== product.id && !sameCat.includes(p)).slice(0, 3 - sameCat.length);
-    const candidates: Product[] = [product, ...sameCat, ...fillers];
-    return candidates.slice(0, 4);
-  }, [product]);
-
-  const [activeImg, setActiveImg] = useState<number>(0);
   const activeImage = gallery[activeImg] ?? product;
-
-  const onAdd = () => {
-    addToCart({ id: product.id, name: product.name, price: Number(product.price), cover: product.cover }, qty);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
-  };
 
   return (
     <>
