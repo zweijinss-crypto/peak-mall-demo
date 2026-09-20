@@ -9,6 +9,7 @@ import { useT } from '@/lib/use-t';
 import { buildDemoOrders } from '@/lib/pay-fixtures';
 import { aggregateByBrand, aggregateByStatus, classifyBin } from '@/lib/bin-classify';
 import { buildPayCSVRows, toCSV, downloadCSV } from '@/lib/pay-csv';
+import PaymentDetailDialog from './payment-detail-dialog';
 
 const NAV_ITEMS_ZH = [
   { key: 'home', label: '首页' },
@@ -56,6 +57,7 @@ const PayRecordsClient: FC = () => {
   const [search, setSearch] = useState('');
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<PaymentRecord['status']>>(new Set());
+  const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   useEffect(() => setMounted(true), []);
 
   const isEn = mounted && locale === 'en';
@@ -430,15 +432,20 @@ const PayRecordsClient: FC = () => {
                     ? ` · ${(t.payRecords.errorCode as Record<string, string>)[payment.errorCode] ?? payment.errorCode}`
                     : '';
                   return (
-                    <tr key={order.id} className="border-t border-ink-100 hover:bg-ink-50/50 transition-colors">
+                    <tr
+                      key={order.id}
+                      onClick={() => setDetailOrder(order)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDetailOrder(order); } }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={t.payRecords.detail.title + ' · ' + order.id}
+                      className="border-t border-ink-100 hover:bg-orange-50/40 focus:bg-orange-50/60 focus:outline-none focus:ring-2 focus:ring-orange-300 cursor-pointer transition-colors"
+                    >
                       <td className="px-3 py-2.5 text-ink-700 tabular-nums whitespace-nowrap">{ts}</td>
                       <td className="px-3 py-2.5">
-                        <button
-                          onClick={() => router.push(`/orders`)}
-                          className="font-mono text-ink-900 hover:text-orange-700 transition-colors"
-                        >
+                        <span className="font-mono text-ink-900 hover:text-orange-700 transition-colors">
                           {order.id}
-                        </button>
+                        </span>
                       </td>
                       <td className="px-3 py-2.5 text-ink-700">{METHOD_LABEL[payment.method][isEn ? 'en' : 'zh']}</td>
                       <td className="px-3 py-2.5">
@@ -484,6 +491,12 @@ const PayRecordsClient: FC = () => {
       </main>
 
       <Footer />
+
+      <PaymentDetailDialog
+        order={detailOrder}
+        isEn={isEn}
+        onClose={() => setDetailOrder(null)}
+      />
     </>
   );
 };
