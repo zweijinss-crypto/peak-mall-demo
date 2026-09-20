@@ -35,6 +35,9 @@ export type { ServiceStripProps } from './ServiceStrip';
 export { default as ShopHeader } from './ShopHeader';
 export type { ShopHeaderProps } from './ShopHeader';
 
+export { default as SupportWidget } from './SupportWidget';
+export type { SupportWidgetProps } from './SupportWidget';
+
 export type {
   BannerItem,
   BrandInfo,

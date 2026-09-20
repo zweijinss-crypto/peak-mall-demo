@@ -47,6 +47,8 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
     { key: 'cart', label: '购物车' },
     { key: 'orders', label: '我的订单' },
     { key: 'wishlist', label: '我的收藏' },
+    { key: 'address', label: '我的地址' },
+    { key: 'aftersale', label: '我的售后' },
     { key: 'profile', label: '个人中心' },
   ],
   en: [
@@ -54,6 +56,8 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string }>> = {
     { key: 'cart', label: 'Cart' },
     { key: 'orders', label: 'My orders' },
     { key: 'wishlist', label: 'Wishlist' },
+    { key: 'address', label: 'Addresses' },
+    { key: 'aftersale', label: 'After-sales' },
     { key: 'profile', label: 'Account' },
   ],
 };
@@ -95,6 +99,8 @@ export type PageKey =
   | 'cart'
   | 'orders'
   | 'wishlist'
+  | 'address'
+  | 'aftersale'
   | 'profile'
   | 'pay-records'
   | 'search';
