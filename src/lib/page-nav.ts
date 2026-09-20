@@ -121,7 +121,9 @@ export type PageKey =
   | 'withdraw-address'
   | 'profile'
   | 'pay-records'
-  | 'search';
+  | 'search'
+  | 'terms'
+  | 'privacy';
 
 export type NavMode = 'home' | 'account';
 

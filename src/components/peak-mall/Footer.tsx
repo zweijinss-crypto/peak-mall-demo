@@ -54,9 +54,8 @@ const Footer: FC<FooterProps> = ({
       links: [
         { label: t.footer.aftersales, href: '/aftersale' },
         { label: t.footer.shipping, href: '/about#shipping' },
-        // /terms /privacy 暂未建站 → 占位 # 避免 404
-        { label: t.footer.terms, href: '#' },
-        { label: t.footer.privacy, href: '#' },
+        { label: t.footer.terms, href: '/terms' },
+        { label: t.footer.privacy, href: '/privacy' },
       ],
     },
   ];
