@@ -100,3 +100,103 @@ src/
 ## 截图
 
 `screenshots/` 下保存历史 desktop/mobile 截图(2.3 MB+,用于回归对比)。
+---
+
+## /ref-peak-mall/ — 参考改写合规 demo
+
+参考站点 `reference/peak-mall/` 源站是 **多级分销 + USDT-TRC20 + 强制邀请码** 的电商系统。
+本 demo 做合规改写,展示 **如何在保留 UI 风格的同时剔除所有违规/可疑字段**。
+
+### 路由
+
+`http://localhost:3002/ref-peak-mall`
+
+### 文件结构
+
+```
+src/app/ref-peak-mall/page.tsx          # demo 客户端页面 (Provider + LangSwitcher)
+src/components/reference/               # 8 个 React + Tailwind 组件
+  ├── AnnouncementBar.tsx
+  ├── AuthSplit.tsx                      # 注册只剩 email/nickname/password/confirmPassword
+  ├── CartLine.tsx
+  ├── CategoryBar.tsx
+  ├── DoubleBanner.tsx
+  ├── HeroBanner.tsx
+  ├── ProductCard.tsx
+  ├── ProductModal.tsx
+  ├── index.ts                           # barrel
+  └── types.ts
+src/lib/ref-translations.tsx            # 单 Context 双语字典 (zh + en)
+reference/peak-mall/                    # 源参考包 (8 jsx + 8 tsx + analysis/ + legal/ + covers/ + sources/)
+```
+
+### 双语 (i18n) 架构
+
+- 单 Context (`RefI18nProvider`) 包住整页子树
+- `useT()` hook 共享 `lang` state(所有组件读同一份,setLang 立即全树传播)
+- `useMockProducts / useMockCategories / useMockCart` 数据 hooks(zh + en 平铺)
+- localStorage 持久化 key: `ref-peak-mall-lang`
+- 切语言通过 header `<LangSwitcher>`(中 / EN 双按钮)
+
+### 红线 (审计 grep)
+
+```
+邀请码字段 = 0
+USDT / 分销 / 支付 / 提现 / 佣金 = 0
+占位符泄漏 (__COPY_ / TODO / FIXME / [COPY:) = 0
+zh → en 切换后 ref demo 内 zh 字符串残留 = 0
+  (LangSwitcher 「中」按设计保留为中文)
+```
+
+### 验收
+
+```
+# dev (含 dev noise, 数字略低于 prod)
+Perf 97 / A11y 96 / BP 100 / SEO 100
+LCP 0.1s / CLS 0 / TBT 140ms / FCP 0.1s
+
+# prod 静态产物待 build (pay-records TS error 阻塞,见下)
+```
+
+`pnpm build` 当前因为 `pay-records-client.tsx` 用户改动的 TS 错误 fail
+(`t.payRecords.searchPlaceholder` 类型缺失)。
+ref-peak-mall 自身 build 干净 — 待修 pay-records 后即可 build 全项目。
+
+### 重跑命令
+
+```bash
+# 启动 dev
+cd /Users/bz/Projects/peak-mall-demo
+pnpm dev                    # localhost:3002
+
+# 验收 zh ↔ en (4 张截图)
+node /tmp/ref-i18n-shots.mjs
+
+# 验收 EN 模式 zh 残留
+node /tmp/ref-zh-clean.mjs
+
+# 验收 i18n UI 切换
+node /tmp/ref-i18n-dom.mjs
+
+# Lighthouse (dev server, 注 dev noise)
+cd /tmp/lh && ./node_modules/.bin/lighthouse \
+  http://localhost:3002/ref-peak-mall \
+  --preset=desktop \
+  --only-categories=performance,accessibility,best-practices,seo \
+  --chrome-flags="--headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage" \
+  --output=html --output-path=./ref-peak-mall-desktop.html
+```
+
+### 截图 / lighthouse 存证
+
+```
+crawls/ref-i18n-screenshots/   # 4 张全尺寸 + 4 张 thumbs + README.md
+crawls/lighthouse/             # ref-peak-mall-desktop.html / .json
+```
+
+### Commits
+
+```
+b707db2  feat(ref-demo): reference/peak-mall/ 合规改写 demo page
+ac29492  feat(ref-demo): 引入 --ref-* design tokens (隔离命名空间)
+```
