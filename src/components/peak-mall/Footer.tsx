@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import Link from 'next/link';
 import type {
   BrandInfo,
   ContactInfo,
@@ -33,28 +34,29 @@ const Footer: FC<FooterProps> = ({
     {
       title: t.footer.col1,
       links: [
-        { label: t.footer.all },
-        { label: t.footer.new },
-        { label: t.footer.hot },
-        { label: t.footer.about },
+        { label: t.footer.all, href: '/shop-all' },
+        { label: t.footer.new, href: '/shop-new' },
+        { label: t.footer.hot, href: '/shop-hot' },
+        { label: t.footer.about, href: '/about' },
       ],
     },
     {
       title: t.footer.col2,
       links: [
-        { label: t.footer.account },
-        { label: t.footer.orders },
-        { label: t.footer.wishlist },
-        { label: t.footer.address },
+        { label: t.footer.account, href: '/profile' },
+        { label: t.footer.orders, href: '/orders' },
+        { label: t.footer.wishlist, href: '/wishlist' },
+        { label: t.footer.address, href: '/address' },
       ],
     },
     {
       title: t.footer.col3,
       links: [
-        { label: t.footer.aftersales },
-        { label: t.footer.shipping },
-        { label: t.footer.terms },
-        { label: t.footer.privacy },
+        { label: t.footer.aftersales, href: '/aftersale' },
+        { label: t.footer.shipping, href: '/about#shipping' },
+        // /terms /privacy 暂未建站 → 占位 # 避免 404
+        { label: t.footer.terms, href: '#' },
+        { label: t.footer.privacy, href: '#' },
       ],
     },
   ];
@@ -82,9 +84,14 @@ const Footer: FC<FooterProps> = ({
             <p className="text-[13px] leading-[1.9] mb-4">{intro}</p>
             <div className="flex gap-2.5">
               {['f', 'X', 'in', 'IG'].map((s) => (
-                <a key={s} className="w-[34px] h-[34px] rounded-full bg-white/10 flex items-center justify-center text-[13px] hover:bg-orange-500 hover:text-white cursor-pointer">
+                <span
+                  key={s}
+                  aria-label={`社交媒体 ${s} (未配置链接)`}
+                  className="w-[34px] h-[34px] rounded-full bg-white/10 flex items-center justify-center text-[13px] opacity-60"
+                  title="社交媒体链接未配置"
+                >
                   {s}
-                </a>
+                </span>
               ))}
             </div>
           </div>
@@ -95,13 +102,28 @@ const Footer: FC<FooterProps> = ({
                 {col.title}
               </h3>
               <ul className="space-y-2.5">
-                {col.links.map((l, j) => (
-                  <li key={j}>
-                    <a className="text-[13px] cursor-pointer hover:text-orange-500" onClick={l.onClick}>
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((l, j) => {
+                  const href = l.href ?? '#';
+                  const isPlaceholder = href === '#';
+                  return (
+                    <li key={j}>
+                      {href && !isPlaceholder ? (
+                        <Link href={href} className="text-[13px] cursor-pointer hover:text-orange-500" onClick={l.onClick}>
+                          {l.label}
+                        </Link>
+                      ) : (
+                        <a
+                          className="text-[13px] cursor-pointer hover:text-orange-500 opacity-60"
+                          onClick={l.onClick}
+                          aria-disabled="true"
+                          title="页面未建 (placeholder)"
+                        >
+                          {l.label}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

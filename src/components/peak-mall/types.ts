@@ -43,6 +43,9 @@ export interface BrandInfo {
 
 export interface FooterLink {
   label: string;
+  /** href for the link. When set, Footer renders a Next Link. */
+  href?: string;
+  /** When set and no href, Footer renders <a> with this onClick handler. */
   onClick?: () => void;
 }
 
