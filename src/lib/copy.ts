@@ -351,10 +351,8 @@ export const COPY = {
   },
   profile: {
     title: '个人中心',
-    hello: '您好,欢迎来到顶峰',
     notLoggedIn: '请先登录后查看个人中心',
     goLogin: '去登录',
-    accountInfo: '账户信息',
     nickname: '昵称',
     email: '邮箱',
     edit: '编辑',
