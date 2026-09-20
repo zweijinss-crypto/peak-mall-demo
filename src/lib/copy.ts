@@ -601,6 +601,7 @@ export const COPY = {
     inviteDesc: '复制邀请码分享给好友，对方注册后会自动成为你的下级。',
     inviteCopy: '复制',
     inviteCopied: '已复制',
+    inviteCopiedToast: (code: string) => `已复制 ${code}`,
     empty: '暂无下级成员',
     emptyDesc: '分享邀请码，招募你的第一个推广者。',
     sectionMembers: '成员列表',

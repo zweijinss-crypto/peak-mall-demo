@@ -490,6 +490,7 @@ export const COPY_EN = {
     inviteDesc: 'Share your code — anyone who signs up with it becomes your downline automatically.',
     inviteCopy: 'Copy',
     inviteCopied: 'Copied',
+    inviteCopiedToast: (code: string) => `Copied ${code}`,
     empty: 'No downline yet',
     emptyDesc: 'Share your code to recruit your first promoter.',
     sectionMembers: 'Members',

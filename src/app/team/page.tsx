@@ -39,12 +39,16 @@ export default function TeamPage() {
   const t = useT();
   const chrome = usePageChrome('team');
   const [copied, setCopied] = useState(false);
+  /** B6: fixed-position copy success toast */
+  const [copyToast, setCopyToast] = useState<string | null>(null);
 
   const onCopy = async () => {
     try {
       await navigator.clipboard.writeText(INVITE_CODE);
       setCopied(true);
+      setCopyToast(t.team.inviteCopiedToast(INVITE_CODE));
       setTimeout(() => setCopied(false), 1800);
+      setTimeout(() => setCopyToast(null), 2200);
     } catch {
       // fallback: do nothing visible
     }
@@ -107,6 +111,16 @@ export default function TeamPage() {
             </div>
           </div>
         </section>
+
+        {/* B6: 复制成功 fixed toast */}
+        {copyToast && (
+          <div
+            role="status"
+            className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold animate-fade-up z-50"
+          >
+            ✓ {copyToast}
+          </div>
+        )}
 
         {/* Members table */}
         <section className="bg-white rounded-xl border border-ink-100 overflow-hidden">
