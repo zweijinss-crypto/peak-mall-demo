@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { FC } from 'react';
@@ -28,7 +29,7 @@ const NewArrivals: FC<NewArrivalsProps> = ({ products }) => {
             </div>
             <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.newArrivals.title}</h2>
           </div>
-          <a className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">{cp.newArrivals.viewAll} →</a>
+          <Link href="/shop-new" className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">{cp.newArrivals.viewAll} →</Link>
         </div>
 
         {/* Horizontal scroll */}

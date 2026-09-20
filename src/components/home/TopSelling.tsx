@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { FC } from 'react';
@@ -33,9 +34,9 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
             <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose mb-2">🏆 {cp.topSelling.label}</div>
             <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.topSelling.title}</h2>
           </div>
-          <a className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">
+          <Link href="/shop-hot" className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">
             {cp.topSelling.viewAll} →
-          </a>
+          </Link>
         </div>
 
         <div className="space-y-3">
