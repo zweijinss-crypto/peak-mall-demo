@@ -71,7 +71,7 @@ const Footer: FC<FooterProps> = ({
   const intro = brand?.intro ?? t.brand.intro ?? '';
 
   return (
-    <footer className="bg-neutral-900 text-neutral-400 pt-12">
+    <footer className="bg-neutral-900 text-neutral-400 pt-12 min-h-[320px]">
       <div className="max-w-[1280px] mx-auto px-5">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-5 md:gap-9 pb-9">
           <div>

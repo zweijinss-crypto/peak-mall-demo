@@ -10,7 +10,6 @@ import {
 import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
-import { useState } from 'react';
 
 export default function CartPage() {
   const router = useRouter();
@@ -20,18 +19,13 @@ export default function CartPage() {
   const updateQty = usePeakStore((s) => s.updateQty);
   const remove = usePeakStore((s) => s.removeFromCart);
   const clear = usePeakStore((s) => s.clearCart);
-  const placeOrder = usePeakStore((s) => s.placeOrder);
-  const [msg, setMsg] = useState<string | null>(null);
 
   const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
   const itemCount = cart.reduce((sum, c) => sum + c.qty, 0);
 
   const onCheckout = () => {
-    const o = placeOrder();
-    if (o) {
-      setMsg(t.cart.orderPlaced);
-      setTimeout(() => router.push('/orders'), 1500);
-    }
+    if (cart.length === 0) return;
+    router.push('/checkout');
   };
 
   return (
@@ -156,12 +150,6 @@ export default function CartPage() {
                 {t.cart.continue}
               </button>
             </aside>
-          </div>
-        )}
-
-        {msg && (
-          <div className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold animate-fade-up">
-            ✓ {msg}
           </div>
         )}
       </main>

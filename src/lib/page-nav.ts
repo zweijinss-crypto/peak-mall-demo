@@ -106,6 +106,7 @@ export type PageKey =
   | 'new'
   | 'hot'
   | 'cart'
+  | 'checkout'
   | 'orders'
   | 'wishlist'
   | 'address'
