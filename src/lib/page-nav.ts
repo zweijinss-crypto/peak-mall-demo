@@ -21,6 +21,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { usePeakStore, type CurrencyCode, type Locale } from './store';
 import { useT } from './use-t';
 
@@ -152,6 +153,10 @@ export interface PageChrome {
  */
 export function usePageChrome(active: PageKey, mode: NavMode = 'account'): PageChrome {
   const t = useT();
+  // URL wins over persisted locale, matching useT()'s resolution rule.
+  // pathname is read here so a first-paint en/* route returns English chrome
+  // even before the Zustand store has hydrated from localStorage.
+  const pathname = usePathname();
   const locale = usePeakStore((s) => s.locale);
   const setLocale = usePeakStore((s) => s.setLocale);
   const currency = usePeakStore((s) => s.currency);
@@ -159,10 +164,21 @@ export function usePageChrome(active: PageKey, mode: NavMode = 'account'): PageC
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const safeLocale: Locale = mounted ? locale : 'zh';
+  const isEnPath = pathname === '/en' || pathname.startsWith('/en/');
+  const safeLocale: Locale = mounted ? (isEnPath ? 'en' : locale) : (isEnPath ? 'en' : 'zh');
   const isEn = safeLocale === 'en';
   const navItems = mode === 'home' ? HOME_NAV_ITEMS[safeLocale] : SUB_NAV_ITEMS[safeLocale];
   const announce = ANNOUNCE[safeLocale];
+  // Currency + language labels: localize the option labels at render time so
+  // /en/* pages don't show the default zh short names (e.g. "CNY 人民币").
+  const localizedCurrencyOptions = CURRENCY_OPTIONS.map((o) => ({
+    code: o.code,
+    label: t.currencyLabel[o.code] ?? o.label,
+  }));
+  const localizedLangOptions = LANG_OPTIONS.map((o) => ({
+    code: o.code,
+    label: t.langLabel[o.code] ?? o.label,
+  }));
 
   return {
     brand: { name: t.brand.name, slogan: t.brand.slogan },
@@ -171,10 +187,10 @@ export function usePageChrome(active: PageKey, mode: NavMode = 'account'): PageC
     isEn,
     active,
     currency,
-    currencyOptions: CURRENCY_OPTIONS,
+    currencyOptions: localizedCurrencyOptions,
     onCurrencyChange: (c) => setCurrency(c),
     lang: locale,
-    langOptions: LANG_OPTIONS,
+    langOptions: localizedLangOptions,
     onLangChange: (l) => setLocale(l),
     announceTag: announce.tag,
     announceText: announce.text,

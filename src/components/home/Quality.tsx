@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
-import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 
 /**
@@ -11,26 +10,27 @@ import { useT } from '@/lib/use-t';
 const Quality: FC = () => {
   const router = useRouter();
   const t = useT();
+  const q = t.quality as Record<string, string | string[]>;
   const items = [
     {
-      title: COPY.quality.b1Title,
-      subtitle: COPY.quality.b1Sub,
-      bullets: COPY.quality.b1Bullets,
-      cta: COPY.quality.b1Cta,
+      title: q.b1Title as string,
+      subtitle: q.b1Sub as string,
+      bullets: q.b1Bullets as string[],
+      cta: q.b1Cta as string,
       bg: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 60%, #4c1d95 100%)',
       accent: '#60a5fa',
       emoji: '💻',
-      path: '/?cat=' + encodeURIComponent(t.quality.cat1),
+      path: '/?cat=' + encodeURIComponent(q.cat1 as string),
     },
     {
-      title: COPY.quality.b2Title,
-      subtitle: COPY.quality.b2Sub,
-      bullets: COPY.quality.b2Bullets,
-      cta: COPY.quality.b2Cta,
+      title: q.b2Title as string,
+      subtitle: q.b2Sub as string,
+      bullets: q.b2Bullets as string[],
+      cta: q.b2Cta as string,
       bg: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #431407 100%)',
       accent: '#fb923c',
       emoji: '🤖',
-      path: '/?cat=' + encodeURIComponent(t.quality.cat2),
+      path: '/?cat=' + encodeURIComponent(q.cat2 as string),
     },
   ];
 
@@ -38,8 +38,8 @@ const Quality: FC = () => {
     <section className="max-w-shell mx-auto px-5 py-12">
       <div className="flex items-end justify-between mb-7">
         <div>
-          <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{COPY.quality.label}</div>
-          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.quality.title}</h2>
+          <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{q.label as string}</div>
+          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{q.title as string}</h2>
         </div>
       </div>
 
@@ -59,7 +59,7 @@ const Quality: FC = () => {
 
             <div className="relative h-full flex flex-col justify-between p-7 md:p-9">
               <div>
-                <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{COPY.quality.collection}</div>
+                <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{q.collection as string}</div>
                 <h3 className="text-[26px] md:text-[32px] font-extrabold leading-tight mb-2.5 max-w-[300px]">
                   {it.title}
                 </h3>

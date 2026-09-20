@@ -20,35 +20,12 @@ import Testimonials from '@/components/home/Testimonials';
 import Promise from '@/components/home/Promise';
 import NewsletterCTA from '@/components/home/NewsletterCTA';
 
-const FOOTER_COLUMNS = [
-  {
-    title: '购物',
-    links: [
-      { label: '全部商品' },
-      { label: '新品上架' },
-      { label: '热卖榜单' },
-      { label: '关于我们' },
-    ],
-  },
-  {
-    title: '账户',
-    links: [
-      { label: '个人中心' },
-      { label: '我的订单' },
-      { label: '我的收藏' },
-      { label: '收货地址' },
-    ],
-  },
-  {
-    title: '帮助',
-    links: [
-      { label: '售后服务' },
-      { label: '配送说明' },
-      { label: '使用条款' },
-      { label: '隐私政策' },
-    ],
-  },
-];
+const FOOTER_PAY = ['VISA', 'MasterCard'];
+const FOOTER_CONTACT = {
+  telegram: '@YourSupport',
+  hours: '13:00 - 23:30',
+  email: 'support@peakmall.com',
+};
 
 export default function HomePage() {
   const chrome = usePageChrome('home', 'home');
@@ -104,18 +81,8 @@ export default function HomePage() {
       </main>
 
       <Footer
-        brand={{
-          name: '顶峰商城',
-          slogan: 'PEAK MALL',
-          intro: '全球优选 · 正品保障。28 国配送,7 天无理由退换。',
-        }}
-        columns={FOOTER_COLUMNS}
-        contact={{
-          telegram: '@YourSupport',
-          hours: '13:00 - 23:30',
-          email: 'support@peakmall.com',
-        }}
-        payLogos={['VISA', 'MasterCard']}
+        contact={FOOTER_CONTACT}
+        payLogos={FOOTER_PAY}
       />
     </>
   );
