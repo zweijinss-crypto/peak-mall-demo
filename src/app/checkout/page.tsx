@@ -34,15 +34,14 @@ function loadAddrs(): Address[] {
   }
 }
 
-type PaymentMethod = 'card' | 'wallet' | 'bank';
+type PaymentMethod = 'visa' | 'mastercard';
 
-const WALLET_BALANCE = 248.90;
-
-const BANK_INFO = {
-  account: '6225 7600 1234 5678',
-  bankName: 'ICBC 中国工商银行',
-  beneficiary: '深圳市顶峰商城有限公司',
-};
+function detectBrand(num: string): 'visa' | 'mastercard' | null {
+  const d = num.replace(/\D/g, '');
+  if (/^4/.test(d)) return 'visa';
+  if (/^(5[1-5]|2[2-7])/.test(d)) return 'mastercard';
+  return null;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -53,7 +52,7 @@ export default function CheckoutPage() {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [pickedAddrId, setPickedAddrId] = useState<string | null>(null);
-  const [method, setMethod] = useState<PaymentMethod>('card');
+  const [method, setMethod] = useState<PaymentMethod>('visa');
   const [mounted, setMounted] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
@@ -61,16 +60,12 @@ export default function CheckoutPage() {
   const [pendingOrder, setPendingOrder] = useState<Order | null>(null);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
-  const [bankCopied, setBankCopied] = useState(false);
 
   /** Card fields */
   const [cardNum, setCardNum] = useState('');
   const [cardExp, setCardExp] = useState('');
   const [cardCvv, setCardCvv] = useState('');
   const [cardHolder, setCardHolder] = useState('');
-
-  /** Bank countdown */
-  const [bankSecondsLeft, setBankSecondsLeft] = useState(15 * 60);
 
   /** Suppress the cart-empty redirect for ~2s after pay completes —
    *  without this, paying clears the cart and the empty-cart guard
@@ -91,15 +86,6 @@ export default function CheckoutPage() {
     }
   }, [mounted, cart.length, router, pendingOrder]);
 
-  useEffect(() => {
-    if (pendingOrder && method === 'bank') {
-      const t = setInterval(() => {
-        setBankSecondsLeft((s) => (s > 0 ? s - 1 : 0));
-      }, 1000);
-      return () => clearInterval(t);
-    }
-  }, [pendingOrder, method]);
-
   const subtotal = pendingOrder
     ? pendingOrder.total
     : cart.reduce((sum, c) => sum + c.price * c.qty, 0);
@@ -114,6 +100,10 @@ export default function CheckoutPage() {
     /^\d{2}\/\d{2}$/.test(cardExp) &&
     /^\d{3,4}$/.test(cardCvv) &&
     cardHolder.trim().length > 0;
+
+  const detectedBrand = detectBrand(cardNum);
+  const brandMismatch =
+    cardNum.replace(/\s/g, '').length >= 4 && detectedBrand !== null && detectedBrand !== method;
 
   const enterCashier = () => {
     setErrMsg(null);
@@ -135,24 +125,19 @@ export default function CheckoutPage() {
     setCardExp('');
     setCardCvv('');
     setCardHolder('');
-    setBankSecondsLeft(15 * 60);
-    setBankCopied(false);
   };
 
   const confirmPay = () => {
     if (!pendingOrder) return;
     setPayError(null);
 
-    if (method === 'card') {
-      if (!cardValid) {
-        setPayError(t.checkout.cardCvv + ' / ' + t.checkout.cardHolder);
-        return;
-      }
-    } else if (method === 'wallet') {
-      if (WALLET_BALANCE < total) {
-        setPayError(t.checkout.walletInsufficient);
-        return;
-      }
+    if (!cardValid) {
+      setPayError(t.checkout.cardCvv + ' / ' + t.checkout.cardHolder);
+      return;
+    }
+    if (brandMismatch) {
+      setPayError(t.checkout.brandUnknown);
+      return;
     }
 
     setPaying(true);
@@ -175,14 +160,6 @@ export default function CheckoutPage() {
     const digits = raw.replace(/\D/g, '').slice(0, 4);
     if (digits.length < 3) return digits;
     return digits.slice(0, 2) + '/' + digits.slice(2);
-  };
-
-  const copyBankAccount = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(BANK_INFO.account).catch(() => {});
-      setBankCopied(true);
-      window.setTimeout(() => setBankCopied(false), 1500);
-    }
   };
 
   if (!mounted) {
@@ -216,9 +193,6 @@ export default function CheckoutPage() {
       </>
     );
   }
-
-  const mm = Math.floor(bankSecondsLeft / 60).toString().padStart(2, '0');
-  const ss = (bankSecondsLeft % 60).toString().padStart(2, '0');
 
   return (
     <>
@@ -333,10 +307,9 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {(
                     [
-                      { key: 'card', label: t.checkout.methodCard, desc: t.checkout.methodCardDesc, icon: '💳' },
-                      { key: 'wallet', label: t.checkout.methodWallet, desc: t.checkout.methodWalletDesc, icon: '👛' },
-                      { key: 'bank', label: t.checkout.methodBank, desc: t.checkout.methodBankDesc, icon: '🏦' },
-                    ] as Array<{ key: PaymentMethod; label: string; desc: string; icon: string }>
+                      { key: 'visa', label: t.checkout.methodVisa, desc: t.checkout.methodVisaDesc, icon: '💳', brand: 'VISA' },
+                      { key: 'mastercard', label: t.checkout.methodMastercard, desc: t.checkout.methodMastercardDesc, icon: '💳', brand: 'MC' },
+                    ] as Array<{ key: PaymentMethod; label: string; desc: string; icon: string; brand: string }>
                   ).map((m) => {
                     const picked = method === m.key;
                     return (
@@ -379,10 +352,9 @@ export default function CheckoutPage() {
                 <div className="flex gap-2 mb-5">
                   {(
                     [
-                      { key: 'card', label: t.checkout.methodCard, icon: '💳' },
-                      { key: 'wallet', label: t.checkout.methodWallet, icon: '👛' },
-                      { key: 'bank', label: t.checkout.methodBank, icon: '🏦' },
-                    ] as Array<{ key: PaymentMethod; label: string; icon: string }>
+                      { key: 'visa' as PaymentMethod, label: t.checkout.methodVisa, icon: '💳', brand: 'VISA' },
+                      { key: 'mastercard' as PaymentMethod, label: t.checkout.methodMastercard, icon: '💳', brand: 'MC' },
+                    ]
                   ).map((m) => {
                     const picked = method === m.key;
                     return (
@@ -404,20 +376,44 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Card form */}
-                {method === 'card' && (
-                  <div className="space-y-4 max-w-[520px]">
+                <div className="space-y-4 max-w-[520px]">
                     <label className="block">
                       <span className="block text-[12.5px] text-ink-700 mb-1.5 font-medium">{t.checkout.cardNumber}</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="cc-number"
-                        value={cardNum}
-                        onChange={(e) => setCardNum(formatCardNumber(e.target.value))}
-                        placeholder={t.checkout.cardNumberPh}
-                        className="w-full px-3 py-2.5 border border-ink-200 rounded-md text-[14px] font-mono tracking-wide outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                        aria-label={t.checkout.cardNumber}
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="cc-number"
+                          value={cardNum}
+                          onChange={(e) => setCardNum(formatCardNumber(e.target.value))}
+                          placeholder={t.checkout.cardNumberPh}
+                          className={`w-full px-3 py-2.5 pr-16 border rounded-md text-[14px] font-mono tracking-wide outline-none focus:ring-2 ${
+                            brandMismatch
+                              ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100'
+                              : 'border-ink-200 focus:border-orange-500 focus:ring-orange-100'
+                          }`}
+                          aria-label={t.checkout.cardNumber}
+                        />
+                        {cardNum.replace(/\s/g, '').length >= 4 && (
+                          <span
+                            className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10.5px] font-extrabold tracking-wider px-1.5 py-0.5 rounded ${
+                              brandMismatch
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-orange-100 text-orange-700'
+                            }`}
+                            aria-live="polite"
+                          >
+                            {detectedBrand
+                              ? t.checkout.brandDetected(method === 'visa' ? 'Visa' : 'Mastercard')
+                              : t.checkout.brandUnknown}
+                          </span>
+                        )}
+                      </div>
+                      {brandMismatch && (
+                        <span className="block mt-1.5 text-[11.5px] text-rose-600">
+                          {t.checkout.brandUnknown}
+                        </span>
+                      )}
                     </label>
                     <div className="grid grid-cols-2 gap-4">
                       <label className="block">
@@ -464,81 +460,6 @@ export default function CheckoutPage() {
                       {t.checkout.cardEncrypted}
                     </p>
                   </div>
-                )}
-
-                {/* Wallet summary */}
-                {method === 'wallet' && (
-                  <div className="max-w-[520px] space-y-4">
-                    <div className={`p-4 rounded-lg border ${
-                      WALLET_BALANCE >= total
-                        ? 'bg-emerald-50 border-emerald-200'
-                        : 'bg-rose-50 border-rose-200'
-                    }`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-[11px] uppercase tracking-wider text-ink-500 mb-0.5">
-                            {t.checkout.walletBalance}
-                          </div>
-                          <div className="text-[24px] font-extrabold text-ink-900 tabular-nums">
-                            ${WALLET_BALANCE.toFixed(2)}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => router.push('/funds')}
-                          className="px-3 py-1.5 border border-orange-700 text-orange-700 hover:bg-orange-700 hover:text-white text-[12px] font-bold rounded transition-colors"
-                        >
-                          + {t.checkout.walletTopup}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-[13px] text-ink-700">
-                      <span>{t.checkout.total}</span>
-                      <span className="font-bold tabular-nums">${total.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[13px]">
-                      <span className="text-ink-500">
-                        {chrome.isEn ? 'After payment' : '支付后余额'}
-                      </span>
-                      <span className={`font-bold tabular-nums ${WALLET_BALANCE >= total ? 'text-emerald-700' : 'text-rose-700'}`}>
-                        ${(WALLET_BALANCE - total).toFixed(2)}
-                      </span>
-                    </div>
-                    {WALLET_BALANCE < total && (
-                      <div role="alert" className="px-3 py-2 rounded-md bg-rose-100 border border-rose-200 text-rose-700 text-[12.5px]">
-                        {t.checkout.walletInsufficient}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Bank transfer */}
-                {method === 'bank' && (
-                  <div className="max-w-[520px] space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 px-3 py-2 rounded-md text-[12.5px] text-amber-800 flex items-center justify-between">
-                      <span>⏱ {t.checkout.bankCountdown} · {t.checkout.bankExpiresIn} {mm}:{ss}</span>
-                    </div>
-                    <div className="bg-white border border-ink-200 rounded-lg overflow-hidden">
-                      <div className="px-4 py-3 bg-ink-50 border-b border-ink-100 flex items-center justify-between">
-                        <span className="text-[12px] font-bold text-ink-700">{t.checkout.bankAccount}</span>
-                        <button
-                          onClick={copyBankAccount}
-                          className="text-[12px] font-bold text-orange-700 hover:text-orange-800"
-                        >
-                          {bankCopied ? `✓ ${t.checkout.bankCopied}` : t.checkout.bankCopy}
-                        </button>
-                      </div>
-                      <dl className="px-4 py-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-[13px]">
-                        <dt className="text-ink-500">{BANK_INFO.bankName}</dt>
-                        <dd className="font-mono font-bold text-ink-900">{BANK_INFO.account}</dd>
-                        <dt className="text-ink-500">{chrome.isEn ? 'Beneficiary' : '收款人'}</dt>
-                        <dd className="text-ink-900">{BANK_INFO.beneficiary}</dd>
-                        <dt className="text-ink-500">{chrome.isEn ? 'Order ID' : '订单号'}</dt>
-                        <dd className="font-mono font-bold text-orange-700">{pendingOrder.id}</dd>
-                      </dl>
-                    </div>
-                    <p className="text-[12px] text-ink-500">{t.checkout.bankMemo}</p>
-                  </div>
-                )}
               </section>
             )}
 
@@ -632,8 +553,8 @@ export default function CheckoutPage() {
                 onClick={confirmPay}
                 disabled={
                   paying ||
-                  (method === 'card' && !cardValid) ||
-                  (method === 'wallet' && WALLET_BALANCE < total)
+                  !cardValid ||
+                  brandMismatch
                 }
                 className="w-full py-3.5 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 disabled:cursor-not-allowed text-white text-[14px] font-extrabold tracking-wide rounded-md transition-colors"
               >
