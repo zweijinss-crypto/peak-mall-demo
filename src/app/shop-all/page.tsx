@@ -31,7 +31,7 @@ export default function ShopAllPage() {
         </Suspense>
       </main>
 
-      <Footer />
+      <Footer locale={chrome.isEn ? 'en' : 'zh'} />
     </>
   );
 }

@@ -141,18 +141,25 @@ export default function ProductGrid({ products, mode, showCategory = true }: Pro
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {sorted.map((p) => (
+          {sorted.map((p, i) => (
             <article
               key={p.id}
               className="group bg-white rounded-xl overflow-hidden border border-ink-100 hover:shadow-float hover:-translate-y-1 transition-all relative"
             >
               <Link
                 href={`/shop/${p.id}`}
-                aria-label={p.name}
                 className="block w-full aspect-square bg-ink-100 relative overflow-hidden"
               >
                 {p.cover?.startsWith('/') || p.cover?.startsWith('http') ? (
-                  <Image src={p.cover} alt={p.name} width={320} height={320} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image
+                    src={p.cover}
+                    alt={p.name}
+                    width={320}
+                    height={320}
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                    priority={i < 4}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                 )}
