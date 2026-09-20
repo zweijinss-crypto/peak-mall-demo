@@ -19,20 +19,17 @@ pnpm build        # 生成 out/ 静态产物
 pnpm serve        # serve out -p 5050 (本地预览生产产物)
 ```
 
-## Lighthouse (2025-09-19)
+## Lighthouse (2026-09-20)
 
 ```
-Desktop preset (1440×900, CPU 1×, provided throttling):
-  Performance     100  (LCP 0.5s, CLS 0)
-  Accessibility   100
-  Best Practices  100
-  SEO             100
+Desktop preset (1440×900, CPU 1×, provided throttling), admin 关键页:
+  /admin/dashboard   Perf 100  A11y 100  BP 100  SEO 100  LCP 0.6s  CLS 0
+  /admin/orders      Perf 100  A11y 100  BP 100  SEO 100  LCP 0.5s  CLS 0
+  /admin/wd          Perf 100  A11y 100  BP 100  SEO 100  LCP 0.5s  CLS 0
+  /admin/users       Perf 100  A11y 100  BP 100  SEO 100  LCP 0.5s  CLS 0
 
-Mobile preset (412×823, CPU 4×, simulated):
-  Performance      99  (LCP 2.1s, CLS 0, TBT 30ms)
-  Accessibility   100
-  Best Practices  100
-  SEO             100
+商阔页面 (首页 / 详情 / 购物车 / 订单 / 收银台 / 佣金 / 提现等)
+  在 2025-09-19 也是 100/100/100/100 desktop。
 ```
 
 ## 路由
@@ -86,6 +83,90 @@ src/
 - **`new Date().getFullYear()` 在 server vs client 不一致** → Footer year 写死或 SSR 注入。
 - **`Date.now()` 在 useState 初始化** → 触发 React #418 hydration mismatch,改 `useEffect` mount 后赋值。
 - **Lighthouse dev 服务跑不准**: 必须跑生产 `out/` 静态产物才能反映用户真实体验。
+
+## 管理后台 (Admin Console)
+
+参考 peak-mall.com `#admin-*` hash 路由,复刻为 14 张独立页面 (zh + en, 共 30 路由, 全 ○ static)。
+
+### 路由
+
+| 路由 | 说明 |
+|---|---|
+| `/admin/dashboard` | 数据看板 — 4 张 KPI 卡 + 系统说明 panel |
+| `/admin/products` | 商品管理 — 表格 + 内联编辑 + 上架/下架 |
+| `/admin/orders` | 订单管理 — 6 tab + 10 列表格 + 发货/完成 |
+| `/admin/users` | 分销商/代理商 — 11 列表格 + 冻结/解冻/改密/新增 |
+| `/admin/agents` | 代理管理 — 费率调节 (own/sub/limit 三列 %) |
+| `/admin/invite` | 邀请码管理 — 表格 + 生成/启用/禁用 |
+| `/admin/tickets` | 售后管理 — 列表 + 回复/关闭 |
+| `/admin/rules` | 佣金规则设置 — 自购返佣% + 最低提现 + 手续费 + 2 开关 |
+| `/admin/comm` | 佣金流水 — 结算表 |
+| `/admin/wd` | 提现审核 — 10 列 + 通过/驳回/标记已到账 |
+| `/admin/wd-center` | 提现中心 — 申请表单 + 个人提现表 |
+| `/admin/home` | 首页设置 — 轮播标题/副标题/公告 3 字段 |
+| `/admin/support` | 客服设置 — 名称/链接/在线时间 3 字段 |
+| `/admin/demo` | 模拟下单 — 生成一条虚拟订单 |
+
+`/en/admin/*` 镜像 15 路由。 `/admin` 与 `/en/admin` 重定向到各自 dashboard。
+
+### 文件结构
+
+```
+src/app/admin/
+├── page.tsx                          # 重定向 → /admin/dashboard
+├── dashboard/{page.tsx,dashboard-client.tsx}
+├── products/{page.tsx,products-client.tsx}
+├── orders/{page.tsx,orders-client.tsx}
+├── users/{page.tsx,users-client.tsx}
+├── agents/{page.tsx,agents-client.tsx}
+├── invite/{page.tsx,invite-client.tsx}
+├── tickets/{page.tsx,tickets-client.tsx}
+├── rules/{page.tsx,rules-client.tsx}
+├── comm/{page.tsx,comm-client.tsx}
+├── wd/{page.tsx,wd-client.tsx}
+├── wd-center/{page.tsx,wd-center-client.tsx}
+├── home/{page.tsx,home-client.tsx}
+├── support/{page.tsx,support-client.tsx}
+└── demo/{page.tsx,demo-client.tsx}
+
+src/app/en/admin/                     # 镜像 15 页 (thin import re-export)
+
+src/components/admin/AdminShell.tsx   # 深色 sidebar + role badge + reset/back 顶部
+
+src/lib/admin/
+├── sidebar.ts        # AdminKey + ADMIN_GROUPS 5 组
+├── fixtures.ts       # SEED_* (6 products / 6 orders / 6 users / 2 agents / 3 invites / 3 tickets / 4 comm / 4 wd) + adminStore + usd() + status labels
+├── use-admin-store.ts # [data, setData, mounted, isEn] hook
+└── page-helper.tsx    # makeAdminPage(key, Client) 30 行一个 page generator
+```
+
+### 状态与存储
+
+- **localStorage NS** `peak_admin_v1`,11 个 key CRUD + `adminStore.reset()`
+- **数据 mock**: 源站 HTML 公开 SPA bundle 包含 admin render function,从中复刻表格 + 状态位 + 操作
+- **没有真实后端 / 登录态 / 凭据** — 所有数据都是 SEED + localStorage,刷新仍记住操作
+- **侧栏重置按钮** → `if (confirm) { adminStore.reset(); location.reload() }`
+
+### 双语 (i18n)
+
+- 每个 client 用 `useT()`,`useAdminStore` 返回 `[data, setData, mounted, isEn]`
+- URL `/en/admin/*` 走 COPY_EN,`/admin/*` 走 COPY
+- 表格列头、按钮、状态颜色映射全部双语
+
+### a11y 验收 (v14)
+
+所有 admin 表格按钮 + sidebar 文字 + 表头达 WCAG AA 4.5:1 对比度:
+
+| 修法 | 问题 | 文件 |
+|---|---|---|
+| emerald-600 → 700 (3.89 → 5.13) | 按钮 white文字不够亮 | 9 个 client |
+| orange-600 → 700 (3.55 → 4.95) | 加号按钮/保存按钮临界 | 8 个 client |
+| text-neutral-400 → 700 | 表格次要文字 (2.93 不够) | 9 个 client |
+| sidebar text-neutral-500 → 300 | 组标题 on #1c1c1c (4.5:1) | AdminShell |
+| sidebar small text-neutral-700 → 200 | 角色提示 (1.64 太暗) | AdminShell |
+| SupportWidget aria-label 去掉 | text 跟 aria 名不匹配 | SupportWidget |
+
+桌面 LH (1440×900, CPU 1×, provided): dashboard / orders / wd / users 全 100/100/100/100。
 
 ## 部署
 
@@ -207,10 +288,17 @@ crawls/lighthouse/             # ref-peak-mall-desktop.html / .json (dev + prod 
 ### Commits
 
 ```
-d0ab684  test(ref-demo): lighthouse 静态产物截图 + 报告
-fa274b5  docs(ref-demo): README.md 新增 /ref-peak-mall/ 章节
-57fe208  fix(ref-demo): 修 import path 去掉 .tsx 后缀 + CartLine destructuring
-8ff6ae8  fix(pay-records): 恢复 searchPlaceholder 类型
-b707db2  feat(ref-demo): reference/peak-mall/ 合规改写 demo page
-ac29492  feat(ref-demo): 引入 --ref-* design tokens (隔离命名空间)
+e284594  fix(admin-a11y): color-contrast + label-content-name-mismatch
+814aa61  feat(admin): 14 admin console pages (zh+en) mirroring source-site
+434cd66  fix(home): TopSelling/NewArrivals 'view all' 链接导航到真路由
+baaef45  fix(footer): 9 dead-end footer links now navigate to real routes
+f8aeab6  fix(nav): every button leads to a real 2nd/3rd-level page
+684fe23  feat(seo): strip 顶峰商城 from title/keywords/og + og image alt
+d2de2a4  feat(i18n): URL wins in usePageChrome + drop hardcoded zh in Quality + Footer
+... 还有 36 个 pre-v14 commit (Shop routes, copy refactors, v1-v13 ...
 ```
+
+最近 3 个重要提交:
+- `e284594` **fix(admin-a11y)** — color-contrast + label-content-name-mismatch (4 页 LH 全 100/100/100/100)
+- `814aa61` **feat(admin)** — 14 admin console pages (zh+en, 30 routes, all ○ static)
+- `434cd66` **fix(home)** — TopSelling/NewArrivals 'view all' 链接导航到真路由
