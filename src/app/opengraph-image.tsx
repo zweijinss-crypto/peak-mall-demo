@@ -7,7 +7,7 @@ import { ImageResponse } from 'next/og';
  */
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'Peak Mall · 顶峰商城 Demo';
+export const alt = 'Peak Mall Demo';
 export const dynamic = 'force-static';
 
 export default function OgImage() {
@@ -47,7 +47,7 @@ export default function OgImage() {
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: 84, fontWeight: 800, lineHeight: 1.05, maxWidth: 1000 }}>
-            顶峰商城 · Static Demo
+            Peak Mall · Static Demo
           </div>
           <div style={{ marginTop: 28, fontSize: 32, opacity: 0.95, maxWidth: 900 }}>
             16 SKUs · zh + en · dark/light · Next.js static export

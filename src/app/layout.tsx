@@ -6,12 +6,13 @@ import SupportWidget from '@/components/peak-mall/SupportWidget';
 export const metadata: Metadata = {
   metadataBase: new URL('https://peak-mall-demo.netlify.app'),
   title: {
-    default: 'Peak Mall · 顶峰商城 Demo',
+    default: 'Peak Mall Demo',
     template: '%s · Peak Mall',
   },
-  description: 'Static e-commerce demo — 16 SKUs across categories, zh + en bilingual, dark/light aware.',
+  description:
+    'Static e-commerce demo — 16 SKUs across categories, bilingual zh + en, dark/light aware.',
   applicationName: 'Peak Mall',
-  keywords: ['peak mall', 'demo', 'next.js', '静态导出', 'bilingual', 'ecommerce'],
+  keywords: ['peak mall', 'demo', 'next.js', 'bilingual', 'ecommerce'],
   authors: [{ name: 'Peak Mall Demo' }],
   manifest: '/manifest.webmanifest',
   icons: {
@@ -22,16 +23,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'Peak Mall',
-    title: 'Peak Mall · 顶峰商城 Demo',
-    description: 'Static e-commerce demo — 16 SKUs, zh + en bilingual.',
+    title: 'Peak Mall Demo',
+    description:
+      'Static e-commerce demo — 16 SKUs across categories, bilingual zh + en.',
     locale: 'zh_CN',
     alternateLocale: 'en_US',
     url: 'https://peak-mall-demo.netlify.app',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Peak Mall · 顶峰商城 Demo',
-    description: 'Static e-commerce demo — 16 SKUs, zh + en bilingual.',
+    title: 'Peak Mall Demo',
+    description:
+      'Static e-commerce demo — 16 SKUs across categories, bilingual zh + en.',
   },
   robots: {
     index: true,
