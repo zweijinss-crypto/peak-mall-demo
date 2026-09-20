@@ -135,7 +135,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-px flex-1">
+          <nav className="hidden md:flex items-center gap-1 flex-1">
             {navItems
               .filter((n) => !n.top)
               .map((n) => {
@@ -144,13 +144,15 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                   <a
                     key={n.key}
                     onClick={n.onClick}
-                    className={`relative px-3.5 py-2 text-[14.5px] font-medium rounded-md cursor-pointer whitespace-nowrap ${
-                      on ? 'text-orange-700' : 'text-neutral-900 hover:text-orange-600'
+                    className={`relative px-4 py-2 text-[14.5px] font-medium rounded-lg cursor-pointer whitespace-nowrap transition-all duration-200 ${
+                      on
+                        ? 'text-orange-700 bg-orange-50/70'
+                        : 'text-neutral-700 hover:text-orange-700 hover:bg-orange-50/40'
                     }`}
                   >
                     {n.label}
                     {on && (
-                      <span className="absolute left-3.5 right-3.5 bottom-0.5 h-0.5 bg-orange-700 rounded-sm" />
+                      <span className="absolute left-1/2 -translate-x-1/2 bottom-1 w-1 h-1 rounded-full bg-orange-600" aria-hidden />
                     )}
                   </a>
                 );

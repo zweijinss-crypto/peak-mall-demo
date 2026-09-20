@@ -43,7 +43,7 @@ const Hero: FC = () => {
               {t.hero.eyebrow}
             </div>
 
-            <h1 className="text-[44px] md:text-[64px] lg:text-[72px] leading-[1.02] font-extrabold tracking-tight mb-6">
+            <h1 className="text-[40px] md:text-[56px] lg:text-[64px] leading-[1.05] font-extrabold tracking-[-0.02em] mb-6">
               <span className="block">{t.hero.h1}</span>
               <span className="block text-gradient-orange">{t.hero.h2}</span>
             </h1>

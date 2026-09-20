@@ -229,13 +229,13 @@ export default function ShopDetailClient({ id }: { id: string }) {
             <div className="flex gap-3 mb-3">
               <button
                 onClick={onAdd}
-                className="flex-1 h-[48px] bg-white border-2 border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white text-[14.5px] font-bold tracking-wide rounded transition-colors"
+                className="flex-1 h-[48px] bg-white border-2 border-orange-700 text-orange-700 hover:bg-orange-50 text-[14.5px] font-bold tracking-wide rounded-lg transition-all duration-200 hover:-translate-y-0.5"
               >
                 {added ? '✓ ' + COPY.cart.orderPlaced : COPY.cta.addToCart}
               </button>
               <button
                 onClick={() => router.push('/cart')}
-                className="flex-1 h-[48px] bg-orange-700 hover:bg-orange-800 text-white text-[14.5px] font-bold tracking-wide rounded transition-colors"
+                className="flex-1 h-[48px] bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white text-[14.5px] font-bold tracking-wide rounded-lg transition-all duration-200 hover:-translate-y-0.5 shadow-[0_4px_12px_rgba(234,88,12,0.25)] hover:shadow-[0_6px_18px_rgba(234,88,12,0.35)]"
               >
                 {COPY.cta.buyNow}
               </button>
