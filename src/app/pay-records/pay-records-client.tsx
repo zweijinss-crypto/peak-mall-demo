@@ -53,6 +53,9 @@ const PayRecordsClient: FC = () => {
   const ordersInStore = usePeakStore((s) => s.orders);
   const [mounted, setMounted] = useState(false);
   const [exported, setExported] = useState(false);
+  const [search, setSearch] = useState('');
+  const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<Set<PaymentRecord['status']>>(new Set());
   useEffect(() => setMounted(true), []);
 
   const isEn = mounted && locale === 'en';
@@ -71,24 +74,74 @@ const PayRecordsClient: FC = () => {
     [orders]
   );
 
-  // 汇总
+  // 筛选后的记录(文本搜索 + 品牌 + 状态)
+  const filteredRecords = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return records.filter(({ order, payment }) => {
+      if (brandFilter.size > 0) {
+        const info = classifyBin(payment.bin);
+        if (!brandFilter.has(info.brand)) return false;
+      }
+      if (statusFilter.size > 0 && !statusFilter.has(payment.status)) return false;
+      if (q) {
+        const haystack = `${order.id} ${payment.bin} ${payment.last4} ${payment.brand}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [records, search, brandFilter, statusFilter]);
+
+  // 可选品牌(从全部记录动态算)
+  const availableBrands = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of records) set.add(classifyBin(r.payment.bin).brand);
+    return Array.from(set).sort();
+  }, [records]);
+
+  const isFiltering = search.trim() !== '' || brandFilter.size > 0 || statusFilter.size > 0;
+
+  function toggleBrand(brand: string) {
+    setBrandFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(brand)) next.delete(brand);
+      else next.add(brand);
+      return next;
+    });
+  }
+
+  function toggleStatus(s: PaymentRecord['status']) {
+    setStatusFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
+      return next;
+    });
+  }
+
+  function resetFilters() {
+    setSearch('');
+    setBrandFilter(new Set());
+    setStatusFilter(new Set());
+  }
+
+  // 汇总(基于筛选后记录)
   const counts = useMemo(() => {
     const c = { success: 0, failed: 0, pending: 0, refunded: 0, total: 0, captured: 0 };
-    for (const r of records) {
+    for (const r of filteredRecords) {
       c.total += 1;
       c[r.payment.status] += 1;
       if (r.payment.status === 'success') c.captured += r.payment.amount;
     }
     return c;
-  }, [records]);
+  }, [filteredRecords]);
 
-  const brandAgg = useMemo(() => aggregateByBrand(records), [records]);
-  const statusAgg = useMemo(() => aggregateByStatus(records), [records]);
+  const brandAgg = useMemo(() => aggregateByBrand(filteredRecords), [filteredRecords]);
+  const statusAgg = useMemo(() => aggregateByStatus(filteredRecords), [filteredRecords]);
 
   // 按天聚合(成功)
   const dayAgg = useMemo(() => {
     const map = new Map<string, { count: number; total: number }>();
-    for (const r of records) {
+    for (const r of filteredRecords) {
       if (r.payment.status !== 'success') continue;
       const d = new Date(r.payment.paidAt ?? r.order.createdAt).toISOString().slice(0, 10);
       const cur = map.get(d) ?? { count: 0, total: 0 };
@@ -99,15 +152,17 @@ const PayRecordsClient: FC = () => {
     return Array.from(map.entries())
       .map(([day, v]) => ({ day, count: v.count, total: v.total }))
       .sort((a, b) => a.day.localeCompare(b.day));
-  }, [records]);
+  }, [filteredRecords]);
 
   const maxDayTotal = Math.max(1, ...dayAgg.map((d) => d.total));
 
   function handleExport() {
-    const rows = buildPayCSVRows(orders);
+    const source = isFiltering ? filteredRecords : records;
+    const rows = buildPayCSVRows(source.map((r) => r.order));
     const csv = toCSV(rows);
     const stamp = new Date().toISOString().slice(0, 10);
-    downloadCSV(`pay-records-${stamp}.csv`, csv);
+    const suffix = isFiltering ? '-filtered' : '';
+    downloadCSV(`pay-records-${stamp}${suffix}.csv`, csv);
     setExported(true);
     window.setTimeout(() => setExported(false), 1800);
   }
@@ -153,6 +208,79 @@ const PayRecordsClient: FC = () => {
         </section>
 
         {/* 三栏分布 */}
+
+        {/* 筛选工具条 */}
+        <section
+          aria-label="filters"
+          className="bg-white border border-ink-100 rounded-xl p-4 mb-4"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t.payRecords.searchPlaceholder}
+              aria-label={t.payRecords.searchPlaceholder}
+              className="flex-1 min-w-[180px] px-3 py-2 border border-ink-200 rounded-md text-[13px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+            />
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] text-ink-500 uppercase tracking-wide">{t.payRecords.filterBrand}</span>
+              {availableBrands.map((b) => {
+                const on = brandFilter.has(b);
+                return (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => toggleBrand(b)}
+                    aria-pressed={on}
+                    className={`inline-flex items-center px-2 py-1 rounded-md text-[11.5px] font-semibold border transition-colors ${
+                      on
+                        ? `${BRAND_COLORS[b] ?? BRAND_COLORS.Unknown} text-white border-transparent`
+                        : 'bg-white text-ink-700 border-ink-200 hover:border-ink-300'
+                    }`}
+                  >
+                    {b}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] text-ink-500 uppercase tracking-wide">{t.payRecords.filterStatus}</span>
+              {(Object.keys(STATUS_STYLES) as PaymentRecord['status'][]).map((s) => {
+                const on = statusFilter.has(s);
+                const st = STATUS_STYLES[s];
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleStatus(s)}
+                    aria-pressed={on}
+                    className={`inline-flex items-center px-2 py-1 rounded-md text-[11.5px] font-semibold border transition-colors ${
+                      on ? st.fg : 'bg-white text-ink-700 border-ink-200 hover:border-ink-300'
+                    }`}
+                  >
+                    {st.label[isEn ? 'en' : 'zh']}
+                  </button>
+                );
+              })}
+            </div>
+            {isFiltering && (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="ml-auto inline-flex items-center px-2.5 py-1.5 rounded-md text-[11.5px] font-semibold text-ink-600 hover:bg-ink-50 border border-ink-200"
+              >
+                ↻ {t.payRecords.filterReset}
+              </button>
+            )}
+          </div>
+          {isFiltering && (
+            <div className="mt-2 text-[11.5px] text-ink-500">
+              {t.payRecords.showing} <b className="text-ink-900 tabular-nums">{filteredRecords.length}</b> {t.payRecords.of} <span className="tabular-nums">{records.length}</span> {t.payRecords.matched}
+            </div>
+          )}
+        </section>
+
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* 按品牌 */}
           <div className="bg-white border border-ink-100 rounded-xl p-5">
@@ -275,14 +403,26 @@ const PayRecordsClient: FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {records.length === 0 && (
+                {filteredRecords.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-ink-500">
-                      —
+                    <td colSpan={9} className="px-3 py-10 text-center text-ink-500">
+                      {records.length === 0 ? '—' : (
+                        <>
+                          <div className="text-[15px] font-bold text-ink-700 mb-1">{t.payRecords.emptyResult}</div>
+                          <div className="text-[12.5px]">{t.payRecords.emptyResultDesc}</div>
+                          <button
+                            type="button"
+                            onClick={resetFilters}
+                            className="mt-3 inline-flex items-center px-3 py-1.5 rounded-md text-[12px] font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200"
+                          >
+                            ↻ {t.payRecords.filterReset}
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 )}
-                {records.map(({ order, payment }) => {
+                {filteredRecords.map(({ order, payment }) => {
                   const info = classifyBin(payment.bin);
                   const st = STATUS_STYLES[payment.status];
                   const ts = new Date(payment.paidAt ?? order.createdAt).toLocaleString();
