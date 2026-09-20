@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 import { PRODUCTS } from '@/data/products';
 
 const CATEGORY_THEMES = [
@@ -11,14 +11,12 @@ const CATEGORY_THEMES = [
     bg: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)',
     accent: '#60a5fa',
     emoji: '💻',
-    desc: COPY.home.cat1Desc,
   },
   {
     key: '家用电器',
     bg: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 100%)',
     accent: '#fb923c',
     emoji: '🤖',
-    desc: COPY.home.cat2Desc,
   },
 ] as const;
 
@@ -27,12 +25,18 @@ const CATEGORY_THEMES = [
  */
 const CategoryGrid: FC = () => {
   const router = useRouter();
+  const t = useT();
+  const home = t.home as Record<string, unknown> & { catOfItems?: (n: number) => string };
+  const descMap: Record<string, string> = {
+    '数码电子': (home.cat1Desc as string) ?? '',
+    '家用电器': (home.cat2Desc as string) ?? '',
+  };
   return (
     <section className="max-w-shell mx-auto px-5 py-12">
       <div className="flex items-end justify-between mb-7">
         <div>
-          <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{COPY.home.browseByCat}</div>
-          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.home.exploreCategories}</h2>
+          <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{home.browseByCat as string}</div>
+          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{home.exploreCategories as string}</h2>
         </div>
       </div>
 
@@ -53,13 +57,13 @@ const CategoryGrid: FC = () => {
               />
               <div className="relative h-full flex flex-col justify-between p-7 md:p-9">
                 <div>
-                  <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{COPY.home.catOfItems(count)}</div>
+                  <div className="text-[11px] tracking-[3px] uppercase opacity-80 mb-3">{home.catOfItems ? home.catOfItems(count) : `${count} items`}</div>
                   <div className="text-[36px] md:text-[44px] font-extrabold leading-none mb-3">{c.key}</div>
-                  <div className="text-[14px] opacity-85 max-w-[280px] leading-relaxed">{c.desc}</div>
+                  <div className="text-[14px] opacity-85 max-w-[280px] leading-relaxed">{descMap[c.key] ?? ''}</div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="inline-flex items-center gap-2 bg-white text-ink-900 px-4 py-2 rounded-md text-[12.5px] font-bold tracking-wide group-hover:gap-3 transition-all">
-                    {COPY.hero.ctaPrimary}
+                    {(t.hero as Record<string, string>).ctaPrimary}
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                       <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>

@@ -100,6 +100,16 @@ export const COPY_EN = {
     searchPlaceholder: 'Search 160k items · laptops / earbuds / vacuums …',
     searchHint: 'Popular:',
     searchTags: ['Business laptops', 'Wireless earbuds', 'Robot vacuums', 'Smart watches'],
+    trust: {
+      countries: 'Countries served',
+      countryUnit: '+',
+      support: 'Support',
+      supportUnit: '',
+      return: 'No-reason returns',
+      returnUnit: ' days',
+      authentic: 'Authentic',
+      authenticUnit: '',
+    },
   },
 
   home: {
@@ -117,6 +127,13 @@ export const COPY_EN = {
     endsIn: 'Ends in',
     stock: 'Stock left',
     save: 'Save',
+  },
+
+  service: {
+    shipping: { title: 'Multi-warehouse shipping', desc: 'Ships to 28 countries' },
+    return: { title: 'Hassle-free returns', desc: '7-day no-reason' },
+    support: { title: 'Concierge support', desc: 'Online 13:00-23:30' },
+    authentic: { title: 'Authentic guaranteed', desc: '10x compensation if fake' },
   },
 
   topSelling: {

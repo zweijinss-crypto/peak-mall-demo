@@ -20,13 +20,6 @@ export interface RecommendedProps {
 
 type SortKey = 'default' | 'price-asc' | 'price-desc' | 'rating';
 
-const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
-  { key: 'default', label: COPY.rec.sortDefault },
-  { key: 'price-asc', label: COPY.rec.sortPriceAsc },
-  { key: 'price-desc', label: COPY.rec.sortPriceDesc },
-  { key: 'rating', label: COPY.rec.sortRating },
-];
-
 /**
  * Recommended - 推荐商品:排序下拉 + 分类切换,section header 有 渐变 accent bar
  */
@@ -34,6 +27,12 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
   const router = useRouter();
   const t = useT();
   const allLabel = t.nav.all;
+  const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
+    { key: 'default', label: t.rec.sortDefault },
+    { key: 'price-asc', label: t.rec.sortPriceAsc },
+    { key: 'price-desc', label: t.rec.sortPriceDesc },
+    { key: 'rating', label: t.rec.sortRating },
+  ];
   const [active, setActive] = useState(categories[0] ?? allLabel);
   const [sort, setSort] = useState<SortKey>('default');
 
@@ -57,19 +56,19 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
         <div>
           <div className="flex items-center gap-2 mb-2">
             <div className="h-1 w-12 bg-gradient-to-r from-primary to-primary-light rounded-full" />
-            <span className="text-[11px] font-extrabold tracking-[3px] uppercase text-ink-500">{COPY.rec.label}</span>
+            <span className="text-[11px] font-extrabold tracking-[3px] uppercase text-ink-500">{t.rec.label}</span>
           </div>
-          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.rec.title}</h2>
-          <p className="text-[13.5px] text-ink-500 mt-1.5 max-w-[520px]">{COPY.rec.sub}</p>
+          <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{t.rec.title}</h2>
+          <p className="text-[13.5px] text-ink-500 mt-1.5 max-w-[520px]">{t.rec.sub}</p>
         </div>
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <span className="text-[12px] text-ink-500">{COPY.rec.sortBy}</span>
+          <span className="text-[12px] text-ink-500">{t.rec.sortBy}</span>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            aria-label={COPY.rec.sortBy}
+            aria-label={t.rec.sortBy}
             className="px-3 py-2 bg-white border border-ink-200 rounded-md text-[12.5px] font-semibold text-ink-700 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/15 outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map((o) => (
@@ -98,7 +97,7 @@ const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) =
 
       {filtered.length === 0 && (
         <div className="text-center py-16 text-ink-500 text-[14px]">
-          {COPY.rec.empty}
+          {t.rec.empty}
         </div>
       )}
     </section>

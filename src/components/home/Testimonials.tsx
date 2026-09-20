@@ -1,32 +1,35 @@
+'use client';
+
 import type { FC } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 /**
  * Testimonials - 用户故事:评测聚合卡片,3 列,带星级 + 头像 + 引用
  */
 const Testimonials: FC = () => {
+  const cp = useT();
   const items = [
     {
       stars: 5,
-      quote: COPY.testimonial.q1,
-      name: COPY.testimonial.n1,
-      role: COPY.testimonial.r1,
+      quote: cp.testimonial.q1,
+      name: cp.testimonial.n1,
+      role: cp.testimonial.r1,
       avatar: '👩‍💼',
       bg: 'from-primary-50 to-rose-50',
     },
     {
       stars: 5,
-      quote: COPY.testimonial.q2,
-      name: COPY.testimonial.n2,
-      role: COPY.testimonial.r2,
+      quote: cp.testimonial.q2,
+      name: cp.testimonial.n2,
+      role: cp.testimonial.r2,
       avatar: '👨‍💻',
       bg: 'from-accent-violet/10 to-primary-50',
     },
     {
       stars: 5,
-      quote: COPY.testimonial.q3,
-      name: COPY.testimonial.n3,
-      role: COPY.testimonial.r3,
+      quote: cp.testimonial.q3,
+      name: cp.testimonial.n3,
+      role: cp.testimonial.r3,
       avatar: '👩‍🎨',
       bg: 'from-accent-teal/10 to-primary-50',
     },
@@ -35,11 +38,11 @@ const Testimonials: FC = () => {
   return (
     <section className="max-w-shell mx-auto px-5 py-12">
       <div className="text-center mb-10">
-        <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{COPY.testimonial.label}</div>
-        <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.testimonial.title}</h2>
+        <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-ink-500 mb-2">{cp.testimonial.label}</div>
+        <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.testimonial.title}</h2>
         <div className="flex items-center justify-center gap-1 mt-3">
           {[1,2,3,4,5].map((i) => <span key={i} className="text-accent-gold text-[20px]">★</span>)}
-          <span className="text-[14px] font-bold text-ink-700 ml-2">{COPY.testimonial.aggregate}</span>
+          <span className="text-[14px] font-bold text-ink-700 ml-2">{cp.testimonial.aggregate}</span>
         </div>
       </div>
 

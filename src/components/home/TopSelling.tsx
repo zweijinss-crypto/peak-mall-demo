@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
 import type { Product } from '@/components/peak-mall/types';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface TopSellingProps {
   products: Product[];
@@ -14,6 +14,7 @@ export interface TopSellingProps {
  */
 const TopSelling: FC<TopSellingProps> = ({ products }) => {
   const router = useRouter();
+  const cp = useT();
   const top = [...products].sort((a, b) => Number(b.stock) - Number(a.stock)).slice(0, 5);
   const podiumColors = ['#fbbf24', '#cbd5e1', '#d97706']; // gold / silver / bronze
 
@@ -22,11 +23,11 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
       <div className="max-w-shell mx-auto px-5">
         <div className="flex items-end justify-between mb-7">
           <div>
-            <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose mb-2">🏆 {COPY.topSelling.label}</div>
-            <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.topSelling.title}</h2>
+            <div className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose mb-2">🏆 {cp.topSelling.label}</div>
+            <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.topSelling.title}</h2>
           </div>
           <a className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">
-            {COPY.topSelling.viewAll} →
+            {cp.topSelling.viewAll} →
           </a>
         </div>
 
@@ -63,7 +64,7 @@ const TopSelling: FC<TopSellingProps> = ({ products }) => {
                   <div className="text-[11.5px] text-ink-500 mt-0.5 flex items-center gap-2">
                     <span>{p.category}</span>
                     <span className="w-1 h-1 bg-ink-300 rounded-full" />
-                    <span>{COPY.topSelling.sold} {Math.floor(Number(p.stock) * 1.3)}</span>
+                    <span>{cp.topSelling.sold} {Math.floor(Number(p.stock) * 1.3)}</span>
                   </div>
                 </div>
 

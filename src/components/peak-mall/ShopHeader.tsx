@@ -218,7 +218,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
           <div className="flex items-center gap-1 ml-auto">
             <button
               onClick={() => router.push('/wishlist')}
-              aria-label={`${COPY.footer.wishlist} (${wishCount})`}
+              aria-label={`${t.footer.wishlist} (${wishCount})`}
               className="relative w-10 h-10 flex items-center justify-center rounded-md text-[18px] text-neutral-700 hover:bg-neutral-100 hover:text-orange-500 transition-colors"
             >
               {t.card.wishlistOff}
@@ -230,7 +230,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             </button>
             <button
               onClick={() => router.push('/cart')}
-              aria-label={`${COPY.cart.title} (${cartCount})`}
+              aria-label={`${t.cart.title} (${cartCount})`}
               className="relative w-10 h-10 flex items-center justify-center rounded-md text-[18px] text-neutral-700 hover:bg-neutral-100 hover:text-orange-500 transition-colors"
             >
               🛒

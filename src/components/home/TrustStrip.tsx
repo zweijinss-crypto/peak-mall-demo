@@ -1,15 +1,18 @@
+'use client';
+
 import type { FC } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 /**
  * TrustStrip - 信任条:4 个数据徽章(不是图标,是数字)
  */
 const TrustStrip: FC = () => {
+  const cp = useT();
   const items = [
-    { value: '28', label: COPY.hero.trust.countries, suffix: COPY.hero.trust.countryUnit },
-    { value: '24/7', label: COPY.hero.trust.support, suffix: COPY.hero.trust.supportUnit },
-    { value: '7', label: COPY.hero.trust.return, suffix: COPY.hero.trust.returnUnit },
-    { value: '100%', label: COPY.hero.trust.authentic, suffix: COPY.hero.trust.authenticUnit },
+    { value: '28', label: cp.hero.trust.countries, suffix: cp.hero.trust.countryUnit },
+    { value: '24/7', label: cp.hero.trust.support, suffix: cp.hero.trust.supportUnit },
+    { value: '7', label: cp.hero.trust.return, suffix: cp.hero.trust.returnUnit },
+    { value: '100%', label: cp.hero.trust.authentic, suffix: cp.hero.trust.authenticUnit },
   ];
 
   return (

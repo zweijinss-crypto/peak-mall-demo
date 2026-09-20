@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
 import type { Product } from '@/components/peak-mall/types';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface FlashSaleProps {
   products: Product[];
@@ -26,6 +26,7 @@ function diff(target: number) {
  */
 const FlashSale: FC<FlashSaleProps> = ({ products }) => {
   const router = useRouter();
+  const cp = useT();
   const items = products.slice(0, 4);
   // Hydration-safe: start with 0, compute target after mount
   const [end, setEnd] = useState<number>(0);
@@ -52,15 +53,15 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
         <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose">⚡ {COPY.flashSale.label}</span>
-              <span className="text-[12px] text-ink-500">{COPY.flashSale.scope}</span>
+              <span className="text-[12px] font-extrabold tracking-[3px] uppercase text-accent-rose">⚡ {cp.flashSale.label}</span>
+              <span className="text-[12px] text-ink-500">{cp.flashSale.scope}</span>
             </div>
             <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">
-              {COPY.flashSale.title}
+              {cp.flashSale.title}
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[12px] text-ink-500 font-semibold">{COPY.flashSale.endsIn}</span>
+            <span className="text-[12px] text-ink-500 font-semibold">{cp.flashSale.endsIn}</span>
             <div className="flex items-center gap-1">
               {[pad(t.h), pad(t.m), pad(t.s)].map((v, i) => (
                 <span key={i} className="flex items-center">
@@ -94,7 +95,7 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
                     -{40 + i * 5}%
                   </div>
                   <div className="absolute bottom-2 right-2 bg-ink-900/85 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded">
-                    {COPY.flashSale.stock}: {stock}
+                    {cp.flashSale.stock}: {stock}
                   </div>
                 </div>
                 <div className="p-3.5">
@@ -103,7 +104,7 @@ const FlashSale: FC<FlashSaleProps> = ({ products }) => {
                     <span className="text-accent-rose text-[20px] font-extrabold">${salePrice}</span>
                     <span className="text-ink-600 text-[12px] line-through">${p.price}</span>
                   </div>
-                  <div className="text-[11px] text-accent-rose font-semibold">{COPY.flashSale.save} ${savings}</div>
+                  <div className="text-[11px] text-accent-rose font-semibold">{cp.flashSale.save} ${savings}</div>
                 </div>
               </button>
             );

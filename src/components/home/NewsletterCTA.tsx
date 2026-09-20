@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, type FC, type FormEvent } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 /**
  * NewsletterCTA - 邮件订阅 + 双 CTA
  */
 const NewsletterCTA: FC = () => {
+  const cp = useT();
   const [email, setEmail] = useState('');
   const [state, setState] = useState<'idle' | 'ok' | 'err'>('idle');
 
@@ -29,11 +30,11 @@ const NewsletterCTA: FC = () => {
 
         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
-            <div className="text-[12px] font-extrabold tracking-[3px] uppercase opacity-90 mb-2">{COPY.cta.label}</div>
+            <div className="text-[12px] font-extrabold tracking-[3px] uppercase opacity-90 mb-2">{cp.cta.label}</div>
             <h2 className="text-[28px] md:text-[36px] font-extrabold leading-tight mb-3">
-              {COPY.cta.title}
+              {cp.cta.title}
             </h2>
-            <p className="text-[14.5px] opacity-90 leading-relaxed max-w-[440px]">{COPY.cta.sub}</p>
+            <p className="text-[14.5px] opacity-90 leading-relaxed max-w-[440px]">{cp.cta.sub}</p>
           </div>
 
           <form onSubmit={submit} className="flex flex-col gap-3">
@@ -42,8 +43,8 @@ const NewsletterCTA: FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setState('idle'); }}
-                placeholder={COPY.cta.emailPh}
-                aria-label={COPY.cta.emailLabel}
+                placeholder={cp.cta.emailPh}
+                aria-label={cp.cta.emailLabel}
                 className="flex-1 px-4 py-3.5 bg-white/15 backdrop-blur-md border border-white/30 rounded-md text-[14px] text-white placeholder-white/60 focus:bg-white/25 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/40 transition-all"
                 required
               />
@@ -51,12 +52,12 @@ const NewsletterCTA: FC = () => {
                 type="submit"
                 className="px-6 py-3.5 bg-white text-orange-700 hover:bg-ink-900 hover:text-white text-[13.5px] font-extrabold tracking-wide rounded-md transition-all whitespace-nowrap"
               >
-                {COPY.cta.subscribe}
+                {cp.cta.subscribe}
               </button>
             </div>
-            {state === 'ok' && <div className="text-[12.5px] text-white bg-white/15 px-3 py-2 rounded">{COPY.cta.success}</div>}
-            {state === 'err' && <div className="text-[12.5px] text-white bg-rose-700/60 px-3 py-2 rounded">{COPY.cta.error}</div>}
-            <p className="text-[11px] opacity-70 leading-relaxed">{COPY.cta.disclaimer}</p>
+            {state === 'ok' && <div className="text-[12.5px] text-white bg-white/15 px-3 py-2 rounded">{cp.cta.success}</div>}
+            {state === 'err' && <div className="text-[12.5px] text-white bg-rose-700/60 px-3 py-2 rounded">{cp.cta.error}</div>}
+            <p className="text-[11px] opacity-70 leading-relaxed">{cp.cta.disclaimer}</p>
           </form>
         </div>
       </div>

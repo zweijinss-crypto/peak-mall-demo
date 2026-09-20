@@ -1,5 +1,5 @@
 import { useState, type FC, type ReactNode, type FormEvent } from 'react';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface AuthI18n {
   hero: string;
@@ -49,26 +49,33 @@ export interface AuthSplitProps {
   i18n?: AuthI18n;
 }
 
-const DEFAULT_I18N: AuthI18n = {
-  hero: COPY.auth.hero,
-  loginTitle: COPY.auth.login,
-  registerTitle: COPY.auth.register,
-  email: COPY.auth.email,
-  emailPh: COPY.auth.emailPh,
-  password: COPY.auth.password,
-  passwordPh: COPY.auth.passwordPh,
-  password2: COPY.auth.password2,
-  password2Ph: COPY.auth.password2Ph,
-  nickname: COPY.auth.nickname,
-  nicknamePh: COPY.auth.nicknamePh,
-  invite: COPY.auth.invite,
-  invitePh: COPY.auth.invitePh,
-  remember: COPY.auth.remember,
-  login: COPY.auth.login,
-  register: COPY.auth.register,
-  pwMismatch: COPY.auth.pwMismatch,
-  errGeneric: COPY.auth.errGeneric,
-};
+function buildI18n(t: ReturnType<typeof useT>): AuthI18n {
+  // Use the long-form keys (loginTitle / emailLabel / submitLogin) when
+  // present, otherwise fall back to the short keys shared by both locales.
+  const a = t.auth as Record<string, unknown>;
+  const pick = (long: string, short: string) =>
+    typeof a[long] === 'string' ? (a[long] as string) : (a[short] as string);
+  return {
+    hero: pick('hero', 'hero'),
+    loginTitle: pick('loginTitle', 'login'),
+    registerTitle: pick('registerTitle', 'register'),
+    email: pick('emailLabel', 'email'),
+    emailPh: pick('emailPh', 'emailPh'),
+    password: pick('passwordLabel', 'password'),
+    passwordPh: pick('passwordPh', 'passwordPh'),
+    password2: pick('password2', 'password2'),
+    password2Ph: pick('password2Ph', 'password2Ph'),
+    nickname: pick('nicknameLabel', 'nickname'),
+    nicknamePh: pick('nicknamePh', 'nicknamePh'),
+    invite: pick('invite', 'invite'),
+    invitePh: pick('invitePh', 'invitePh'),
+    remember: pick('rememberMe', 'remember'),
+    login: pick('submitLogin', 'login'),
+    register: pick('submitRegister', 'register'),
+    pwMismatch: pick('pwMismatch', 'pwMismatch'),
+    errGeneric: pick('errGeneric', 'errGeneric'),
+  };
+}
 
 const inputCls =
   'w-full px-3 py-2.5 border border-neutral-200 rounded-md text-[14px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100';
@@ -84,23 +91,25 @@ const AuthSplit: FC<AuthSplitProps> = ({
   onLogin,
   onRegister,
   requireInvite = false,
-  i18n = DEFAULT_I18N,
+  i18n,
 }) => {
+  const t = useT();
+  const resolved = i18n ?? buildI18n(t);
   return (
     <>
       <div className="text-center py-9">
         <h1 className="text-[27px] font-bold text-neutral-800 tracking-wide">
-          {i18n.hero}
+          {resolved.hero}
         </h1>
       </div>
       <div className="max-w-[1280px] mx-auto px-5 pb-16">
         <div className="flex flex-col md:flex-row md:justify-center items-stretch gap-0">
-          <LoginPanel onLogin={onLogin} i18n={i18n} />
+          <LoginPanel onLogin={onLogin} i18n={resolved ?? buildI18n(t)} />
           <div className="hidden md:block w-px bg-neutral-200 self-stretch mx-8" />
           <RegisterPanel
             onRegister={onRegister}
             requireInvite={requireInvite}
-            i18n={i18n}
+            i18n={resolved ?? buildI18n(t)}
           />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
 import type { Product } from '@/components/peak-mall/types';
-import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface NewArrivalsProps {
   products: Product[];
@@ -14,6 +14,7 @@ export interface NewArrivalsProps {
  */
 const NewArrivals: FC<NewArrivalsProps> = ({ products }) => {
   const router = useRouter();
+  const cp = useT();
   const items = [...products].reverse().slice(0, 8);
 
   return (
@@ -22,11 +23,11 @@ const NewArrivals: FC<NewArrivalsProps> = ({ products }) => {
         <div className="flex items-end justify-between mb-7">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[11px] font-extrabold tracking-[3px] uppercase text-accent-teal">✨ {COPY.newArrivals.label}</span>
+              <span className="text-[11px] font-extrabold tracking-[3px] uppercase text-accent-teal">✨ {cp.newArrivals.label}</span>
             </div>
-            <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{COPY.newArrivals.title}</h2>
+            <h2 className="text-[28px] md:text-[32px] font-extrabold text-ink-900 leading-tight">{cp.newArrivals.title}</h2>
           </div>
-          <a className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">{COPY.newArrivals.viewAll} →</a>
+          <a className="text-[13px] font-semibold text-orange-700 hover:text-orange-800 cursor-pointer">{cp.newArrivals.viewAll} →</a>
         </div>
 
         {/* Horizontal scroll */}
@@ -45,14 +46,14 @@ const NewArrivals: FC<NewArrivalsProps> = ({ products }) => {
                     <div className="w-full h-full flex items-center justify-center text-[64px]">📦</div>
                   )}
                   <div className="absolute top-2 left-2 bg-teal-700 text-white text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded">
-                    {COPY.newArrivals.badge}
+                    {cp.newArrivals.badge}
                   </div>
                   <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-ink-700 hover:text-accent-rose hover:bg-white text-[14px]">
                     ♡
                   </div>
                   {i === 0 && (
                     <div className="absolute bottom-2 left-2 bg-amber-700 text-white text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded">
-                      {COPY.newArrivals.hot}
+                      {cp.newArrivals.hot}
                     </div>
                   )}
                 </div>
