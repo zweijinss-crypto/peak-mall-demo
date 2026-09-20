@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import type { FC } from 'react';
+import { useMemo, useState } from 'react';
 import {
   UserShell,
 } from '@/components/peak-mall';
@@ -10,29 +10,87 @@ import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
+type StatusTab = 'all' | Order['status'];
+
+/**
+ * /orders — 我的订单
+ * A3: status tab filter + search by ID/name
+ * A4: cancel pending order + buy again (reorder to cart)
+ */
 export default function OrdersPage() {
   const router = useRouter();
   const t = useT();
   const chrome = usePageChrome('orders');
   const orders = usePeakStore((s) => s.orders);
+  const cancelOrder = usePeakStore((s) => s.cancelOrder);
+  const reorder = usePeakStore((s) => s.reorder);
+
+  const [activeTab, setActiveTab] = useState<StatusTab>('all');
+  const [search, setSearch] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
 
   const STATUS_MAP: Record<Order['status'], { label: string; color: string }> = {
     pending: { label: t.orders.statusPending, color: 'bg-amber-100 text-amber-700' },
     paid: { label: t.orders.statusPaid, color: 'bg-blue-100 text-blue-700' },
     shipped: { label: t.orders.statusShipped, color: 'bg-violet-100 text-violet-700' },
     delivered: { label: t.orders.statusDelivered, color: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: t.orders.cancelledTag, color: 'bg-ink-200 text-ink-600' },
   };
+
+  const TABS: Array<{ key: StatusTab; label: string }> = [
+    { key: 'all', label: t.orders.tabAll },
+    { key: 'pending', label: t.orders.tabPending },
+    { key: 'paid', label: t.orders.tabPaid },
+    { key: 'shipped', label: t.orders.tabShipped },
+    { key: 'delivered', label: t.orders.tabDelivered },
+    { key: 'cancelled', label: t.orders.tabCancelled },
+  ];
+
+  const statusCounts = useMemo(() => {
+    const acc: Record<Order['status'], number> = {
+      pending: 0, paid: 0, shipped: 0, delivered: 0, cancelled: 0,
+    };
+    for (const o of orders) acc[o.status]++;
+    return acc;
+  }, [orders]);
+
+  const filtered = useMemo(() => {
+    let arr = orders;
+    if (activeTab !== 'all') arr = arr.filter((o) => o.status === activeTab);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter((o) =>
+        o.id.toLowerCase().includes(q) ||
+        o.items.some((it) => it.name.toLowerCase().includes(q))
+      );
+    }
+    return arr;
+  }, [orders, activeTab, search]);
 
   const totalCount = orders.length;
   const totalSpend = orders.reduce((s, o) => s + o.total, 0);
-  const statusCounts = orders.reduce<Record<Order['status'], number>>(
-    (acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc; },
-    { pending: 0, paid: 0, shipped: 0, delivered: 0 },
-  );
+
+  const flashToast = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2000);
+  };
+
+  const handleCancel = (id: string) => {
+    if (!confirm(t.orders.cancelConfirm)) return;
+    const ok = cancelOrder(id);
+    if (ok) flashToast(t.orders.cancelled);
+  };
+
+  const handleReorder = (id: string) => {
+    const ok = reorder(id);
+    if (ok) {
+      flashToast('🛒');
+      window.setTimeout(() => router.push('/cart/'), 600);
+    }
+  };
 
   return (
     <>
-
       <UserShell>
         {/* Top banner — status at a glance */}
         <section className="bg-white border border-ink-100 overflow-hidden mb-5">
@@ -68,8 +126,8 @@ export default function OrdersPage() {
             </div>
           </div>
           {totalCount > 0 && (
-            <div className="grid grid-cols-4 border-t border-ink-100 divide-x divide-ink-100">
-              {(['pending', 'paid', 'shipped', 'delivered'] as Order['status'][]).map((s) => (
+            <div className="grid grid-cols-5 border-t border-ink-100 divide-x divide-ink-100">
+              {(['pending', 'paid', 'shipped', 'delivered', 'cancelled'] as Order['status'][]).map((s) => (
                 <div key={s} className="px-4 py-2.5">
                   <div className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-bold mb-1 ${STATUS_MAP[s].color}`}>
                     {STATUS_MAP[s].label}
@@ -83,6 +141,64 @@ export default function OrdersPage() {
           )}
         </section>
 
+        {/* Toast */}
+        {toast && (
+          <div
+            role="status"
+            className="mb-4 px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]"
+          >
+            ✓ {toast}
+          </div>
+        )}
+
+        {/* Tabs + Search — only when there are orders */}
+        {orders.length > 0 && (
+          <div className="mb-5 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div role="tablist" className="flex flex-wrap gap-1 bg-ink-50 border border-ink-100 p-1 rounded-md">
+              {TABS.map((tab) => {
+                const count = tab.key === 'all' ? totalCount : statusCounts[tab.key];
+                const active = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`px-3 py-1.5 text-[12.5px] font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                      active ? 'bg-white text-orange-700 shadow-soft' : 'text-ink-600 hover:text-ink-900'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`text-[10px] tabular-nums ${active ? 'text-orange-700' : 'text-ink-500'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex-1 relative">
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t.orders.searchPlaceholder}
+                aria-label={t.orders.searchAria}
+                className="w-full px-3 py-2 pl-9 border border-ink-200 rounded-md text-[13px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-[14px]" aria-hidden="true">🔍</span>
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-ink-400 hover:text-ink-700"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {orders.length === 0 ? (
           <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
             <div className="text-[64px] mb-4">📦</div>
@@ -95,12 +211,24 @@ export default function OrdersPage() {
               {t.orders.startShopping}
             </button>
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">🔎</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.orders.noMatch}</div>
+            <div className="text-[12px] text-ink-500">{t.orders.noMatchDesc}</div>
+          </div>
         ) : (
           <div className="space-y-4">
-            {orders.map((o: Order) => {
+            {filtered.map((o: Order) => {
               const st = STATUS_MAP[o.status];
+              const canCancel = o.status === 'pending';
               return (
-                <article key={o.id} className="bg-white rounded-xl border border-ink-100 overflow-hidden">
+                <article
+                  key={o.id}
+                  className={`bg-white rounded-xl border border-ink-100 overflow-hidden ${
+                    o.status === 'cancelled' ? 'opacity-80' : ''
+                  }`}
+                >
                   <header className="flex flex-wrap items-center gap-3 px-5 py-3 bg-ink-50 border-b border-ink-100 text-[12.5px]">
                     <div className="flex items-center gap-2">
                       <span className="text-ink-500">{t.orders.placedAt}:</span>
@@ -139,11 +267,11 @@ export default function OrdersPage() {
                     ))}
                   </div>
 
-                  <footer className="flex justify-between items-center px-5 py-3.5 bg-ink-50 border-t border-ink-100">
+                  <footer className="flex flex-wrap justify-between items-center gap-3 px-5 py-3.5 bg-ink-50 border-t border-ink-100">
                     <span className="text-[12.5px] text-ink-500">
                       {t.orders.itemCount(o.items.reduce((s, i) => s + i.qty, 0))}
                     </span>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <span className="text-[13px] text-ink-600">
                         {t.orders.amount}: <b className="text-orange-700 text-[16px]">${o.total.toFixed(2)}</b>
                       </span>
@@ -153,6 +281,20 @@ export default function OrdersPage() {
                       >
                         {t.orders.viewDetail} →
                       </button>
+                      <button
+                        onClick={() => handleReorder(o.id)}
+                        className="px-3 py-1.5 border border-orange-700 text-orange-700 hover:bg-orange-700 hover:text-white text-[12px] font-bold rounded transition-colors"
+                      >
+                        ↻ {t.orders.buyAgain}
+                      </button>
+                      {canCancel && (
+                        <button
+                          onClick={() => handleCancel(o.id)}
+                          className="px-3 py-1.5 border border-ink-200 text-ink-600 hover:border-rose-300 hover:text-rose-700 text-[12px] font-bold rounded transition-colors"
+                        >
+                          {t.orders.cancel}
+                        </button>
+                      )}
                     </div>
                   </footer>
                 </article>
@@ -161,7 +303,6 @@ export default function OrdersPage() {
           </div>
         )}
       </UserShell>
-
     </>
   );
 }

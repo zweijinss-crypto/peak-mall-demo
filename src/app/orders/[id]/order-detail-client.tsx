@@ -15,6 +15,7 @@ const STATUS_LABEL: Record<Order['status'], { zh: string; en: string; cls: strin
   paid:      { zh: '已支付', en: 'Paid',            cls: 'bg-blue-100 text-blue-700' },
   shipped:   { zh: '已发货', en: 'Shipped',         cls: 'bg-violet-100 text-violet-700' },
   delivered: { zh: '已收货', en: 'Delivered',       cls: 'bg-emerald-100 text-emerald-700' },
+  cancelled: { zh: '已取消', en: 'Cancelled',       cls: 'bg-ink-200 text-ink-600' },
 };
 
 const STATUS_T_KEY: Record<Order['status'], keyof ReturnType<typeof useT>['orderDetail']> = {
@@ -22,6 +23,7 @@ const STATUS_T_KEY: Record<Order['status'], keyof ReturnType<typeof useT>['order
   paid:      'statusPaid',
   shipped:   'statusShipped',
   delivered: 'statusDelivered',
+  cancelled: 'statusCancelled',
 };
 
 interface Props {

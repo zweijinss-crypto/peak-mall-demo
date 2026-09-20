@@ -266,6 +266,23 @@ export const COPY_EN = {
     statusPaid: 'Paid',
     statusShipped: 'Shipped',
     statusDelivered: 'Delivered',
+    /** A3: tab + search */
+    tabAll: 'All',
+    tabPending: 'Pending',
+    tabPaid: 'Paid',
+    tabShipped: 'Shipped',
+    tabDelivered: 'Delivered',
+    tabCancelled: 'Cancelled',
+    searchPlaceholder: 'Search by ID or item name',
+    searchAria: 'Search orders',
+    noMatch: 'No matching orders',
+    noMatchDesc: 'Try a different keyword or status tab',
+    /** A4: cancel / buy again */
+    cancel: 'Cancel order',
+    cancelConfirm: 'Cancel this order?',
+    cancelled: 'Cancelled',
+    buyAgain: 'Buy again',
+    cancelledTag: 'Cancelled',
   },
 
   wishlist: {
@@ -404,6 +421,7 @@ export const COPY_EN = {
     statusShipped: 'Shipped',
     statusDelivered: 'Delivered',
     statusRefunded: 'Refunded',
+    statusCancelled: 'Cancelled',
     subtotal: 'Subtotal',
     shipping: 'Shipping',
     total: 'Total',

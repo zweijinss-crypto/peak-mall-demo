@@ -66,9 +66,11 @@ export interface Order {
   createdAt: number;
   items: OrderItem[];
   total: number;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered';
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   /** 支付明细(可选,放空就当作未支付) */
   payment?: PaymentRecord;
+  /** 取消时间(仅 cancelled) */
+  cancelledAt?: number;
 }
 
 export interface WishItem {
@@ -101,6 +103,10 @@ interface PeakStore {
   removeCoupon: () => void;
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
+  /** 取消订单(仅 pending 可取消) */
+  cancelOrder: (id: string) => boolean;
+  /** 再买一次 — 把订单 items 加回购物车 */
+  reorder: (id: string) => boolean;
   setLocale: (l: Locale) => void;
   setCurrency: (c: CurrencyCode) => void;
 }
@@ -170,6 +176,41 @@ export const usePeakStore = create<PeakStore>()(
               : [...s.wishlist, { id, addedAt: Date.now() }],
           };
         }),
+
+      cancelOrder: (id) => {
+        const order = get().orders.find((o) => o.id === id);
+        if (!order || order.status !== 'pending') return false;
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, status: 'cancelled' as const, cancelledAt: Date.now() } : o
+          ),
+        }));
+        return true;
+      },
+
+      reorder: (id) => {
+        const order = get().orders.find((o) => o.id === id);
+        if (!order) return false;
+        set((s) => {
+          const existingIds = new Set(s.cart.map((c) => c.id));
+          const additions = order.items
+            .filter((it) => !existingIds.has(it.productId))
+            .map((it) => ({
+              id: it.productId,
+              name: it.name,
+              price: it.price,
+              cover: it.cover,
+              qty: it.qty,
+              selected: true,
+            }));
+          const merged = s.cart.map((c) => {
+            const same = order.items.find((it) => it.productId === c.id);
+            return same ? { ...c, qty: c.qty + same.qty } : c;
+          });
+          return { cart: [...merged, ...additions] };
+        });
+        return true;
+      },
 
       placeOrder: () => {
         const s = get();
