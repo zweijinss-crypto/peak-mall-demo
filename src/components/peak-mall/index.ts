@@ -39,7 +39,6 @@ export type {
   BannerItem,
   BrandInfo,
   ContactInfo,
-  CurrencyCode,
   CurrencyOption,
   FooterColumn,
   FooterLink,
@@ -50,3 +49,8 @@ export type {
   ServiceItem,
   Slide,
 } from './types';
+
+// CurrencyCode is now defined in @/lib/store (single source of truth).
+// Re-export from there for ergonomic imports:
+//   import { type CurrencyCode } from '@/components/peak-mall';
+export type { CurrencyCode } from '@/lib/store';

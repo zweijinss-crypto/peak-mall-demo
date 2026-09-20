@@ -9,26 +9,12 @@ import {
   Footer,
   ProductCard,
   ServiceStrip,
-  type CurrencyCode,
   type Product,
 } from '@/components/peak-mall';
 import { PRODUCTS } from '@/data/products';
-import { usePeakStore } from '@/lib/store';
-import { COPY } from '@/lib/copy';
-
-const NAV_ITEMS = [
-  { key: 'home', label: '首页' },
-  { key: 'all', label: '全部' },
-  { key: 'new', label: '新品' },
-  { key: 'hot', label: '热卖' },
-  { key: 'orders', label: '我的订单' },
-];
-
-const CURRENCY_OPTIONS = [
-  { code: 'USD' as CurrencyCode, label: 'USD 美元' },
-  { code: 'CNY' as CurrencyCode, label: 'CNY 人民币' },
-  { code: 'EUR' as CurrencyCode, label: 'EUR 欧元' },
-];
+import { usePeakStore, type CurrencyCode } from '@/lib/store';
+import { useT } from '@/lib/use-t';
+import { usePageChrome } from '@/lib/page-nav';
 
 const SYMBOLS: Record<CurrencyCode, string> = {
   USD: '$', CNY: '¥', EUR: '€', GBP: '£', JPY: '¥', KRW: '₩', AUD: 'A$', CAD: 'C$',
@@ -36,11 +22,13 @@ const SYMBOLS: Record<CurrencyCode, string> = {
 
 export default function ShopDetailClient({ id }: { id: string }) {
   const router = useRouter();
+  const t = useT();
+  const chrome = usePageChrome('home', 'home');
   const productId = Number(id);
   const product: Product | undefined = PRODUCTS.find((p) => p.id === productId);
 
   // Hooks must run unconditionally — call them all before any early-return.
-  const [currency, setCurrency] = useState<CurrencyCode>('USD');
+  const currency = chrome.currency;
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImg, setActiveImg] = useState<number>(0);
@@ -66,27 +54,28 @@ export default function ShopDetailClient({ id }: { id: string }) {
   if (!product) {
     return (
       <>
+        <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
         <ShopHeader
-          brand={{ name: COPY.brand.name, slogan: COPY.brand.slogan }}
-          navItems={[{ key: 'home', label: '首页' }]}
+          brand={chrome.brand}
+          navItems={chrome.navItems}
           active="home"
-          currencyOptions={[{ code: 'USD', label: 'USD 美元' }]}
-          currency="USD"
-          onCurrencyChange={() => {}}
-          langOptions={[{ code: 'zh', label: '中文' }, { code: 'en', label: 'EN' }]}
-          lang="zh"
-          onLangChange={() => {}}
+          currencyOptions={chrome.currencyOptions}
+          currency={chrome.currency}
+          onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+          langOptions={chrome.langOptions}
+          lang={chrome.lang}
+          onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
         />
         <main className="max-w-shell mx-auto px-5 py-24 text-center">
           <h1 className="text-[28px] font-extrabold text-ink-900 mb-3">
-            {COPY.shop.notFoundTitle}
+            {t.shop.notFoundTitle}
           </h1>
-          <p className="text-ink-500 mb-8">{COPY.shop.notFoundDesc}</p>
+          <p className="text-ink-500 mb-8">{t.shop.notFoundDesc}</p>
           <button
             onClick={() => router.push('/')}
             className="px-6 py-2.5 bg-ink-900 hover:bg-primary text-white text-[14px] font-bold rounded transition-colors"
           >
-            {COPY.cta.backToHome}
+            {t.cta.backToHome}
           </button>
         </main>
         <Footer />
@@ -100,23 +89,28 @@ export default function ShopDetailClient({ id }: { id: string }) {
 
   return (
     <>
-      <AnnouncementBar tag="公告" text="全场满 $50 包邮 · 7 天无理由退换" />
+      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
       <ShopHeader
-        brand={{ name: COPY.brand.name, slogan: COPY.brand.slogan }}
-        navItems={NAV_ITEMS}
+        brand={chrome.brand}
+        navItems={chrome.navItems}
         active="all"
-        currencyOptions={CURRENCY_OPTIONS}
-        currency={currency}
-        onCurrencyChange={(c) => setCurrency(c as CurrencyCode)}
-        langOptions={[{ code: 'zh', label: '中文' }, { code: 'en', label: 'EN' }]}
-        lang="zh"
-        onLangChange={() => {}}
+        currencyOptions={chrome.currencyOptions}
+        currency={chrome.currency}
+        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+        langOptions={chrome.langOptions}
+        lang={chrome.lang}
+        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
         {/* Breadcrumb — Link-based for SEO + Next prefetch */}
-        <nav aria-label="面包屑" className="text-[12.5px] text-ink-500 mb-6 flex items-center flex-wrap gap-x-1.5 gap-y-1">
-          <Link href="/" className="hover:text-orange-700 transition-colors">首页</Link>
+        <nav
+          aria-label={chrome.isEn ? 'Breadcrumb' : '面包屑'}
+          className="text-[12.5px] text-ink-500 mb-6 flex items-center flex-wrap gap-x-1.5 gap-y-1"
+        >
+          <Link href="/" className="hover:text-orange-700 transition-colors">
+            {chrome.isEn ? 'Home' : '首页'}
+          </Link>
           <span aria-hidden="true" className="text-ink-300">/</span>
           <Link
             href={`/#recommended?cat=${encodeURIComponent(product.category)}`}
@@ -140,7 +134,7 @@ export default function ShopDetailClient({ id }: { id: string }) {
                   key={`${g.id}-${i}`}
                   type="button"
                   onClick={() => setActiveImg(i)}
-                  aria-label={`查看图片 ${i + 1} of ${gallery.length}`}
+                  aria-label={chrome.isEn ? `View image ${i + 1} of ${gallery.length}` : `查看图片 ${i + 1} / ${gallery.length}`}
                   aria-current={isActive ? 'true' : undefined}
                   className={`flex-shrink-0 w-[72px] h-[72px] md:w-[80px] md:h-[80px] rounded-[10px] overflow-hidden bg-ink-100 border-2 transition-all ${
                     isActive
@@ -193,11 +187,11 @@ export default function ShopDetailClient({ id }: { id: string }) {
               <span className="text-ink-300">|</span>
               <span className="bg-ink-100 text-ink-600 px-2 py-0.5 rounded-full">{product.category}</span>
               <span className="text-ink-300">|</span>
-              <span className="text-emerald-700 font-semibold">{COPY.label.inStock} {product.stock} {COPY.label.pcs}</span>
+              <span className="text-emerald-700 font-semibold">{t.label.inStock} {product.stock} {t.label.pcs}</span>
             </div>
 
             <div className="bg-gradient-to-br from-primary-50 to-amber-50 border border-primary-100 rounded-[14px] p-5 mb-5">
-              <div className="text-[12px] text-ink-500 mb-1">{COPY.label.price}</div>
+              <div className="text-[12px] text-ink-500 mb-1">{t.label.price}</div>
               <div className="flex items-baseline gap-3">
                 <span className="text-[36px] font-extrabold text-orange-700 leading-none">
                   {sym}{Number(product.price || 0).toFixed(2)}
@@ -210,18 +204,18 @@ export default function ShopDetailClient({ id }: { id: string }) {
             </div>
 
             <div className="mb-5">
-              <div className="text-[13px] text-ink-500 mb-2">{COPY.product.qty}</div>
+              <div className="text-[13px] text-ink-500 mb-2">{t.product.qty}</div>
               <div className="inline-flex items-center border border-ink-200 rounded-md overflow-hidden">
                 <button
                   onClick={() => setQty(Math.max(1, qty - 1))}
                   className="w-9 h-9 hover:bg-ink-50 text-[16px]"
-                  aria-label="减少"
+                  aria-label={t.cart.qtyDecLabel}
                 >−</button>
                 <span className="w-12 text-center text-[14px] font-semibold">{qty}</span>
                 <button
                   onClick={() => setQty(Math.min(product.stock, qty + 1))}
                   className="w-9 h-9 hover:bg-ink-50 text-[16px]"
-                  aria-label="增加"
+                  aria-label={t.cart.qtyIncLabel}
                 >+</button>
               </div>
             </div>
@@ -231,13 +225,13 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 onClick={onAdd}
                 className="flex-1 h-[48px] bg-white border-2 border-orange-700 text-orange-700 hover:bg-orange-50 text-[14.5px] font-bold tracking-wide rounded-lg transition-all duration-200 hover:-translate-y-0.5"
               >
-                {added ? '✓ ' + COPY.cart.orderPlaced : COPY.cta.addToCart}
+                {added ? '✓ ' + t.cart.orderPlaced : t.cta.addToCart}
               </button>
               <button
                 onClick={() => router.push('/cart')}
                 className="flex-1 h-[48px] bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white text-[14.5px] font-bold tracking-wide rounded-lg transition-all duration-200 hover:-translate-y-0.5 shadow-[0_4px_12px_rgba(234,88,12,0.25)] hover:shadow-[0_6px_18px_rgba(234,88,12,0.35)]"
               >
-                {COPY.cta.buyNow}
+                {t.cta.buyNow}
               </button>
             </div>
             <button
@@ -250,18 +244,18 @@ export default function ShopDetailClient({ id }: { id: string }) {
             </button>
 
             <div className="text-[14px] text-ink-700 leading-[1.85] p-4 bg-ink-50 rounded-[10px] border border-ink-100 mt-5">
-              {product.description || COPY.label.noDescription}
+              {product.description || t.label.noDescription}
             </div>
 
             <div className="mt-3 text-[12px] text-ink-600">
-              id: #{product.id} · {COPY.label.createdAt} {product.created_at ? new Date(product.created_at).toISOString().slice(0, 10) : '—'}
+              id: #{product.id} · {t.label.createdAt} {product.created_at ? new Date(product.created_at).toISOString().slice(0, 10) : '—'}
             </div>
         </div>
 
         {related.length > 0 && (
           <section className="mt-16">
             <h2 className="text-[20px] md:text-[22px] font-bold text-ink-900 mb-5">
-              {COPY.product.related}
+              {t.product.related}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {related.map((p) => (

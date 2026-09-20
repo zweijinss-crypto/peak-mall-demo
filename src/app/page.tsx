@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
   Footer,
-  type CurrencyCode,
 } from '@/components/peak-mall';
 import { PRODUCTS, CATEGORIES } from '@/data/products';
-import { usePeakStore, type Locale } from '@/lib/store';
+import { usePeakStore } from '@/lib/store';
+import { usePageChrome } from '@/lib/page-nav';
 import Hero from '@/components/home/Hero';
 import TrustStrip from '@/components/home/TrustStrip';
 import FlashSale from '@/components/home/FlashSale';
@@ -20,32 +19,6 @@ import NewArrivals from '@/components/home/NewArrivals';
 import Testimonials from '@/components/home/Testimonials';
 import Promise from '@/components/home/Promise';
 import NewsletterCTA from '@/components/home/NewsletterCTA';
-
-const NAV_ITEMS = [
-  { key: 'home', label: '首页' },
-  { key: 'all', label: '全部' },
-  { key: 'new', label: '新品' },
-  { key: 'hot', label: '热卖' },
-  { key: 'orders', label: '我的订单' },
-  { key: 'after', label: '售后' },
-  { key: 'about', label: '关于' },
-];
-
-const CURRENCY_OPTIONS = [
-  { code: 'USD' as CurrencyCode, label: 'USD 美元' },
-  { code: 'CNY' as CurrencyCode, label: 'CNY 人民币' },
-  { code: 'EUR' as CurrencyCode, label: 'EUR 欧元' },
-  { code: 'GBP' as CurrencyCode, label: 'GBP 英镑' },
-  { code: 'JPY' as CurrencyCode, label: 'JPY 日元' },
-  { code: 'KRW' as CurrencyCode, label: 'KRW 韩元' },
-  { code: 'AUD' as CurrencyCode, label: 'AUD 澳元' },
-  { code: 'CAD' as CurrencyCode, label: 'CAD 加元' },
-];
-
-const LANG_OPTIONS = [
-  { code: 'zh' as const, label: '中文' },
-  { code: 'en' as const, label: 'EN' },
-];
 
 const FOOTER_COLUMNS = [
   {
@@ -78,32 +51,21 @@ const FOOTER_COLUMNS = [
 ];
 
 export default function HomePage() {
-  const [currency, setCurrency] = useState<CurrencyCode>('USD');
-  const locale = usePeakStore((s) => s.locale);
-  const setLocale = usePeakStore((s) => s.setLocale);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const brand = mounted && locale === 'en'
-    ? { name: 'Peak Mall', slogan: 'PEAK MALL' }
-    : { name: '顶峰商城', slogan: 'PEAK MALL' };
-  const announcement = mounted && locale === 'en'
-    ? 'New customers save 20% on first order · Free shipping over $50'
-    : '新用户首单立享 8 折优惠 · 全场满 $50 包邮';
+  const chrome = usePageChrome('home', 'home');
 
   return (
     <>
-      <AnnouncementBar tag={mounted && locale === 'en' ? 'Notice' : '公告'} text={announcement} duration={20} />
+      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} duration={20} />
       <ShopHeader
-        brand={brand}
-        navItems={NAV_ITEMS}
+        brand={chrome.brand}
+        navItems={chrome.navItems}
         active="home"
-        currencyOptions={CURRENCY_OPTIONS}
-        currency={currency}
-        onCurrencyChange={(c) => setCurrency(c as CurrencyCode)}
-        langOptions={LANG_OPTIONS}
-        lang={locale}
-        onLangChange={(l) => setLocale(l as Locale)}
+        currencyOptions={chrome.currencyOptions}
+        currency={chrome.currency}
+        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+        langOptions={chrome.langOptions}
+        lang={chrome.lang}
+        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
       />
 
       <main>
@@ -123,7 +85,7 @@ export default function HomePage() {
         <TopSelling products={PRODUCTS} />
 
         {/* 6. 推荐商品 + 排序 */}
-        <Recommended products={PRODUCTS} categories={CATEGORIES} currency={currency} />
+        <Recommended products={PRODUCTS} categories={CATEGORIES} currency={chrome.currency} />
 
         {/* 7. 品质专区(双 banner 重做) */}
         <Quality />

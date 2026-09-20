@@ -60,12 +60,14 @@ export interface WishItem {
 }
 
 export type Locale = 'zh' | 'en';
+export type CurrencyCode = 'USD' | 'CNY' | 'EUR' | 'GBP' | 'JPY' | 'KRW' | 'AUD' | 'CAD';
 
 interface PeakStore {
   cart: CartItem[];
   orders: Order[];
   wishlist: WishItem[];
   locale: Locale;
+  currency: CurrencyCode;
   addToCart: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
   updateQty: (id: number, qty: number) => void;
   removeFromCart: (id: number) => void;
@@ -73,6 +75,7 @@ interface PeakStore {
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
   setLocale: (l: Locale) => void;
+  setCurrency: (c: CurrencyCode) => void;
 }
 
 export const usePeakStore = create<PeakStore>()(
@@ -82,6 +85,7 @@ export const usePeakStore = create<PeakStore>()(
       orders: [],
       wishlist: [],
       locale: 'zh',
+      currency: 'USD',
 
       addToCart: (item, qty = 1) =>
         set((s) => {
@@ -139,6 +143,7 @@ export const usePeakStore = create<PeakStore>()(
       },
 
       setLocale: (locale) => set({ locale }),
+      setCurrency: (currency: CurrencyCode) => set({ currency }),
     }),
     {
       name: 'peak-mall-store',
@@ -148,6 +153,7 @@ export const usePeakStore = create<PeakStore>()(
         orders: s.orders,
         wishlist: s.wishlist,
         locale: s.locale,
+        currency: s.currency,
       }),
     }
   )

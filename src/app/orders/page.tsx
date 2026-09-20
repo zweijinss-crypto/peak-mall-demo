@@ -1,38 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
   Footer,
-  type CurrencyCode,
 } from '@/components/peak-mall';
-import { usePeakStore, type Locale, type Order } from '@/lib/store';
+import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
-
-const NAV_ITEMS_ZH = [
-  { key: 'home', label: '首页' },
-  { key: 'orders', label: '我的订单' },
-];
-const NAV_ITEMS_EN = [
-  { key: 'home', label: 'Home' },
-  { key: 'orders', label: 'My orders' },
-];
-
-const CURRENCY_OPTIONS = [{ code: 'USD' as CurrencyCode, label: 'USD' }];
+import { usePageChrome } from '@/lib/page-nav';
 
 export default function OrdersPage() {
   const router = useRouter();
   const t = useT();
+  const chrome = usePageChrome('orders');
   const orders = usePeakStore((s) => s.orders);
-  const locale = usePeakStore((s) => s.locale);
-  const setLocale = usePeakStore((s) => s.setLocale);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const isEn = mounted && locale === 'en';
 
   const STATUS_MAP: Record<Order['status'], { label: string; color: string }> = {
     pending: { label: t.orders.statusPending, color: 'bg-amber-100 text-amber-700' },
@@ -43,20 +26,17 @@ export default function OrdersPage() {
 
   return (
     <>
-      <AnnouncementBar
-        tag={isEn ? 'Notice' : '公告'}
-        text={isEn ? 'Free shipping over $50 · 7-day no-reason returns' : '全场满 $50 包邮 · 7 天无理由退换'}
-      />
+      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
       <ShopHeader
-        brand={{ name: t.brand.name, slogan: t.brand.slogan }}
-        navItems={isEn ? NAV_ITEMS_EN : NAV_ITEMS_ZH}
-        active="orders"
-        currencyOptions={CURRENCY_OPTIONS}
-        currency="USD"
-        onCurrencyChange={() => {}}
-        langOptions={[{ code: 'zh', label: '中文' }, { code: 'en', label: 'EN' }]}
-        lang={locale}
-        onLangChange={(l) => setLocale(l as Locale)}
+        brand={chrome.brand}
+        navItems={chrome.navItems}
+        active={chrome.active}
+        currencyOptions={chrome.currencyOptions}
+        currency={chrome.currency}
+        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+        langOptions={chrome.langOptions}
+        lang={chrome.lang}
+        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">

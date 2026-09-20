@@ -145,6 +145,20 @@ export const COPY_EN = {
     removed: 'Removed',
     freeShippingNote: 'Free shipping',
     shippingFee: '$5.00',
+    shippingLabel: 'Shipping',
+    qtyDecLabel: 'Decrease quantity',
+    qtyIncLabel: 'Increase quantity',
+  },
+
+  search: {
+    title: 'Search results',
+    subCount: (n: number, q: string) => `${n} items match “${q}”`,
+    subEmpty: (q: string) => `No items match “${q}”`,
+    suggest: 'Try other keywords, or head back home to keep browsing',
+    clear: 'Clear',
+    backHome: 'Back to home',
+    hot: 'Popular searches',
+    hotTags: ['Laptops', 'Earbuds', 'Robot vacuums', 'Smart watches', 'Humidifiers'],
   },
 
   orders: {
@@ -195,6 +209,7 @@ export const COPY_EN = {
     settings: 'Settings',
     logout: 'Sign out',
     memberSince: 'Member since',
+    goLogin: 'Sign in',
   },
 
   auth: {
@@ -212,6 +227,12 @@ export const COPY_EN = {
     welcomeBack: (name: string) => `Welcome, ${name}`,
     rememberMe: 'Remember me',
     forgotPassword: 'Forgot password?',
+    announce: 'Sign in for member pricing · Track order history anytime',
+    loginErrorShort: 'Password must be at least 6 characters',
+    registerErrorShort: 'Password must be at least 6 characters',
+    loginErrorGeneric: 'Sign in failed',
+    registerErrorGeneric: 'Registration failed',
+    loggedInAs: (email: string, at: string) => `Signed in as ${email} · since ${at}`,
   },
 
   label: {

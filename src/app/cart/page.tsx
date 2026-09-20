@@ -6,38 +6,22 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
-  type CurrencyCode,
 } from '@/components/peak-mall';
-import { usePeakStore, type Locale } from '@/lib/store';
+import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
-import { useEffect, useState } from 'react';
-
-const NAV_ITEMS_ZH = [
-  { key: 'home', label: '首页' },
-  { key: 'orders', label: '我的订单' },
-];
-const NAV_ITEMS_EN = [
-  { key: 'home', label: 'Home' },
-  { key: 'orders', label: 'My orders' },
-];
-
-const CURRENCY_OPTIONS = [{ code: 'USD' as CurrencyCode, label: 'USD' }];
+import { usePageChrome } from '@/lib/page-nav';
+import { useState } from 'react';
 
 export default function CartPage() {
   const router = useRouter();
   const t = useT();
+  const chrome = usePageChrome('cart');
   const cart = usePeakStore((s) => s.cart);
   const updateQty = usePeakStore((s) => s.updateQty);
   const remove = usePeakStore((s) => s.removeFromCart);
   const clear = usePeakStore((s) => s.clearCart);
   const placeOrder = usePeakStore((s) => s.placeOrder);
-  const locale = usePeakStore((s) => s.locale);
-  const setLocale = usePeakStore((s) => s.setLocale);
   const [msg, setMsg] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const isEn = mounted && locale === 'en';
 
   const total = cart.reduce((sum, c) => sum + c.price * c.qty, 0);
   const itemCount = cart.reduce((sum, c) => sum + c.qty, 0);
@@ -52,20 +36,17 @@ export default function CartPage() {
 
   return (
     <>
-      <AnnouncementBar
-        tag={isEn ? 'Notice' : '公告'}
-        text={isEn ? 'Free shipping over $50 · 7-day no-reason returns' : '全场满 $50 包邮 · 7 天无理由退换'}
-      />
+      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
       <ShopHeader
-        brand={{ name: t.brand.name, slogan: t.brand.slogan }}
-        navItems={isEn ? NAV_ITEMS_EN : NAV_ITEMS_ZH}
-        active="home"
-        currencyOptions={CURRENCY_OPTIONS}
-        currency="USD"
-        onCurrencyChange={() => {}}
-        langOptions={[{ code: 'zh', label: '中文' }, { code: 'en', label: 'EN' }]}
-        lang={locale}
-        onLangChange={(l) => setLocale(l as Locale)}
+        brand={chrome.brand}
+        navItems={chrome.navItems}
+        active={chrome.active}
+        currencyOptions={chrome.currencyOptions}
+        currency={chrome.currency}
+        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+        langOptions={chrome.langOptions}
+        lang={chrome.lang}
+        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
@@ -124,13 +105,13 @@ export default function CartPage() {
                         onClick={() => updateQty(item.id, item.qty - 1)}
                         disabled={item.qty <= 1}
                         className="w-9 h-9 hover:bg-ink-50 text-[14px] disabled:opacity-40"
-                        aria-label="减少"
+                        aria-label={t.cart.qtyDecLabel}
                       >−</button>
                       <span className="w-10 text-center text-[13.5px] font-semibold">{item.qty}</span>
                       <button
                         onClick={() => updateQty(item.id, item.qty + 1)}
                         className="w-9 h-9 hover:bg-ink-50 text-[14px]"
-                        aria-label="增加"
+                        aria-label={t.cart.qtyIncLabel}
                       >+</button>
                     </div>
                   </div>
@@ -154,8 +135,8 @@ export default function CartPage() {
                   <span>${total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-ink-600">
-                  <span>运费</span>
-                  <span className="text-emerald-700 font-semibold">{total >= 50 ? '免运费' : '$5.00'}</span>
+                  <span>{t.cart.shippingLabel}</span>
+                  <span className="text-emerald-700 font-semibold">{total >= 50 ? t.cart.freeShippingNote : t.cart.shippingFee}</span>
                 </div>
                 <div className="border-t border-ink-100 pt-2.5 flex justify-between text-[16px] font-extrabold text-ink-900">
                   <span>{t.cart.total}</span>

@@ -6,41 +6,36 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
-  type CurrencyCode,
 } from '@/components/peak-mall';
 import { usePeakStore } from '@/lib/store';
-import { COPY } from '@/lib/copy';
-
-const NAV_ITEMS = [
-  { key: 'home', label: '首页' },
-  { key: 'orders', label: '我的订单' },
-];
-
-const CURRENCY_OPTIONS = [{ code: 'USD' as CurrencyCode, label: 'USD 美元' }];
+import { useT } from '@/lib/use-t';
+import { usePageChrome } from '@/lib/page-nav';
 
 export default function ProfilePage() {
   const router = useRouter();
+  const t = useT();
+  const chrome = usePageChrome('profile');
   const cartCount = usePeakStore((s) => s.cart.reduce((sum, c) => sum + c.qty, 0));
   const wishCount = usePeakStore((s) => s.wishlist.length);
   const orderCount = usePeakStore((s) => s.orders.length);
 
   return (
     <>
-      <AnnouncementBar tag="公告" text="全场满 $50 包邮 · 7 天无理由退换" />
+      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
       <ShopHeader
-        brand={{ name: COPY.brand.name, slogan: COPY.brand.slogan }}
-        navItems={NAV_ITEMS}
-        active="home"
-        currencyOptions={CURRENCY_OPTIONS}
-        currency="USD"
-        onCurrencyChange={() => {}}
-        langOptions={[{ code: 'zh', label: '中文' }, { code: 'en', label: 'EN' }]}
-        lang="zh"
-        onLangChange={() => {}}
+        brand={chrome.brand}
+        navItems={chrome.navItems}
+        active={chrome.active}
+        currencyOptions={chrome.currencyOptions}
+        currency={chrome.currency}
+        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
+        langOptions={chrome.langOptions}
+        lang={chrome.lang}
+        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{COPY.profile.title}</h1>
+        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.profile.title}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Sidebar / stats */}
@@ -50,16 +45,16 @@ export default function ProfilePage() {
                 👤
               </div>
               <div>
-                <div className="text-[15px] font-bold">访客用户</div>
-                <div className="text-[11.5px] opacity-80 mt-0.5">{COPY.profile.memberSince}: 2026</div>
+                <div className="text-[15px] font-bold">{chrome.isEn ? 'Guest user' : '访客用户'}</div>
+                <div className="text-[11.5px] opacity-80 mt-0.5">{t.profile.memberSince}: 2026</div>
               </div>
             </div>
-            <p className="text-[13px] opacity-90 leading-relaxed mb-5">{COPY.profile.notLoggedIn}</p>
+            <p className="text-[13px] opacity-90 leading-relaxed mb-5">{t.profile.notLoggedIn}</p>
             <button
               onClick={() => router.push('/login')}
               className="w-full py-2.5 bg-white text-orange-700 text-[13px] font-extrabold rounded-md hover:bg-ink-50 transition-colors"
             >
-              {COPY.profile.goLogin} →
+              {chrome.isEn ? 'Sign in' : t.profile.goLogin} →
             </button>
           </aside>
 
@@ -69,26 +64,26 @@ export default function ProfilePage() {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-xl p-4 border border-ink-100 text-center">
                 <div className="text-[28px] font-extrabold text-orange-700">{orderCount}</div>
-                <div className="text-[11.5px] text-ink-500 mt-0.5">{COPY.profile.myOrders}</div>
+                <div className="text-[11.5px] text-ink-500 mt-0.5">{t.profile.myOrders}</div>
               </div>
               <div className="bg-white rounded-xl p-4 border border-ink-100 text-center">
                 <div className="text-[28px] font-extrabold text-rose-700">{wishCount}</div>
-                <div className="text-[11.5px] text-ink-500 mt-0.5">{COPY.profile.myWishlist}</div>
+                <div className="text-[11.5px] text-ink-500 mt-0.5">{t.profile.myWishlist}</div>
               </div>
               <div className="bg-white rounded-xl p-4 border border-ink-100 text-center">
                 <div className="text-[28px] font-extrabold text-accent-teal">{cartCount}</div>
-                <div className="text-[11.5px] text-ink-500 mt-0.5">{COPY.profile.cart}</div>
+                <div className="text-[11.5px] text-ink-500 mt-0.5">{t.profile.cart}</div>
               </div>
             </div>
 
             {/* Quick links */}
-            <div className="bg-white rounded-xl border border-ink-100 overflow-hidden">
-              <div className="px-5 py-3 border-b border-ink-100 text-[13px] font-bold text-ink-900">{COPY.profile.quickLinks}</div>
+            <section aria-labelledby="profile-quicklinks-heading" className="bg-white rounded-xl border border-ink-100 overflow-hidden">
+              <h2 id="profile-quicklinks-heading" className="px-5 py-3 border-b border-ink-100 text-[13px] font-bold text-ink-900">{t.profile.quickLinks}</h2>
               {[
-                { label: COPY.profile.myOrders, path: '/orders', emoji: '📦', hint: `${orderCount}` },
-                { label: COPY.profile.myWishlist, path: '/wishlist', emoji: '♡', hint: `${wishCount}` },
-                { label: COPY.profile.cart, path: '/cart', emoji: '🛒', hint: `${cartCount}` },
-                { label: COPY.profile.settings, path: '#', emoji: '⚙️', hint: '' },
+                { label: t.profile.myOrders, path: '/orders', emoji: '📦', hint: `${orderCount}` },
+                { label: t.profile.myWishlist, path: '/wishlist', emoji: '♡', hint: `${wishCount}` },
+                { label: t.profile.cart, path: '/cart', emoji: '🛒', hint: `${cartCount}` },
+                { label: t.profile.settings, path: '#', emoji: '⚙️', hint: '' },
               ].map((l, i) => (
                 <button
                   key={i}
@@ -101,7 +96,7 @@ export default function ProfilePage() {
                   <span className="text-ink-300">→</span>
                 </button>
               ))}
-            </div>
+            </section>
           </div>
         </div>
       </main>

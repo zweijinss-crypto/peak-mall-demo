@@ -1,13 +1,11 @@
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import { COPY } from '@/lib/copy';
+'use client';
 
-export const metadata: Metadata = {
-  title: '404 · 页面不存在 — Peak Mall',
-  description: '你访问的页面不存在,看看热卖榜也不错。',
-};
+import Link from 'next/link';
+import { useT } from '@/lib/use-t';
 
 export default function NotFound() {
+  const t = useT();
+
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-ink-50 via-white to-primary-50/30 flex items-center justify-center px-5 py-16">
       <div className="relative max-w-[680px] w-full">
@@ -24,15 +22,15 @@ export default function NotFound() {
               <span className="text-gradient-orange">4</span>
             </div>
             <div className="mt-2 text-[11px] font-extrabold tracking-[4px] uppercase text-ink-500">
-              {COPY.notFound.eyebrow}
+              {t.notFound.eyebrow}
             </div>
           </div>
 
           <h1 className="text-[28px] md:text-[36px] font-extrabold text-ink-900 leading-tight mb-3">
-            {COPY.notFound.title}
+            {t.notFound.title}
           </h1>
           <p className="text-[15px] md:text-[16px] text-ink-700 leading-[1.7] max-w-[480px] mx-auto mb-8">
-            {COPY.notFound.desc}
+            {t.notFound.desc}
           </p>
 
           {/* CTAs */}
@@ -44,13 +42,13 @@ export default function NotFound() {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M13 8H3M3 8l4-4M3 8l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              {COPY.notFound.home}
+              {t.notFound.home}
             </Link>
             <Link
               href="/shop/49"
               className="inline-flex items-center gap-2 bg-ink-50 hover:bg-ink-100 border border-ink-200 text-ink-900 px-6 py-3 text-[14px] font-bold tracking-wide rounded-md transition-all hover:-translate-y-0.5"
             >
-              {COPY.notFound.hot}
+              {t.notFound.hot}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -59,13 +57,13 @@ export default function NotFound() {
 
           {/* Quote */}
           <blockquote className="text-[13px] text-ink-700 italic leading-[1.7] border-t border-ink-100 pt-5 max-w-[440px] mx-auto">
-            &ldquo;{COPY.notFound.quote}&rdquo;
-            <footer className="mt-2 text-[11.5px] text-ink-500 not-italic">{COPY.notFound.quoteBy}</footer>
+            &ldquo;{t.notFound.quote}&rdquo;
+            <footer className="mt-2 text-[11.5px] text-ink-500 not-italic">{t.notFound.quoteBy}</footer>
           </blockquote>
 
           {/* Code */}
           <div className="mt-6 text-[10.5px] font-mono tracking-[2px] uppercase text-ink-500">
-            {COPY.notFound.code} · 404 / NOT_FOUND
+            {t.notFound.code} · 404 / NOT_FOUND
           </div>
         </div>
       </div>

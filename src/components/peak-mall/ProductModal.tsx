@@ -45,7 +45,7 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
           ✕
         </button>
 
-        <h3 className="text-[18px] font-bold mb-3.5">{product.name}</h3>
+        <h2 className="text-[18px] font-bold mb-3.5">{product.name}</h2>
 
         <div className="w-full aspect-square bg-neutral-100 rounded-[10px] flex items-center justify-center text-[120px] overflow-hidden mb-3.5">
           {isCoverUrl && !imgErr ? (

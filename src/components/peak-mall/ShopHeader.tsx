@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import type {
   BrandInfo,
   CurrencyOption,
@@ -22,6 +22,12 @@ export interface ShopHeaderProps {
   langOptions?: LangOption[];
   lang?: LangCode;
   onLangChange?: (code: LangCode) => void;
+  /** Search input placeholder (locale-aware). */
+  searchPlaceholder?: string;
+  /** Search submit handler. Defaults to router.push('/search?q=...'). */
+  onSearch?: (query: string) => void;
+  /** Initial search value (e.g. pre-fill on /search?q=foo). */
+  initialQuery?: string;
 }
 
 const DEFAULT_NAV: NavItem[] = [
@@ -63,10 +69,23 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   langOptions = DEFAULT_LANG,
   lang,
   onLangChange,
+  searchPlaceholder = COPY.hero.searchPlaceholder,
+  onSearch,
+  initialQuery = '',
 }) => {
   const router = useRouter();
   const cartCount = usePeakStore((s) => s.cart.reduce((sum, c) => sum + c.qty, 0));
   const wishCount = usePeakStore((s) => s.wishlist.length);
+  const [q, setQ] = useState(initialQuery);
+  useEffect(() => setQ(initialQuery), [initialQuery]);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    if (onSearch) onSearch(trimmed);
+    else router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+  };
   return (
     <>
       {/* 顶部细条 */}
@@ -135,6 +154,33 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             </div>
           </div>
 
+          {/* Search */}
+          <form
+            role="search"
+            onSubmit={submit}
+            className="hidden md:flex flex-1 max-w-[480px] items-center gap-2 px-3.5 h-[40px] bg-neutral-50 border border-neutral-200 rounded-full focus-within:border-orange-500 focus-within:bg-white transition-colors"
+          >
+            <span aria-hidden="true" className="text-[15px] text-neutral-500">🔍</span>
+            <label htmlFor="peak-mall-search" className="sr-only">
+              {searchPlaceholder}
+            </label>
+            <input
+              id="peak-mall-search"
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="flex-1 bg-transparent outline-none text-[13.5px] placeholder:text-neutral-400"
+            />
+            <button
+              type="submit"
+              className="px-3 py-1.5 text-[12px] font-bold text-white bg-orange-700 hover:bg-orange-800 rounded-full transition-colors"
+              aria-label="Search"
+            >
+              {lang === 'en' ? 'Go' : '搜索'}
+            </button>
+          </form>
+
           <nav className="hidden md:flex items-center gap-1 flex-1">
             {navItems
               .filter((n) => !n.top)
@@ -160,7 +206,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
           </nav>
 
           {/* Cart + Wish icons */}
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-1 ml-auto">
             <button
               onClick={() => router.push('/wishlist')}
               aria-label={`${COPY.footer.wishlist} (${wishCount})`}
