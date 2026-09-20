@@ -83,12 +83,17 @@ function randomAuthCode(rng: () => number): string {
 }
 
 /**
- * 生成 16 个订单,每个订单带一个 PaymentRecord。
+ * 生成 16 个订单，每个订单带一个 PaymentRecord。
  * 使用种子 42 保证刷新页面数据稳定。
+ * createdAt 用固定 epoch (2026-09-19T00:00:00Z) 而不是 Date.now()，
+ * 这样 order id（createdAt.toString(36) 部分）跨 build 保持一致，
+ * /orders/[id] 这种动态路由的 generateStaticParams 不会摇到。
  */
+const FIXED_NOW = Date.UTC(2026, 8, 19, 0, 0, 0); // 2026-09-19T00:00:00Z (month is 0-indexed)
+
 export function buildDemoOrders(): Order[] {
   const rng = mulberry32(42);
-  const now = Date.now();
+  const now = FIXED_NOW;
   const orders: Order[] = [];
 
   // 用 16 个商品作为订单骨架
