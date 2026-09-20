@@ -540,6 +540,19 @@ export const COPY_EN = {
     statusCompleted: 'Completed',
     submitted: 'Withdraw request submitted',
     minAmount: 'Minimum withdraw is $10',
+    /** C1: fund password modal */
+    fundPwdPrompt: 'Enter your fund password',
+    fundPwdHint: '6 digits, used for withdrawals',
+    fundPwdWrong: 'Wrong fund password — try again',
+    fundPwdForgot: 'Forgot it?',
+    cancel: 'Cancel',
+    confirm: 'Confirm withdraw',
+    /** C2: fee preview */
+    fee: 'Fee',
+    feeRate: '(2% rate)',
+    actualReceive: 'You receive',
+    feeHint: 'Minimum $10. You receive = amount − fee',
+    insufficientBalance: 'Insufficient available balance',
   },
   withdrawAddress: {
     title: 'Payout addresses',

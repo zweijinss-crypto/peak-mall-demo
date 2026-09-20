@@ -651,6 +651,19 @@ export const COPY = {
     statusCompleted: '已完成',
     submitted: '提现申请已提交',
     minAmount: '最低提现金额 $10',
+    /** C1: 资金密码 modal */
+    fundPwdPrompt: '请输入资金密码',
+    fundPwdHint: '6 位数字,用于提现校验',
+    fundPwdWrong: '资金密码错误,请重试',
+    fundPwdForgot: '忘记密码?',
+    cancel: '取消',
+    confirm: '确认提现',
+    /** C2: 手续费预览 */
+    fee: '手续费',
+    feeRate: '(费率 2%)',
+    actualReceive: '实际到账',
+    feeHint: '最低 $10,实际到账 = 提现金额 - 手续费',
+    insufficientBalance: '可提现余额不足',
   },
   withdrawAddress: {
     title: '绑定提现地址',
