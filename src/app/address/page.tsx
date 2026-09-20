@@ -41,6 +41,10 @@ export default function AddressPage() {
   const [editing, setEditing] = useState<Omit<Address, 'id'> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  /** D2: 删除确认 modal — pendingId = 待删除地址 id, null = 关闭 */
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [deleteFlash, setDeleteFlash] = useState<string | null>(null);
+
   useEffect(() => {
     setList(loadAddrs());
   }, []);
@@ -89,8 +93,16 @@ export default function AddressPage() {
     cancel();
   };
   const remove = (id: string) => {
-    if (!confirm(cp.address.removeConfirm as string)) return;
-    persist(list.filter((a) => a.id !== id));
+    setPendingDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    const next = list.filter((a) => a.id !== pendingDelete);
+    persist(next);
+    setDeleteFlash(t.address.removed ?? '已删除');
+    setPendingDelete(null);
+    window.setTimeout(() => setDeleteFlash(null), 1800);
   };
   const setDefault = (id: string) => {
     persist(list.map((a) => ({ ...a, isDefault: a.id === id })));
@@ -182,6 +194,51 @@ export default function AddressPage() {
             </div>
           </div>
         ) : null}
+
+        {/* D2: 删除确认 modal */}
+        {pendingDelete && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delAddrTitle"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+            onClick={(e) => { if (e.target === e.currentTarget) setPendingDelete(null); }}
+          >
+            <div className="bg-white rounded-2xl w-full max-w-[400px] p-6 shadow-float">
+              <div className="text-[28px] mb-2" aria-hidden="true">🗑️</div>
+              <h3 id="delAddrTitle" className="text-[18px] font-extrabold text-ink-900 mb-1.5">
+                {t.address.removeConfirm}
+              </h3>
+              <p className="text-[12.5px] text-ink-500 mb-5">
+                {t.address.removeHint ?? '该地址将从你的收货地址簿中移除,此操作不可撤销。'}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPendingDelete(null)}
+                  className="flex-1 py-2.5 border border-ink-200 text-ink-700 hover:bg-ink-50 text-[13.5px] font-bold rounded-md transition-colors"
+                >
+                  {t.address.cancel}
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[13.5px] font-bold rounded-md transition-colors"
+                >
+                  {t.address.remove}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* D2: 删除成功 toast */}
+        {deleteFlash && (
+          <div
+            role="status"
+            className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold animate-fade-up z-50"
+          >
+            ✓ {deleteFlash}
+          </div>
+        )}
 
         {list.length === 0 ? (
           <div className="bg-white rounded-xl py-14 text-center border border-ink-100">

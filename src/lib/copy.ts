@@ -443,6 +443,8 @@ export const COPY = {
     save: '保存',
     cancel: '取消',
     removeConfirm: '确定删除该地址吗?',
+    removeHint: '该地址将从你的收货地址簿中移除,此操作不可撤销。',
+    removed: '地址已删除',
   },
   checkout: {
     title: '确认订单',

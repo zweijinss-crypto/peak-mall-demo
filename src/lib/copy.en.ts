@@ -332,6 +332,8 @@ export const COPY_EN = {
     save: 'Save',
     cancel: 'Cancel',
     removeConfirm: 'Remove this address?',
+    removeHint: 'This address will be removed from your address book. This cannot be undone.',
+    removed: 'Address removed',
   },
   checkout: {
     title: 'Confirm order',
