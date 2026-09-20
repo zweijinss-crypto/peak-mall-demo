@@ -10,19 +10,26 @@ import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
-type QuickItem = { labelZh: string; labelEn: string; path: string; emoji: string; group: 'orders' | 'account' | 'wallet' };
+type QuickItem = {
+  labelZh: string;
+  labelEn: string;
+  path: string;
+  emoji: string;
+  group: 'orders' | 'account' | 'wallet';
+  countKey?: 'orders' | 'cart' | 'wishlist' | 'balance';
+};
 
 function buildQuickItems(t: ReturnType<typeof useT>): QuickItem[] {
   return [
-    { group: 'orders', labelZh: t.profile.myOrders, labelEn: 'My orders', path: '/orders', emoji: '📦' },
-    { group: 'orders', labelZh: t.profile.cart, labelEn: 'Cart', path: '/cart', emoji: '🛒' },
-    { group: 'orders', labelZh: t.profile.myWishlist, labelEn: 'Wishlist', path: '/wishlist', emoji: '♡' },
+    { group: 'orders', labelZh: t.profile.myOrders, labelEn: 'My orders', path: '/orders', emoji: '📦', countKey: 'orders' },
+    { group: 'orders', labelZh: t.profile.cart, labelEn: 'Cart', path: '/cart', emoji: '🛒', countKey: 'cart' },
+    { group: 'orders', labelZh: t.profile.myWishlist, labelEn: 'Wishlist', path: '/wishlist', emoji: '♡', countKey: 'wishlist' },
     { group: 'orders', labelZh: '售后记录', labelEn: 'After-sales', path: '/ref-peak-mall', emoji: '🛠' },
     { group: 'account', labelZh: t.security.changePassword, labelEn: 'Change password', path: '/security/password', emoji: '🔑' },
     { group: 'account', labelZh: t.security.changeFundPassword, labelEn: 'Fund password', path: '/security/fund-password', emoji: '🔒' },
     { group: 'account', labelZh: '收货地址', labelEn: 'Addresses', path: '/address', emoji: '📍' },
     { group: 'account', labelZh: t.profile.settings, labelEn: 'Settings', path: '#', emoji: '⚙️' },
-    { group: 'wallet', labelZh: t.commissions.title, labelEn: 'Commissions', path: '/commissions', emoji: '📊' },
+    { group: 'wallet', labelZh: t.commissions.title, labelEn: 'Commissions', path: '/commissions', emoji: '📊', countKey: 'balance' },
     { group: 'wallet', labelZh: t.withdraw.title, labelEn: 'Withdraw', path: '/withdraw', emoji: '💳' },
     { group: 'wallet', labelZh: t.withdrawAddress.title, labelEn: 'Withdraw address', path: '/withdraw-address', emoji: '🏦' },
     { group: 'wallet', labelZh: t.team.title, labelEn: 'My team', path: '/team', emoji: '👥' },
@@ -89,26 +96,6 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* Stat row — inline strip, no card frames */}
-      <div className="grid grid-cols-4 bg-white border border-ink-100 divide-x divide-ink-100 mb-4">
-        <button onClick={() => router.push('/orders')} className="px-4 py-3 text-left hover:bg-ink-50 transition-colors">
-          <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-1">{t.profile.myOrders}</div>
-          <div className="text-[20px] font-bold text-ink-900 leading-none">{orderCount}</div>
-        </button>
-        <button onClick={() => router.push('/cart')} className="px-4 py-3 text-left hover:bg-ink-50 transition-colors">
-          <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-1">{t.profile.cart}</div>
-          <div className="text-[20px] font-bold text-ink-900 leading-none">{cartCount}</div>
-        </button>
-        <button onClick={() => router.push('/wishlist')} className="px-4 py-3 text-left hover:bg-ink-50 transition-colors">
-          <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-1">{t.profile.myWishlist}</div>
-          <div className="text-[20px] font-bold text-ink-900 leading-none">{wishCount}</div>
-        </button>
-        <button onClick={() => router.push('/commissions')} className="px-4 py-3 text-left hover:bg-ink-50 transition-colors">
-          <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 mb-1">{chrome.isEn ? 'Earnings' : '钱包余额'}</div>
-          <div className="text-[20px] font-bold text-ink-900 leading-none">$0.00</div>
-        </button>
-      </div>
-
       {/* Main 2-column: recent orders (narrow) + flat quick-links grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Recent orders — narrower, takes 1/3 on lg */}
@@ -171,20 +158,33 @@ export default function ProfilePage() {
                   {chrome.isEn ? GROUP_META[g].headingEn : GROUP_META[g].headingZh}
                 </h3>
                 <ul>
-                  {quickItems.filter((it) => it.group === g).map((it, i) => (
-                    <li key={i}>
-                      <button
-                        onClick={() => it.path !== '#' && router.push(it.path)}
-                        className="w-full flex items-center gap-2.5 py-2 text-left hover:text-orange-700 transition-colors group"
-                      >
-                        <span className="text-[15px]" aria-hidden="true">{it.emoji}</span>
-                        <span className="text-[12.5px] font-semibold text-ink-900 group-hover:text-orange-700 flex-1 truncate">
-                          {chrome.isEn ? it.labelEn : it.labelZh}
-                        </span>
-                        <span className="text-[11px] text-ink-400 group-hover:text-orange-700">→</span>
-                      </button>
-                    </li>
-                  ))}
+                  {quickItems.filter((it) => it.group === g).map((it, i) => {
+                    const badge =
+                      it.countKey === 'orders' ? (orderCount > 0 ? String(orderCount) : null) :
+                      it.countKey === 'cart' ? (cartCount > 0 ? String(cartCount) : null) :
+                      it.countKey === 'wishlist' ? (wishCount > 0 ? String(wishCount) : null) :
+                      it.countKey === 'balance' ? '$0.00' :
+                      null;
+                    return (
+                      <li key={i}>
+                        <button
+                          onClick={() => it.path !== '#' && router.push(it.path)}
+                          className="w-full flex items-center gap-2.5 py-2 text-left hover:text-orange-700 transition-colors group"
+                        >
+                          <span className="text-[15px]" aria-hidden="true">{it.emoji}</span>
+                          <span className="text-[12.5px] font-semibold text-ink-900 group-hover:text-orange-700 flex-1 truncate">
+                            {chrome.isEn ? it.labelEn : it.labelZh}
+                          </span>
+                          {badge && (
+                            <span className="text-[11px] font-bold text-ink-500 group-hover:text-orange-700 tabular-nums">
+                              {badge}
+                            </span>
+                          )}
+                          <span className="text-[11px] text-ink-400 group-hover:text-orange-700">→</span>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
