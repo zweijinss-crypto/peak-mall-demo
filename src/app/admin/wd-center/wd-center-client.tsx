@@ -51,10 +51,10 @@ export function WdCenterClient() {
           <h2 className="text-[14px] font-bold text-neutral-900 mb-3">{t.admin.wdCenter.apply}</h2>
           <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.wdCenter.balance}</label>
           <div className="text-[22px] font-extrabold text-orange-600 mb-3">{usd(1240.32)}</div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.wdCenter.amt}</label>
-          <input value={amt} onChange={(e) => setAmt(e.target.value)} type="number" className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] mb-3" />
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.wdCenter.colMethod}</label>
-          <select value={method} onChange={(e) => setMethod(e.target.value as any)} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] mb-3">
+          <label htmlFor="wd-amt" className="block text-[12px] text-neutral-600 mb-1">{t.admin.wdCenter.colAmt}</label>
+          <input id="wd-amt" value={amt} onChange={(e) => setAmt(e.target.value)} type="number" className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] mb-3" />
+          <label htmlFor="wd-method" className="block text-[12px] text-neutral-600 mb-1">{t.admin.wdCenter.colMethod}</label>
+          <select id="wd-method" value={method} onChange={(e) => setMethod(e.target.value as any)} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] mb-3">
             <option value="usdt_trc20">USDT-TRC20</option>
             <option value="card">Card</option>
           </select>

@@ -28,17 +28,17 @@ export function SupportClient() {
       <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.support.title}</h1>
       <div className="bg-white rounded-xl border border-neutral-200 p-5 space-y-3">
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.name}</label>
-          <input value={local.name} onChange={(e) => setLocal({ ...local, name: e.target.value })} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
+          <label htmlFor="sp-name" className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.name}</label>
+          <input id="sp-name" value={local.name} onChange={(e) => setLocal({ ...local, name: e.target.value })} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
         </div>
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.url}</label>
-          <input value={local.url} onChange={(e) => setLocal({ ...local, url: e.target.value })} placeholder={t.admin.support.phUrl} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
+          <label htmlFor="sp-url" className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.url}</label>
+          <input id="sp-url" value={local.url} onChange={(e) => setLocal({ ...local, url: e.target.value })} placeholder={t.admin.support.phUrl} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
           <div className="text-[11.5px] text-neutral-500 mt-1">{t.admin.support.hintUrl}</div>
         </div>
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.hours}</label>
-          <input value={local.hours} onChange={(e) => setLocal({ ...local, hours: e.target.value })} placeholder={t.admin.support.phHours} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
+          <label htmlFor="sp-hours" className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.hours}</label>
+          <input id="sp-hours" value={local.hours} onChange={(e) => setLocal({ ...local, hours: e.target.value })} placeholder={t.admin.support.phHours} className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px]" />
           <div className="text-[11.5px] text-neutral-500 mt-1">{t.admin.support.hintHours}</div>
         </div>
         <button onClick={save} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">{t.admin.support.save}</button>

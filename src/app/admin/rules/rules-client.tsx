@@ -28,12 +28,13 @@ export function RulesClient() {
       <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.rules.title}</h1>
       <div className="bg-white rounded-xl border border-neutral-200 p-5 space-y-3">
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.mode}</label>
-          <input value={t.admin.rules.modeVal} disabled className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] bg-neutral-50" />
+          <label htmlFor="rule-mode" className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.mode}</label>
+          <input id="rule-mode" value={t.admin.rules.modeVal} disabled className="w-full border border-neutral-200 rounded px-2 py-1.5 text-[13px] bg-neutral-50" />
         </div>
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.ownRate}</label>
+          <label htmlFor="rule-own-rate" className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.ownRate}</label>
           <input
+            id="rule-own-rate"
             type="number"
             value={local.rates[0] ?? 0}
             onChange={(e) => setLocal({ ...local, rates: [Number(e.target.value), ...local.rates.slice(1)] })}
@@ -41,8 +42,9 @@ export function RulesClient() {
           />
         </div>
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.minWd}</label>
+          <label htmlFor="rule-min-wd" className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.minWd}</label>
           <input
+            id="rule-min-wd"
             type="number"
             value={local.min_withdraw}
             onChange={(e) => setLocal({ ...local, min_withdraw: Number(e.target.value) })}
@@ -50,8 +52,9 @@ export function RulesClient() {
           />
         </div>
         <div>
-          <label className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.fee}</label>
+          <label htmlFor="rule-fee" className="block text-[12px] text-neutral-600 mb-1">{t.admin.rules.fee}</label>
           <input
+            id="rule-fee"
             type="number"
             value={local.withdraw_fee}
             onChange={(e) => setLocal({ ...local, withdraw_fee: Number(e.target.value) })}
