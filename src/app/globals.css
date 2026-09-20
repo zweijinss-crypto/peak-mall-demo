@@ -64,3 +64,28 @@ html, body {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(15,15,18,0.08), transparent);
 }
+
+/* ===== reference/peak-mall/ demo tokens (isolated to ref-peak-mall page) =====
+ * 来源:reference/peak-mall/analysis/design-tokens.js
+ * 仅作用于显式 var(--ref-*) 引用,不影响其他页面。
+ * 命名加 ref- 前缀避免与全局 utility 冲突。
+ */
+:root {
+  --ref-primary: #fd560f;
+  --ref-primary-d: #dc4a0c;
+  --ref-primary-l: #ff8a3d;
+  --ref-gray-50: #fafafa;
+  --ref-gray-100: #f5f5f5;
+  --ref-gray-200: #e5e5e5;
+  --ref-gray-300: #d4d4d4;
+  --ref-gray-400: #a3a3a3;
+  --ref-gray-500: #737373;
+  --ref-gray-600: #525252;
+  --ref-gray-700: #404040;
+  --ref-gray-800: #262626;
+  --ref-gray-900: #171717;
+  --ref-danger: #dc2626;
+  --ref-success: #16a34a;
+  --ref-warn: #ca8a04;
+  --ref-bg: #ffffff;
+}
