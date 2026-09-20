@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ADMIN_GROUPS, type AdminKey } from '@/lib/admin/sidebar';
 import { useT } from '@/lib/use-t';
 import { adminStore } from '@/lib/admin/fixtures';
+import { logout } from '@/lib/admin/auth';
 
 /**
  * AdminShell — shared layout chrome for every /admin/* page.
@@ -23,6 +24,11 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
       adminStore.reset();
       window.location.reload();
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = isEn ? '/en/admin/login' : '/admin/login';
   };
 
   return (
@@ -78,6 +84,13 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
               className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
             >
               ↻ {t.admin.resetData}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
+            >
+              ⎋ {t.admin.logout}
             </button>
           </div>
         </div>

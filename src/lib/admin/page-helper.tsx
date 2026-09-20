@@ -11,6 +11,7 @@
  */
 import { Suspense } from 'react';
 import { AdminShell } from '@/components/admin/AdminShell';
+import { AdminGate } from '@/components/admin/AdminGate';
 import type { AdminKey } from './sidebar';
 
 export function makeAdminPage(active: AdminKey, Client: React.ComponentType) {
@@ -18,7 +19,9 @@ export function makeAdminPage(active: AdminKey, Client: React.ComponentType) {
     return (
       <AdminShell active={active}>
         <Suspense fallback={<div className="text-neutral-500 text-[13px]">Loading…</div>}>
-          <Client />
+          <AdminGate>
+            <Client />
+          </AdminGate>
         </Suspense>
       </AdminShell>
     );
