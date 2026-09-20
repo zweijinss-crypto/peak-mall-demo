@@ -586,6 +586,17 @@ export const COPY_EN = {
     qty: 'Quantity',
     addSuccess: 'Added to cart',
     loginRequired: 'Please sign in first',
+    featuresLabel: 'Features',
+    specsLabel: 'Specifications',
+    reviewsLabel: 'Reviews',
+    shippingLabel: 'Shipping & returns',
+    inStockShort: 'In stock',
+    soldLabel: 'Sold',
+    skuLabel: 'SKU',
+    categoryLabel: 'Category',
+    addedOnLabel: 'Listed',
+    freeShipNote: 'Free worldwide shipping over $50 · 7-day no-reason returns',
+    reviewsSummary: (n: number) => `Based on ${n} verified buyer reviews`,
   },
 
   cookie: {
