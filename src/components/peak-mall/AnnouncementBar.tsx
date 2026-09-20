@@ -1,38 +1,52 @@
+'use client';
+
 import type { FC } from 'react';
+import { useT } from '@/lib/use-t';
 
 export interface AnnouncementBarProps {
-  /** 左侧小标签 (例如 "公告" / "Notice") */
+  /** Tag label (e.g. "Notice" / "公告"). */
   tag?: string;
-  /** 要滚动的整段文字 */
+  /** Scrolling text (single line). */
   text?: string;
-  /** CSS 动画时长,秒 */
+  /** CSS animation duration in seconds. */
   duration?: number;
 }
 
 /**
- * AnnouncementBar - 顶部滚动公告条 (参考源站 .roll)
+ * AnnouncementBar - Top scrolling notice bar (refer to source site .roll).
+ * Defaults are locale-aware via useT().
  */
 const AnnouncementBar: FC<AnnouncementBarProps> = ({
-  tag = '公告',
-  text = '新用户首单立享 8 折优惠 · 全场满 $50 包邮',
-  duration = 18,
+  tag,
+  text,
+  duration = 28,
 }) => {
+  const t = useT();
+  const finalTag = tag ?? t.announcement.defaultTag;
+  const finalText = text ?? t.announcement.defaultText;
+
   return (
-    <div className="bg-white border-b border-neutral-100 h-[44px] flex items-center overflow-hidden">
-      <div className="max-w-[1280px] mx-auto px-5 w-full flex items-center gap-3">
-        <span className="bg-orange-100 text-orange-700 text-[11.5px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">
-          {tag}
+    <div className="bg-orange-50 border-b border-orange-100 text-[12.5px] text-orange-900 overflow-hidden">
+      <div className="max-w-[1280px] mx-auto px-5 h-9 flex items-center gap-4">
+        <span className="px-2.5 py-0.5 bg-orange-700 text-white text-[10.5px] font-extrabold tracking-wider rounded">
+          {finalTag}
         </span>
-        <div className="flex-1 overflow-hidden whitespace-nowrap text-[13.5px] text-neutral-600 relative">
+        <div className="relative flex-1 overflow-hidden h-full flex items-center">
           <div
-            className="inline-block animate-[marquee_linear_infinite]"
+            className="absolute whitespace-nowrap animate-roll will-change-transform"
             style={{ animationDuration: `${duration}s` }}
           >
-            {text}　·　{text}
+            {finalText}　·　{finalText}　·　{finalText}
           </div>
-          <style>{`@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
         </div>
       </div>
+      <style>{`
+        @keyframes roll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .animate-roll { animation: roll linear infinite; }
+      `}</style>
     </div>
   );
 };

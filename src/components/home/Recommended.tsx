@@ -10,6 +10,7 @@ import {
   type Product,
 } from '@/components/peak-mall';
 import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface RecommendedProps {
   products: Product[];
@@ -31,11 +32,13 @@ const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
  */
 const Recommended: FC<RecommendedProps> = ({ products, categories, currency }) => {
   const router = useRouter();
-  const [active, setActive] = useState(categories[0] ?? '全部');
+  const t = useT();
+  const allLabel = t.nav.all;
+  const [active, setActive] = useState(categories[0] ?? allLabel);
   const [sort, setSort] = useState<SortKey>('default');
 
   const filtered = useMemo(() => {
-    let arr = active === '全部' || active === 'All'
+    let arr = active === allLabel
       ? products
       : products.filter((p) => p.category === active);
     arr = [...arr].sort((a, b) => {

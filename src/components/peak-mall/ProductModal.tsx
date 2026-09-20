@@ -1,6 +1,7 @@
 import { useState, type FC, type MouseEvent } from 'react';
 import type { CurrencyCode, Product } from './types';
 import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 export interface ProductModalProps {
   product: Product | null;
@@ -20,6 +21,7 @@ function currencySymbol(c: CurrencyCode): string {
  * ProductModal - 商品详情弹窗 (参考源站 .modal-mask)
  */
 const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD' }) => {
+  const t = useT();
   const [imgErr, setImgErr] = useState(false);
   if (!product) return null;
 
@@ -38,11 +40,11 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
     >
       <div className="bg-white rounded-[14px] p-6 w-[560px] max-w-[94vw] max-h-[88vh] overflow-auto relative">
         <button
-          aria-label="Close"
+          aria-label={t.modal.close}
           className="absolute top-3.5 right-4.5 text-[18px] text-neutral-400 hover:text-neutral-900 cursor-pointer"
           onClick={onClose}
         >
-          ✕
+          {t.modal.closeSymbol}
         </button>
 
         <h2 className="text-[18px] font-bold mb-3.5">{product.name}</h2>
@@ -56,7 +58,7 @@ const ProductModal: FC<ProductModalProps> = ({ product, onClose, currency = 'USD
               className="w-full h-full object-cover"
             />
           ) : (
-            '📦'
+            t.modal.coverEmoji
           )}
         </div>
 

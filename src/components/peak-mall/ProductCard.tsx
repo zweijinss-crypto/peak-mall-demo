@@ -4,6 +4,7 @@ import { useState, type FC } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CurrencyCode, Product } from './types';
 import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
 
 export interface ProductCardProps {
@@ -14,6 +15,7 @@ export interface ProductCardProps {
 
 const COVER_EMOJI = '📦';
 
+
 const SYMBOLS: Record<CurrencyCode, string> = {
   USD: '$', CNY: '¥', EUR: '€', GBP: '£', JPY: '¥', KRW: '₩', AUD: 'A$', CAD: 'C$',
 };
@@ -23,6 +25,7 @@ function currencySymbol(c: CurrencyCode): string {
 }
 
 const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' }) => {
+  const t = useT();
   const router = useRouter();
   const [imgErr, setImgErr] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -82,14 +85,14 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
               : 'bg-white/95 text-neutral-700 hover:bg-orange-500 hover:text-white'
           }`}
         >
-          {isWished ? '♥' : '♡'}
+          {isWished ? t.card.wishlistOn : t.card.wishlistOff}
         </button>
         <div className="absolute inset-x-0 bottom-0 flex opacity-0 group-hover:opacity-100 group-hover:bottom-0 -bottom-11 transition-all duration-200 z-[3]">
           <button
             className="flex-1 bg-neutral-900 text-white text-[12.5px] font-semibold py-3 border-r border-neutral-700 hover:bg-neutral-700 transition-colors duration-150"
             onClick={handleAdd}
           >
-            {justAdded ? '✓ 已加入' : COPY.cta.addToCart}
+            {justAdded ? t.card.addedToCart : COPY.cta.addToCart}
           </button>
           <button
             className="flex-1 bg-orange-700 text-white text-[12.5px] font-semibold py-3 hover:bg-orange-800 transition-colors duration-150"

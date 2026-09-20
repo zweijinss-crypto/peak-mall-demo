@@ -15,7 +15,58 @@ export const COPY = {
     name: '顶峰商城',
     slogan: 'PEAK MALL',
     intro: '全球优选 · 正品保障。28 国配送,7 天无理由退换。',
+    shortName: '顶峰',
   },
+
+  nav: {
+    home: '首页',
+    all: '全部',
+    new: '新品',
+    hot: '热卖',
+    orders: '我的订单',
+    after: '售后',
+    about: '关于',
+  },
+
+  currencyLabel: {
+    USD: 'USD 美元',
+    CNY: 'CNY 人民币',
+    EUR: 'EUR 欧元',
+    GBP: 'GBP 英镑',
+    JPY: 'JPY 日元',
+    KRW: 'KRW 韩元',
+    AUD: 'AUD 澳元',
+    CAD: 'CAD 加元',
+  },
+
+  langLabel: { zh: '中文', en: 'EN' },
+
+  header: {
+    welcome: '您好,欢迎来到顶峰',
+    login: '登录 / 注册',
+    searchAria: '站内搜索',
+    inputAria: '搜索商品',
+    submit: '搜索',
+    orderStatus: '订单状态',
+  },
+
+  announcement: {
+    defaultTag: '公告',
+    defaultText: '全场满 $50 包邮 · 7 天无理由退换',
+  },
+
+  card: {
+    wishlistOn: '♥',
+    wishlistOff: '♡',
+    addedToCart: '✓ 已加入',
+  },
+
+  modal: {
+    close: '关闭',
+    closeSymbol: '✕',
+    coverEmoji: '📦',
+  },
+
   auth: {
     hero: '欢迎来到顶峰',
     login: '登录账户',
@@ -89,6 +140,9 @@ export const COPY = {
     shipping: '配送说明',
     terms: '使用条款',
     privacy: '隐私政策',
+    account: '个人中心',
+    hours: (h: string) => `服务时间: ${h}`,
+    rights: '保留所有权利',
   },
   product: {
     spec: '规格参数',
@@ -160,6 +214,8 @@ export const COPY = {
     label: '品质专区',
     title: '两大精选系列',
     collection: '精选系列',
+    cat1: '数码电子',
+    cat2: '家用电器',
     b1Title: '数码旗舰专区',
     b1Sub: '从商务办公到日常娱乐,旗舰品质,全球优选',
     b1Bullets: ['商务本 · 旗舰性能', '智能穿戴 · 健康追踪', '音频 · 沉浸体验'],
@@ -274,6 +330,9 @@ export const COPY = {
     desc: '为了提供更好的浏览体验,我们使用 Cookie 记住你的偏好(如购物车、收藏、语言)。继续浏览即表示你同意这一点。',
     accept: '知道了',
     settings: '了解更多',
+    aria: 'Cookie 同意',
+    closeAria: '关闭',
+    emoji: '🍪',
   },
   notFound: {
     eyebrow: '404',

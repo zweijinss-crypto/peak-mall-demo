@@ -3,12 +3,14 @@
 import { useRouter } from 'next/navigation';
 import type { FC } from 'react';
 import { COPY } from '@/lib/copy';
+import { useT } from '@/lib/use-t';
 
 /**
  * Quality - 品质专区:双 banner 但加更多装饰元素 + hover 微动效 + 浮动装饰
  */
 const Quality: FC = () => {
   const router = useRouter();
+  const t = useT();
   const items = [
     {
       title: COPY.quality.b1Title,
@@ -18,7 +20,7 @@ const Quality: FC = () => {
       bg: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 60%, #4c1d95 100%)',
       accent: '#60a5fa',
       emoji: '💻',
-      path: '/?cat=' + encodeURIComponent('数码电子'),
+      path: '/?cat=' + encodeURIComponent(t.quality.cat1),
     },
     {
       title: COPY.quality.b2Title,
@@ -28,7 +30,7 @@ const Quality: FC = () => {
       bg: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 60%, #431407 100%)',
       accent: '#fb923c',
       emoji: '🤖',
-      path: '/?cat=' + encodeURIComponent('家用电器'),
+      path: '/?cat=' + encodeURIComponent(t.quality.cat2),
     },
   ];
 

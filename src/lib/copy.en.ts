@@ -14,15 +14,8 @@ export const COPY_EN = {
   brand: {
     name: 'Peak Mall',
     slogan: 'PEAK MALL',
-  },
-
-  cta: {
-    addToCart: 'Add to cart',
-    buyNow: 'Buy now',
-    backToHome: 'Back to home',
-    submit: 'Submit',
-    login: 'Sign in',
-    register: 'Create account',
+    shortName: 'Peak',
+    intro: 'Curated global finds · Authentic guaranteed. Ships to 28 countries · 7-day no-reason returns.',
   },
 
   nav: {
@@ -31,9 +24,66 @@ export const COPY_EN = {
     new: 'New',
     hot: 'Hot',
     orders: 'My orders',
+    after: 'After-sales',
+    about: 'About',
   },
 
-  announcement: 'New customers save 20% on first order · Free shipping over $50',
+  currencyLabel: {
+    USD: 'USD US Dollar',
+    CNY: 'CNY Yuan',
+    EUR: 'EUR Euro',
+    GBP: 'GBP Pound',
+    JPY: 'JPY Yen',
+    KRW: 'KRW Won',
+    AUD: 'AUD A Dollar',
+    CAD: 'CAD C Dollar',
+  },
+
+  langLabel: { zh: 'Chinese', en: 'EN' },
+
+  header: {
+    welcome: 'Welcome to Peak Mall',
+    login: 'Sign in / Register',
+    searchAria: 'Site search',
+    inputAria: 'Search products',
+    submit: 'Go',
+    orderStatus: 'Order status',
+  },
+
+  announcement: {
+    defaultTag: 'Notice',
+    defaultText: 'Free shipping over $50 · 7-day no-reason returns',
+  },
+
+  card: {
+    wishlistOn: '♥',
+    wishlistOff: '♡',
+    addedToCart: '✓ Added',
+  },
+
+  modal: {
+    close: 'Close',
+    closeSymbol: '✕',
+    coverEmoji: '📦',
+  },
+
+  cta: {
+    addToCart: 'Add to cart',
+    buyNow: 'Buy now',
+    viewDetail: 'View detail',
+    backToHome: 'Back to home',
+    goLogin: 'Sign in',
+    goRegister: 'Create account',
+    subscribe: 'Subscribe',
+    emailPh: 'Enter your email',
+    emailLabel: 'Email address',
+    label: 'Limited offer',
+    title: 'Subscribe for member deals',
+    sub: 'New users save more on first order · Weekly picks · Unsubscribe anytime',
+    success: 'Subscribed! Check your inbox for the welcome email.',
+    error: 'Please enter a valid email address.',
+    disclaimer: 'We respect your privacy. Unsubscribe anytime. See Privacy Policy.',
+  },
 
   hero: {
     h1: 'Curated global goods',
@@ -92,6 +142,8 @@ export const COPY_EN = {
     label: 'Quality zone',
     title: 'Two curated collections',
     collection: 'Collection',
+    cat1: 'Tech',
+    cat2: 'Home',
     b1Title: 'Tech flagship zone',
     b1Sub: 'From business to daily entertainment — flagship quality, global selection',
     b1Bullets: ['Business laptops · flagship performance', 'Smart wearables · health tracking', 'Audio · immersive experience'],
@@ -260,6 +312,9 @@ export const COPY_EN = {
     desc: 'For a better browsing experience, we use cookies to remember your preferences (cart, wishlist, language). Continuing means you agree.',
     accept: 'Got it',
     settings: 'Learn more',
+    aria: 'Cookie consent',
+    closeAria: 'close',
+    emoji: '🍪',
   },
 
   notFound: {
@@ -378,5 +433,8 @@ export const COPY_EN = {
     affiliate: 'Affiliate',
     copyright: 'All rights reserved',
     privacy: 'Privacy policy',
+    account: 'Account',
+    hours: (h: string) => `Hours: ${h}`,
+    rights: 'All rights reserved',
   },
 } as const;
