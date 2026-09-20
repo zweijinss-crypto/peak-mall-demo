@@ -440,6 +440,8 @@ export const COPY = {
     default: '默认',
     name: '收货人',
     phone: '手机号',
+    phonePh: '11 位手机号,如 13800001234',
+    phoneInvalid: '请输入有效的 11 位手机号(1[3-9] 开头)',
     region: '省市区',
     detail: '详细地址',
     save: '保存',

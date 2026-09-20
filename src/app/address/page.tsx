@@ -33,6 +33,11 @@ function saveAddrs(arr: Address[]) {
 
 const EMPTY: Omit<Address, 'id'> = { name: '', phone: '', region: '', detail: '', isDefault: false };
 
+/** D3: 中国大陆手机号验证 — 11 位数字,1[3-9] 开头 */
+function validatePhone(p: string): boolean {
+  return /^1[3-9]\d{9}$/.test(p.trim());
+}
+
 export default function AddressPage() {
   const t = useT();
   const cp = useT() as Record<string, any>;
@@ -40,6 +45,9 @@ export default function AddressPage() {
   const [list, setList] = useState<Address[]>([]);
   const [editing, setEditing] = useState<Omit<Address, 'id'> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  /** D3: phone 验证错误(仅当用户输入后显示) */
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   /** D2: 删除确认 modal — pendingId = 待删除地址 id, null = 关闭 */
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
@@ -57,18 +65,26 @@ export default function AddressPage() {
   const startAdd = () => {
     setEditing({ ...EMPTY, isDefault: list.length === 0 });
     setEditingId(null);
+    setPhoneError(null);
   };
   const startEdit = (a: Address) => {
     setEditing({ ...a });
     setEditingId(a.id);
+    setPhoneError(null);
   };
   const cancel = () => {
     setEditing(null);
     setEditingId(null);
+    setPhoneError(null);
   };
   const save = () => {
     if (!editing) return;
     if (!editing.name.trim() || !editing.phone.trim()) return;
+    if (!validatePhone(editing.phone)) {
+      setPhoneError(t.address.phoneInvalid);
+      return;
+    }
+    setPhoneError(null);
     if (editing.isDefault) {
       // ensure single default
       persist([
@@ -145,10 +161,34 @@ export default function AddressPage() {
               <label className="block">
                 <span className="block text-[13px] text-ink-600 mb-1.5">{t.address.phone} *</span>
                 <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={11}
                   value={editing.phone}
-                  onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-ink-200 rounded-md text-[14px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                    setEditing({ ...editing, phone: digits });
+                    // 实时验证 — 只在用户输过至少 1 位后报错
+                    if (digits.length > 0) {
+                      setPhoneError(validatePhone(digits) ? null : t.address.phoneInvalid);
+                    } else {
+                      setPhoneError(null);
+                    }
+                  }}
+                  placeholder={t.address.phonePh}
+                  aria-invalid={phoneError ? 'true' : 'false'}
+                  aria-describedby={phoneError ? 'phoneErr' : undefined}
+                  className={`w-full px-3 py-2.5 border rounded-md text-[14px] outline-none focus:ring-2 ${
+                    phoneError
+                      ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100'
+                      : 'border-ink-200 focus:border-orange-500 focus:ring-orange-100'
+                  }`}
                 />
+                {phoneError && (
+                  <span id="phoneErr" role="alert" className="block mt-1 text-[11.5px] text-rose-600">
+                    ⚠ {phoneError}
+                  </span>
+                )}
               </label>
               <label className="block md:col-span-2">
                 <span className="block text-[13px] text-ink-600 mb-1.5">{t.address.region}</span>

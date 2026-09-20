@@ -336,6 +336,9 @@ export const COPY_EN = {
     removeConfirm: 'Remove this address?',
     removeHint: 'This address will be removed from your address book. This cannot be undone.',
     removed: 'Address removed',
+    /** D3: phone validation */
+    phonePh: '11 digits, e.g. 13800001234',
+    phoneInvalid: 'Enter a valid 11-digit phone number (starts with 1[3-9])',
   },
   checkout: {
     title: 'Confirm order',
