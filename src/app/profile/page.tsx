@@ -144,13 +144,8 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* Quick links — single flat grid, grouped by column heading */}
+        {/* Functional grid — grouped by column heading */}
         <section className="bg-white border border-ink-100 overflow-hidden lg:col-span-2">
-          <div className="px-4 py-2.5 border-b border-ink-100">
-            <h2 className="text-[12px] font-bold text-ink-900">
-              {chrome.isEn ? 'Quick links' : '快捷入口'}
-            </h2>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 divide-x divide-ink-100">
             {groups.map((g) => (
               <div key={g} className="px-4 py-3">
