@@ -1,6 +1,7 @@
 'use client';
 
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 
 const STATUS_CLASS: Record<'open' | 'replied' | 'closed', string> = {
@@ -20,7 +21,7 @@ export function TicketsClient() {
 
   return (
     <div>
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.tickets.title}</h1>
+      <PageBanner title={t.admin.tickets.title} accent="emerald" />
       <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
         <table className="w-full text-[12.5px] min-w-[720px]">
           <thead className="bg-neutral-50 text-neutral-600">

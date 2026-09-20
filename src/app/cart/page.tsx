@@ -7,6 +7,7 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
+  PageBanner,
 } from '@/components/peak-mall';
 import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
@@ -45,16 +46,23 @@ export default function CartPage() {
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.cart.title}</h1>
+        <PageBanner
+          title={t.cart.title}
+          subtitle={chrome.isEn ? 'Review your items before checkout' : '结算前查看并调整商品'}
+          stats={[
+            { label: chrome.isEn ? 'Items' : '件数', value: itemCount },
+            { label: chrome.isEn ? 'Subtotal' : '小计', value: `$${total.toFixed(2)}`, tone: 'accent' as const },
+          ]}
+        />
 
         {cart.length === 0 ? (
-          <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
-            <div className="text-[64px] mb-4">🛒</div>
-            <div className="text-[18px] font-bold text-ink-900 mb-2">{t.cart.empty}</div>
-            <div className="text-[13.5px] text-ink-500 mb-6">{t.cart.emptyDesc}</div>
+          <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">🛒</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.cart.empty}</div>
+            <div className="text-[12px] text-ink-500 mb-5">{t.cart.emptyDesc}</div>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-orange-700 hover:bg-orange-800 text-white text-[14px] font-bold rounded-md transition-colors"
+              className="px-5 py-2.5 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors"
             >
               {t.cart.continue}
             </button>

@@ -5,6 +5,7 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
+  PageBanner,
 } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
@@ -73,41 +74,16 @@ export default function TeamPage() {
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <header className="mb-6">
-          <h1 className="text-[28px] font-extrabold text-ink-900 leading-tight">{t.team.title}</h1>
-          <p className="text-[13.5px] text-ink-500 mt-1.5">{t.team.subtitle}</p>
-        </header>
-
-        {/* Summary */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-5 border border-ink-100">
-            <div className="text-[12.5px] text-ink-500 mb-2">{t.team.level1}</div>
-            <div className="text-[26px] font-extrabold text-orange-700 leading-none">
-              {t.team.memberCount(levelCounts(1))}
-            </div>
-          </div>
-          <div className="bg-white rounded-xl p-5 border border-ink-100">
-            <div className="text-[12.5px] text-ink-500 mb-2">{t.team.level2}</div>
-            <div className="text-[26px] font-extrabold text-blue-700 leading-none">
-              {t.team.memberCount(levelCounts(2))}
-            </div>
-          </div>
-          <div className="bg-white rounded-xl p-5 border border-ink-100">
-            <div className="text-[12.5px] text-ink-500 mb-2">{t.team.level3}</div>
-            <div className="text-[26px] font-extrabold text-violet-700 leading-none">
-              {t.team.memberCount(levelCounts(3))}
-            </div>
-          </div>
-          <div className="bg-white rounded-xl p-5 border border-ink-100">
-            <div className="text-[12.5px] text-ink-500 mb-2">{t.team.totalCommission}</div>
-            <div className="text-[26px] font-extrabold text-emerald-700 leading-none">
-              ${totalCommission.toFixed(2)}
-            </div>
-            <div className="text-[11.5px] text-ink-500 mt-2">
-              {t.team.thisMonthCommission}: ${thisMonthCommission.toFixed(2)}
-            </div>
-          </div>
-        </section>
+        <PageBanner
+          title={t.team.title}
+          subtitle={t.team.subtitle}
+          stats={[
+            { label: t.team.level1, value: t.team.memberCount(levelCounts(1)), tone: 'accent' as const },
+            { label: t.team.level2, value: t.team.memberCount(levelCounts(2)) },
+            { label: t.team.level3, value: t.team.memberCount(levelCounts(3)) },
+            { label: t.team.totalCommission, value: `$${totalCommission.toFixed(2)}` },
+          ]}
+        />
 
         {/* Invite code */}
         <section className="bg-gradient-to-r from-orange-50 to-rose-50 border border-orange-200 rounded-xl p-5 md:p-6 mb-6">
@@ -138,10 +114,10 @@ export default function TeamPage() {
             {t.team.sectionMembers} · {MEMBERS.length}
           </h2>
           {MEMBERS.length === 0 ? (
-            <div className="px-5 py-16 text-center">
-              <div className="text-[48px] mb-3" aria-hidden="true">👥</div>
-              <div className="text-[15px] font-bold text-ink-900 mb-1">{t.team.empty}</div>
-              <div className="text-[13px] text-ink-500">{t.team.emptyDesc}</div>
+            <div className="px-5 py-10 text-center">
+              <div className="text-[40px] mb-3" aria-hidden="true">👥</div>
+              <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.team.empty}</div>
+              <div className="text-[12px] text-ink-500">{t.team.emptyDesc}</div>
             </div>
           ) : (
             <div className="overflow-x-auto">

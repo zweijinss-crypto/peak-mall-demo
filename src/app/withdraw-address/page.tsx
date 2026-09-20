@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { UserShell } from '@/components/peak-mall';
+import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
@@ -62,17 +62,24 @@ export default function WithdrawAddressPage() {
     <>
 
       <UserShell>
-        <div className="flex items-end justify-between mb-6">
-          <h1 className="text-[28px] font-extrabold text-ink-900">{t.withdrawAddress.title}</h1>
-          {!editing && (
-            <button
-              onClick={startAdd}
-              className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors"
-            >
-              + {t.withdrawAddress.addNew}
-            </button>
-          )}
-        </div>
+        <PageBanner
+          title={t.withdrawAddress.title}
+          subtitle={chrome.isEn ? 'Manage crypto and bank withdrawal addresses' : '管理加密货币与银行提现地址'}
+          stats={[
+            { label: chrome.isEn ? 'Total' : '总地址', value: list.length },
+            { label: chrome.isEn ? 'Default' : '默认', value: list.filter((a) => a.isDefault).length, tone: 'accent' as const },
+          ]}
+          trailing={
+            !editing ? (
+              <button
+                onClick={startAdd}
+                className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors flex-shrink-0"
+              >
+                + {t.withdrawAddress.addNew}
+              </button>
+            ) : undefined
+          }
+        />
 
         {editing ? (
           <div className="bg-white rounded-xl border border-ink-100 p-6 mb-6 max-w-[640px]">
@@ -132,10 +139,10 @@ export default function WithdrawAddressPage() {
         ) : null}
 
         {list.length === 0 ? (
-          <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
-            <div className="text-[64px] mb-4">🏦</div>
-            <div className="text-[18px] font-bold text-ink-900 mb-2">{t.withdrawAddress.empty}</div>
-            <div className="text-[13.5px] text-ink-500">{t.withdrawAddress.emptyDesc}</div>
+          <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">🏦</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.withdrawAddress.empty}</div>
+            <div className="text-[12px] text-ink-500">{t.withdrawAddress.emptyDesc}</div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { DEFAULT_SUPPORT } from '@/lib/admin/fixtures';
 
@@ -25,7 +26,7 @@ export function SupportClient() {
 
   return (
     <div className="max-w-[640px]">
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.support.title}</h1>
+      <PageBanner title={t.admin.support.title} accent="emerald" />
       <div className="bg-white rounded-xl border border-neutral-200 p-5 space-y-3">
         <div>
           <label htmlFor="sp-name" className="block text-[12px] text-neutral-600 mb-1">{t.admin.support.name}</label>

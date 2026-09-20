@@ -42,6 +42,7 @@ export { UserSidebar } from './UserSidebar';
 export type { UserSidebarProps } from './UserSidebar';
 
 export { UserShell } from './UserShell';
+export { PageBanner } from './PageBanner';
 
 export type {
   BannerItem,

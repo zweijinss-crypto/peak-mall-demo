@@ -46,26 +46,26 @@ export default function AboutPage() {
       <main>
         {/* Hero */}
         <section className="bg-gradient-to-br from-orange-500 via-orange-600 to-rose-600 text-white">
-          <div className="max-w-shell mx-auto px-5 py-16 md:py-24">
-            <div className="text-[12.5px] tracking-[2px] uppercase font-bold text-white/80 mb-3">
+          <div className="max-w-shell mx-auto px-5 py-12 md:py-20">
+            <div className="text-[11px] tracking-[1.5px] uppercase font-bold text-white/80 mb-2">
               {t.about.heroEyebrow}
             </div>
-            <h1 className="text-[40px] md:text-[56px] font-extrabold leading-tight tracking-tight mb-5 max-w-3xl">
+            <h1 className="text-[32px] md:text-[44px] font-extrabold leading-tight tracking-tight mb-4 max-w-3xl">
               {t.about.heroLead}
             </h1>
-            <p className="text-[16px] md:text-[17.5px] leading-relaxed text-white/90 max-w-2xl">
+            <p className="text-[14.5px] md:text-[16px] leading-relaxed text-white/90 max-w-2xl">
               {t.about.heroBody}
             </p>
           </div>
         </section>
 
         {/* Mission */}
-        <section className="max-w-shell mx-auto px-5 py-16">
+        <section className="max-w-shell mx-auto px-5 py-12">
           <div className="max-w-3xl">
-            <h2 className="text-[28px] md:text-[34px] font-extrabold text-ink-900 leading-tight mb-4">
+            <h2 className="text-[22px] md:text-[26px] font-extrabold text-ink-900 leading-tight mb-3">
               {t.about.missionTitle}
             </h2>
-            <p className="text-[16px] md:text-[18px] text-ink-700 leading-relaxed">
+            <p className="text-[15px] md:text-[16px] text-ink-700 leading-relaxed">
               {t.about.missionBody}
             </p>
           </div>
@@ -73,17 +73,17 @@ export default function AboutPage() {
 
         {/* Stats */}
         <section className="bg-ink-50 border-y border-ink-100">
-          <div className="max-w-shell mx-auto px-5 py-12 md:py-16">
-            <h2 className="text-[13px] tracking-[2px] uppercase font-bold text-ink-500 mb-8 text-center">
+          <div className="max-w-shell mx-auto px-5 py-10 md:py-14">
+            <h2 className="text-[11px] tracking-[1.5px] uppercase font-bold text-ink-500 mb-6 text-center">
               {t.about.statsTitle}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {STATS.map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="text-[36px] md:text-[44px] font-extrabold text-orange-700 leading-none mb-2">
+                  <div className="text-[28px] md:text-[36px] font-extrabold text-orange-700 leading-none mb-2">
                     {s.value}
                   </div>
-                  <div className="text-[13px] text-ink-600 font-medium">{s.label}</div>
+                  <div className="text-[12.5px] text-ink-600 font-medium">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -91,19 +91,19 @@ export default function AboutPage() {
         </section>
 
         {/* Four guarantees */}
-        <section className="max-w-shell mx-auto px-5 py-16">
-          <h2 className="text-[28px] md:text-[34px] font-extrabold text-ink-900 leading-tight mb-8 text-center">
+        <section className="max-w-shell mx-auto px-5 py-12">
+          <h2 className="text-[22px] md:text-[26px] font-extrabold text-ink-900 leading-tight mb-6 text-center">
             {t.about.promiseTitle}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {PROMISES.map((p) => (
               <div
                 key={p.title}
-                className="bg-white rounded-2xl p-6 border border-ink-100 hover:shadow-float hover:-translate-y-1 transition-all"
+                className="bg-white rounded-xl p-5 border border-ink-100 hover:border-ink-300 transition-colors"
               >
-                <div className="text-[40px] mb-3" aria-hidden="true">{p.icon}</div>
-                <h3 className="text-[16px] font-bold text-ink-900 mb-2">{p.title}</h3>
-                <p className="text-[13px] text-ink-600 leading-relaxed">{p.desc}</p>
+                <div className="text-[32px] mb-2.5" aria-hidden="true">{p.icon}</div>
+                <h3 className="text-[14.5px] font-bold text-ink-900 mb-1.5">{p.title}</h3>
+                <p className="text-[12.5px] text-ink-600 leading-relaxed">{p.desc}</p>
               </div>
             ))}
           </div>
@@ -111,15 +111,15 @@ export default function AboutPage() {
 
         {/* Team */}
         <section className="bg-ink-50 border-y border-ink-100">
-          <div className="max-w-shell mx-auto px-5 py-16">
+          <div className="max-w-shell mx-auto px-5 py-12">
             <div className="max-w-3xl">
-              <div className="text-[12.5px] tracking-[2px] uppercase font-bold text-ink-500 mb-3">
+              <div className="text-[11px] tracking-[1.5px] uppercase font-bold text-ink-500 mb-2">
                 {t.about.teamTitle}
               </div>
-              <h2 className="text-[28px] md:text-[34px] font-extrabold text-ink-900 leading-tight mb-4">
+              <h2 className="text-[22px] md:text-[26px] font-extrabold text-ink-900 leading-tight mb-3">
                 {t.about.teamLead}
               </h2>
-              <p className="text-[15px] md:text-[16.5px] text-ink-700 leading-relaxed">
+              <p className="text-[14.5px] md:text-[15.5px] text-ink-700 leading-relaxed">
                 {t.about.teamBody}
               </p>
             </div>
@@ -127,17 +127,17 @@ export default function AboutPage() {
         </section>
 
         {/* CTA */}
-        <section className="max-w-shell mx-auto px-5 py-16">
-          <div className="bg-white rounded-2xl border border-ink-100 p-8 md:p-12 text-center">
-            <h2 className="text-[24px] md:text-[30px] font-extrabold text-ink-900 mb-3">
+        <section className="max-w-shell mx-auto px-5 py-12">
+          <div className="bg-white rounded-xl border border-ink-100 p-7 md:p-10 text-center">
+            <h2 className="text-[20px] md:text-[24px] font-extrabold text-ink-900 mb-2.5">
               {t.about.ctaTitle}
             </h2>
-            <p className="text-[14.5px] text-ink-600 mb-6 max-w-xl mx-auto leading-relaxed">
+            <p className="text-[13.5px] text-ink-600 mb-5 max-w-xl mx-auto leading-relaxed">
               {t.about.ctaBody}
             </p>
             <button
               onClick={() => router.push('/')}
-              className="px-7 py-3 bg-orange-700 hover:bg-orange-800 text-white text-[14px] font-bold rounded-md transition-colors"
+              className="px-6 py-2.5 bg-orange-700 hover:bg-orange-800 text-white text-[13.5px] font-bold rounded-md transition-colors"
             >
               {t.about.ctaButton}
             </button>

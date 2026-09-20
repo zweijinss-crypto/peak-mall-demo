@@ -7,6 +7,7 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
+  PageBanner,
 } from '@/components/peak-mall';
 import { usePeakStore } from '@/lib/store';
 import { useT } from '@/lib/use-t';
@@ -132,12 +133,9 @@ export default function CheckoutPage() {
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <header className="mb-6">
-          <h1 className="text-[28px] font-extrabold text-ink-900 leading-tight">{t.checkout.title}</h1>
-          <p className="text-[13.5px] text-ink-500 mt-1.5">{t.checkout.subtitle}</p>
-        </header>
+        <PageBanner title={t.checkout.title} subtitle={t.checkout.subtitle} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
           {/* Left: address + payment + items */}
           <div className="lg:col-span-2 space-y-5">
             {/* Address */}

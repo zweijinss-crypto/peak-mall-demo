@@ -1,6 +1,6 @@
 'use client';
 
-import { UserShell } from '@/components/peak-mall';
+import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
@@ -37,20 +37,22 @@ export default function CommissionsPage() {
     <>
 
       <UserShell>
-        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.commissions.title}</h1>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card label={t.commissions.totalEarned} value={`$${total.toFixed(2)}`} color="text-orange-700" />
-          <Card label={t.commissions.thisMonth} value={`$${thisMonth.toFixed(2)}`} color="text-emerald-700" />
-          <Card label={t.commissions.pending} value={`$${pending.toFixed(2)}`} color="text-amber-700" />
-          <Card label={t.commissions.available} value={`$${settled.toFixed(2)}`} color="text-primary" />
-        </div>
+        <PageBanner
+          title={t.commissions.title}
+          subtitle={chrome.isEn ? 'Track direct and team commissions' : '追踪直推与团队佣金'}
+          stats={[
+            { label: t.commissions.totalEarned, value: `$${total.toFixed(2)}`, tone: 'accent' as const },
+            { label: t.commissions.thisMonth, value: `$${thisMonth.toFixed(2)}` },
+            { label: t.commissions.pending, value: `$${pending.toFixed(2)}` },
+            { label: t.commissions.available, value: `$${settled.toFixed(2)}` },
+          ]}
+        />
 
         {ROWS.length === 0 ? (
-          <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
-            <div className="text-[64px] mb-4">💰</div>
-            <div className="text-[18px] font-bold text-ink-900 mb-2">{t.commissions.empty}</div>
-            <div className="text-[13.5px] text-ink-500">{t.commissions.emptyDesc}</div>
+          <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">💰</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.commissions.empty}</div>
+            <div className="text-[12px] text-ink-500">{t.commissions.emptyDesc}</div>
           </div>
         ) : (
           <div className="bg-white rounded-xl border border-ink-100 overflow-x-auto">
@@ -89,14 +91,5 @@ export default function CommissionsPage() {
       </UserShell>
 
     </>
-  );
-}
-
-function Card({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-ink-100 p-5">
-      <div className="text-[11.5px] uppercase tracking-wider text-ink-500 mb-1">{label}</div>
-      <div className={`text-[24px] font-extrabold ${color}`}>{value}</div>
-    </div>
   );
 }

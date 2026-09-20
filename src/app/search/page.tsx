@@ -6,6 +6,7 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
+  PageBanner,
 } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
@@ -111,16 +112,16 @@ function SearchInner() {
           )}
         </form>
 
-        <h1 className="text-[24px] md:text-[28px] font-extrabold text-ink-900 mb-2">
-          {t.search.title}
-        </h1>
-        <p className="text-[13.5px] text-ink-500 mb-6">
-          {q
+        <PageBanner
+          title={t.search.title}
+          subtitle={q
             ? results.length > 0
               ? t.search.subCount(results.length, q)
               : t.search.subEmpty(q)
             : (chrome.isEn ? 'Type a keyword to start searching.' : '输入关键词开始搜索。')}
-        </p>
+        />
+
+        <h1 className="sr-only">{t.search.title}</h1>
 
         {q && results.length > 0 ? (
           <section

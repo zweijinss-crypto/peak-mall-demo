@@ -32,21 +32,21 @@ export default function LoginPage() {
       />
 
       <main>
-        <div className="max-w-shell mx-auto px-5 pt-6">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-[13px] text-amber-900 flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+        <div className="max-w-shell mx-auto px-5 pt-5">
+          <div className="bg-amber-50 border border-amber-200 px-4 py-2.5 text-[12.5px] text-amber-900 flex flex-col md:flex-row md:items-center gap-1.5 md:gap-3">
             <span className="inline-flex items-center gap-1.5 font-bold">
               <span aria-hidden="true">🎬</span>
               {t.auth.demoBannerTitle}
             </span>
             <span className="text-amber-800">{t.auth.demoBannerBody}</span>
-            <code className="text-[12px] font-mono px-2 py-0.5 rounded bg-white border border-amber-300 text-amber-900 md:ml-auto whitespace-nowrap">
+            <code className="text-[11.5px] font-mono px-2 py-0.5 bg-white border border-amber-300 text-amber-900 md:ml-auto whitespace-nowrap">
               {t.auth.demoCredsHint}
             </code>
           </div>
         </div>
         {currentUser && (
           <div className="max-w-shell mx-auto px-5 pt-3">
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-md text-[13px]">
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 text-[12.5px]">
               {t.auth.loggedInAs(currentUser.email, new Date(currentUser.loggedInAt).toLocaleString('en-US', { timeZone: 'UTC' }))}
             </div>
           </div>

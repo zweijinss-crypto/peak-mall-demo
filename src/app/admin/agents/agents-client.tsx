@@ -1,6 +1,7 @@
 'use client';
 
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd } from '@/lib/admin/fixtures';
 
@@ -19,7 +20,7 @@ export function AgentsClient() {
 
   return (
     <div>
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-2">{t.admin.agents.title}</h1>
+      <PageBanner title={t.admin.agents.title} accent="emerald" />
       <p className="text-[12.5px] text-neutral-500 mb-4 leading-relaxed">{t.admin.agents.hint}</p>
       <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
         <table className="w-full text-[12.5px] min-w-[720px]">

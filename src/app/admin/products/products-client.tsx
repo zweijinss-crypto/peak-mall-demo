@@ -1,6 +1,7 @@
 'use client';
 
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 
 export function ProductsClient() {
@@ -30,14 +31,20 @@ export function ProductsClient() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <h1 className="text-[20px] font-extrabold text-neutral-900">
-          {t.admin.products.title}
-          {t.admin.products.count(products.length)}
-        </h1>
-        <button onClick={add} className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-700 text-white hover:bg-orange-700">
-          + {t.admin.products.add}
-        </button>
+      <PageBanner
+        title={t.admin.products.title}
+        accent="emerald"
+        trailing={
+          <button
+            onClick={add}
+            className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-orange-700 text-white hover:bg-orange-700"
+          >
+            + {t.admin.products.add}
+          </button>
+        }
+      />
+      <div className="mb-2 text-[12px] text-neutral-500">
+        {t.admin.products.count(products.length)}
       </div>
       <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
         <table className="w-full text-[12.5px] min-w-[760px]">

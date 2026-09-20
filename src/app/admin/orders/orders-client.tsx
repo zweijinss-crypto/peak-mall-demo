@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
@@ -38,7 +39,7 @@ export function OrdersClient() {
 
   return (
     <div>
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.orders.title}</h1>
+      <PageBanner title={t.admin.orders.title} accent="emerald" />
       <div className="flex gap-3 border-b border-neutral-200 mb-4 overflow-x-auto">
         {tabs.map(([k, n]) => (
           <button

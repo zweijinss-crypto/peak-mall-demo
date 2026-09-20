@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 
@@ -45,7 +46,7 @@ export function WdCenterClient() {
 
   return (
     <div>
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.wdCenter.title}</h1>
+      <PageBanner title={t.admin.wdCenter.title} accent="emerald" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-neutral-200 p-5 lg:col-span-1">
           <h2 className="text-[14px] font-bold text-neutral-900 mb-3">{t.admin.wdCenter.apply}</h2>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserShell } from '@/components/peak-mall';
+import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 import { usePeakStore, type Order } from '@/lib/store';
@@ -54,6 +54,11 @@ export default function AftersalePage() {
     refunded: t.aftersale.statusRefunded,
   };
 
+  const statusCounts = tickets.reduce<Record<Status, number>>(
+    (acc, tk) => { acc[tk.status] = (acc[tk.status] || 0) + 1; return acc; },
+    { pending: 0, approved: 0, rejected: 0, completed: 0, refunded: 0 },
+  );
+
   const submit = () => {
     if (!orderId || !reason) return;
     // Demo: just show success banner. Real impl would POST /api/aftersale.
@@ -69,15 +74,24 @@ export default function AftersalePage() {
     <>
 
       <UserShell>
-        <div className="flex items-end justify-between mb-6">
-          <h1 className="text-[28px] font-extrabold text-ink-900">{t.aftersale.title}</h1>
-          <button
-            onClick={() => setRequestOpen(true)}
-            className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors"
-          >
-            + {t.aftersale.requestBtn}
-          </button>
-        </div>
+        <PageBanner
+          title={t.aftersale.title}
+          subtitle={chrome.isEn ? 'Submit and track after-sales requests' : '提交与追踪售后申请'}
+          stats={[
+            { label: chrome.isEn ? 'Total' : '总单数', value: tickets.length, tone: 'accent' as const },
+            { label: t.aftersale.statusPending, value: statusCounts.pending },
+            { label: t.aftersale.statusApproved, value: statusCounts.approved },
+            { label: t.aftersale.statusRefunded, value: statusCounts.refunded },
+          ]}
+          trailing={
+            <button
+              onClick={() => setRequestOpen(true)}
+              className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors flex-shrink-0"
+            >
+              + {t.aftersale.requestBtn}
+            </button>
+          }
+        />
 
         {submitted && (
           <div className="mb-5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]">
@@ -141,10 +155,10 @@ export default function AftersalePage() {
         )}
 
         {tickets.length === 0 ? (
-          <div className="bg-white rounded-xl py-20 text-center border border-ink-100">
-            <div className="text-[64px] mb-4">🛠️</div>
-            <div className="text-[18px] font-bold text-ink-900 mb-2">{t.aftersale.empty}</div>
-            <div className="text-[13.5px] text-ink-500">{t.aftersale.emptyDesc}</div>
+          <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">🛠️</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.aftersale.empty}</div>
+            <div className="text-[12px] text-ink-500">{t.aftersale.emptyDesc}</div>
           </div>
         ) : (
           <div className="space-y-4">

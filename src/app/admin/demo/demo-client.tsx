@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useT } from '@/lib/use-t';
+import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd } from '@/lib/admin/fixtures';
 
@@ -33,7 +34,7 @@ export function DemoClient() {
 
   return (
     <div className="max-w-[560px]">
-      <h1 className="text-[20px] font-extrabold text-neutral-900 mb-3">{t.admin.demo.title}</h1>
+      <PageBanner title={t.admin.demo.title} accent="emerald" />
       <div className="bg-white rounded-xl border border-neutral-200 p-5">
         <p className="text-[13px] text-neutral-700 mb-4 leading-relaxed">{t.admin.demo.hint}</p>
         <button onClick={trigger} className="px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-700">

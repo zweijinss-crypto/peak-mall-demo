@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserShell } from '@/components/peak-mall';
+import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
@@ -72,13 +72,15 @@ export default function WithdrawPage() {
     <>
 
       <UserShell>
-        <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.withdraw.title}</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <SummaryCard label={t.withdraw.available} value={`$${available.toFixed(2)}`} color="text-emerald-700" />
-          <SummaryCard label={t.withdraw.pending} value={`$${pending.toFixed(2)}`} color="text-amber-700" />
-          <SummaryCard label={t.withdraw.withdrawn} value={`$${withdrawn.toFixed(2)}`} color="text-ink-700" />
-        </div>
+        <PageBanner
+          title={t.withdraw.title}
+          subtitle={chrome.isEn ? 'Apply for and track withdrawals' : '申请提现与查看历史'}
+          stats={[
+            { label: t.withdraw.available, value: `$${available.toFixed(2)}`, tone: 'accent' as const },
+            { label: t.withdraw.pending, value: `$${pending.toFixed(2)}` },
+            { label: t.withdraw.withdrawn, value: `$${withdrawn.toFixed(2)}` },
+          ]}
+        />
 
         {submitted && (
           <div className="mb-5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]">
@@ -135,7 +137,7 @@ export default function WithdrawPage() {
 
         <h2 className="text-[18px] font-bold text-ink-900 mb-3">{t.withdraw.history}</h2>
         {HISTORY.length === 0 ? (
-          <div className="bg-white rounded-xl py-16 text-center border border-ink-100 text-ink-500 text-[13.5px]">
+          <div className="bg-white rounded-xl py-10 text-center border border-ink-100 text-ink-500 text-[13px]">
             {t.withdraw.empty}
           </div>
         ) : (
@@ -159,14 +161,5 @@ export default function WithdrawPage() {
       </UserShell>
 
     </>
-  );
-}
-
-function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-ink-100 p-5">
-      <div className="text-[11.5px] uppercase tracking-wider text-ink-500 mb-1">{label}</div>
-      <div className={`text-[24px] font-extrabold ${color}`}>{value}</div>
-    </div>
   );
 }

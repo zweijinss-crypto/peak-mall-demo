@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { adminStore, type AdminUser, type AdminOrder, type AdminWd, type AdminCommLog } from '@/lib/admin/fixtures';
 
@@ -50,13 +51,22 @@ export function DashboardClient() {
 
   return (
     <div>
-      <h1 className="text-[24px] font-extrabold text-neutral-900 mb-4">{t.admin.dashboard.title}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <PageBanner
+        title={t.admin.dashboard.title}
+        subtitle={isEn ? 'Overview of members, orders and withdrawals' : '会员、订单与提现概览'}
+        accent="emerald"
+        stats={cards.map((c) => ({
+          label: c.label,
+          value: c.value,
+          tone: c.sub ? ('muted' as const) : ('default' as const),
+        }))}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {cards.map((c, i) => (
-          <div key={i} className="bg-white rounded-xl border border-neutral-200 p-4">
-            <div className="text-[12px] text-neutral-500 mb-2">{c.label}</div>
-            <div className="text-[26px] font-extrabold text-neutral-900 leading-tight">{c.value}</div>
-            {c.sub && <div className="text-[11.5px] text-neutral-500 mt-1">{c.sub}</div>}
+          <div key={i} className="bg-white rounded-xl border border-neutral-200 p-3">
+            <div className="text-[11px] text-neutral-500 mb-1">{c.label}</div>
+            <div className="text-[18px] font-extrabold text-neutral-900 leading-tight">{c.value}</div>
+            {c.sub && <div className="text-[10.5px] text-neutral-500 mt-0.5">{c.sub}</div>}
           </div>
         ))}
       </div>

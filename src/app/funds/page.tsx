@@ -5,6 +5,7 @@ import {
   AnnouncementBar,
   ShopHeader,
   Footer,
+  PageBanner,
 } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
@@ -65,39 +66,24 @@ export default function FundsPage() {
       />
 
       <main className="max-w-shell mx-auto px-5 py-8">
-        <header className="mb-6">
-          <h1 className="text-[28px] font-extrabold text-ink-900 leading-tight">{t.funds.title}</h1>
-          <p className="text-[13.5px] text-ink-500 mt-1.5">{t.funds.subtitle}</p>
-        </header>
-
-        {/* Summary cards */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {SUMMARY.map((s) => (
-            <div key={s.label} className="bg-white rounded-xl p-5 border border-ink-100">
-              <div className="text-[12.5px] text-ink-500 mb-2">{s.label}</div>
-              <div className={`text-[26px] md:text-[30px] font-extrabold leading-none ${s.accent}`}>
-                {s.value}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* Quick actions */}
-        <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => router.push('/withdraw')}
-            className="px-5 py-2.5 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors"
-          >
-            {t.funds.withdrawNow}
-          </button>
-          <button
-            disabled
-            title="Demo only"
-            className="px-5 py-2.5 bg-white border border-ink-200 text-ink-500 text-[13px] font-bold rounded-md cursor-not-allowed"
-          >
-            {t.funds.topupNow}
-          </button>
-        </div>
+        <PageBanner
+          title={t.funds.title}
+          subtitle={t.funds.subtitle}
+          stats={[
+            { label: t.funds.available, value: '$248.90', tone: 'accent' as const },
+            { label: t.funds.frozen, value: '$12.30' },
+            { label: t.funds.earnedTotal, value: '$1,234.50' },
+            { label: t.funds.withdrawnTotal, value: '$985.60' },
+          ]}
+          trailing={
+            <button
+              onClick={() => router.push('/withdraw')}
+              className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors flex-shrink-0"
+            >
+              {t.funds.withdrawNow}
+            </button>
+          }
+        />
 
         {/* Recent flows */}
         <section className="bg-white rounded-xl border border-ink-100 overflow-hidden">
