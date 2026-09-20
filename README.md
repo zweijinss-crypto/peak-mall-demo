@@ -155,12 +155,12 @@ zh → en 切换后 ref demo 内 zh 字符串残留 = 0
 Perf 97 / A11y 96 / BP 100 / SEO 100
 LCP 0.1s / CLS 0 / TBT 140ms / FCP 0.1s
 
-# prod 静态产物待 build (pay-records TS error 阻塞,见下)
+# prod 静态产物 (serve out -p 5050, 实测)
+Perf 100 / A11y 96 / BP 100 / SEO 100
+LCP 0.0s / CLS 0 / TBT 0ms / FCP 0.0s
 ```
 
-`pnpm build` 当前因为 `pay-records-client.tsx` 用户改动的 TS 错误 fail
-(`t.payRecords.searchPlaceholder` 类型缺失)。
-ref-peak-mall 自身 build 干净 — 待修 pay-records 后即可 build 全项目。
+`pnpm build` 全项目静态导出成功。`out/ref-peak-mall/index.html` 预渲染 24KB,SSR 内容含 zh/en 双语 fallback (zh 默认)。
 
 ### 重跑命令
 
@@ -197,6 +197,10 @@ crawls/lighthouse/             # ref-peak-mall-desktop.html / .json
 ### Commits
 
 ```
+d0ab684  test(ref-demo): lighthouse 静态产物截图 + 报告
+fa274b5  docs(ref-demo): README.md 新增 /ref-peak-mall/ 章节
+57fe208  fix(ref-demo): 修 import path 去掉 .tsx 后缀 + CartLine destructuring
+8ff6ae8  fix(pay-records): 恢复 searchPlaceholder 类型
 b707db2  feat(ref-demo): reference/peak-mall/ 合规改写 demo page
 ac29492  feat(ref-demo): 引入 --ref-* design tokens (隔离命名空间)
 ```
