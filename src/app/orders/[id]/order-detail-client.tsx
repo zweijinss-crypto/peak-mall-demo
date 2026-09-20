@@ -4,17 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
-  AnnouncementBar,
-  ShopHeader,
-  Footer,
+  UserShell,
 } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 import type { Order } from '@/lib/store';
-
-interface Props {
-  demoOrder: Order;
-}
 
 const STATUS_LABEL: Record<Order['status'], { zh: string; en: string; cls: string }> = {
   pending:   { zh: '待支付', en: 'Pending payment', cls: 'bg-amber-100 text-amber-700' },
@@ -29,6 +23,10 @@ const STATUS_T_KEY: Record<Order['status'], keyof ReturnType<typeof useT>['order
   shipped:   'statusShipped',
   delivered: 'statusDelivered',
 };
+
+interface Props {
+  demoOrder: Order;
+}
 
 export default function OrderDetailClient({ demoOrder }: Props) {
   const router = useRouter();
@@ -53,20 +51,8 @@ export default function OrderDetailClient({ demoOrder }: Props) {
 
   return (
     <>
-      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
-      <ShopHeader
-        brand={chrome.brand}
-        navItems={chrome.navItems}
-        active={chrome.active}
-        currencyOptions={chrome.currencyOptions}
-        currency={chrome.currency}
-        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
-        langOptions={chrome.langOptions}
-        lang={chrome.lang}
-        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
-      />
 
-      <main className="max-w-shell mx-auto px-5 py-8">
+      <UserShell>
         <header className="mb-6">
           <div className="flex flex-wrap items-center gap-3 mb-2">
             <h1 className="text-[28px] font-extrabold text-ink-900 leading-tight">
@@ -199,9 +185,8 @@ export default function OrderDetailClient({ demoOrder }: Props) {
             </aside>
           </div>
         </div>
-      </main>
+      </UserShell>
 
-      <Footer />
     </>
   );
 }

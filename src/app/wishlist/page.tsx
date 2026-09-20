@@ -4,9 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { FC } from 'react';
 import {
-  AnnouncementBar,
-  ShopHeader,
-  Footer,
+  UserShell,
   type Product,
 } from '@/components/peak-mall';
 import { PRODUCTS } from '@/data/products';
@@ -31,20 +29,8 @@ export default function WishlistPage() {
 
   return (
     <>
-      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
-      <ShopHeader
-        brand={chrome.brand}
-        navItems={chrome.navItems}
-        active={chrome.active}
-        currencyOptions={chrome.currencyOptions}
-        currency={chrome.currency}
-        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
-        langOptions={chrome.langOptions}
-        lang={chrome.lang}
-        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
-      />
 
-      <main className="max-w-shell mx-auto px-5 py-8">
+      <UserShell>
         <div className="flex items-end justify-between mb-6">
           <h1 className="text-[28px] font-extrabold text-ink-900">{t.wishlist.title}</h1>
           {items.length > 0 && (
@@ -107,9 +93,8 @@ export default function WishlistPage() {
           </div>
         )}
         </section>
-      </main>
+      </UserShell>
 
-      <Footer />
     </>
   );
 }

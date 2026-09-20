@@ -1,6 +1,6 @@
 'use client';
 
-import { AnnouncementBar, ShopHeader, Footer } from '@/components/peak-mall';
+import { UserShell } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
@@ -35,20 +35,8 @@ export default function CommissionsPage() {
 
   return (
     <>
-      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
-      <ShopHeader
-        brand={chrome.brand}
-        navItems={chrome.navItems}
-        active={chrome.active}
-        currencyOptions={chrome.currencyOptions}
-        currency={chrome.currency}
-        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
-        langOptions={chrome.langOptions}
-        lang={chrome.lang}
-        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
-      />
 
-      <main className="max-w-shell mx-auto px-5 py-8">
+      <UserShell>
         <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.commissions.title}</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -98,9 +86,8 @@ export default function CommissionsPage() {
             </table>
           </div>
         )}
-      </main>
+      </UserShell>
 
-      <Footer />
     </>
   );
 }

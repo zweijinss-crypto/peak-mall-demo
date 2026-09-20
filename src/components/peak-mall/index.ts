@@ -38,6 +38,11 @@ export type { ShopHeaderProps } from './ShopHeader';
 export { default as SupportWidget } from './SupportWidget';
 export type { SupportWidgetProps } from './SupportWidget';
 
+export { UserSidebar } from './UserSidebar';
+export type { UserSidebarProps } from './UserSidebar';
+
+export { UserShell } from './UserShell';
+
 export type {
   BannerItem,
   BrandInfo,

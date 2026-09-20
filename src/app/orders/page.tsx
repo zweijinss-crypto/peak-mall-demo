@@ -4,9 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { FC } from 'react';
 import {
-  AnnouncementBar,
-  ShopHeader,
-  Footer,
+  UserShell,
 } from '@/components/peak-mall';
 import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
@@ -27,20 +25,8 @@ export default function OrdersPage() {
 
   return (
     <>
-      <AnnouncementBar tag={chrome.announceTag} text={chrome.announceText} />
-      <ShopHeader
-        brand={chrome.brand}
-        navItems={chrome.navItems}
-        active={chrome.active}
-        currencyOptions={chrome.currencyOptions}
-        currency={chrome.currency}
-        onCurrencyChange={(c) => chrome.onCurrencyChange(c as typeof chrome.currency)}
-        langOptions={chrome.langOptions}
-        lang={chrome.lang}
-        onLangChange={(l) => chrome.onLangChange(l as typeof chrome.lang)}
-      />
 
-      <main className="max-w-shell mx-auto px-5 py-8">
+      <UserShell>
         <h1 className="text-[28px] font-extrabold text-ink-900 mb-6">{t.orders.title}</h1>
 
         {orders.length === 0 ? (
@@ -120,9 +106,8 @@ export default function OrdersPage() {
             })}
           </div>
         )}
-      </main>
+      </UserShell>
 
-      <Footer />
     </>
   );
 }
