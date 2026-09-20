@@ -98,15 +98,15 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               </select>
             )}
             {langOptions.length > 0 && (
-              <div className="inline-flex border border-neutral-300 rounded-md overflow-hidden">
+              <div className="inline-flex border border-neutral-200 rounded-lg overflow-hidden bg-white/60">
                 {langOptions.map((l) => (
                   <button
                     key={l.code}
                     onClick={() => onLangChange?.(l.code as LangCode)}
-                    className={`px-3 py-0.5 text-[12px] ${
+                    className={`px-3.5 py-1 text-[12px] font-medium transition-colors ${
                       l.code === lang
-                        ? 'bg-orange-700 text-white font-semibold'
-                        : 'bg-white text-neutral-700 hover:text-orange-600'
+                        ? 'bg-gradient-to-b from-orange-500 to-orange-600 text-white shadow-[inset_0_-1px_0_rgba(0,0,0,0.1)]'
+                        : 'bg-transparent text-neutral-600 hover:bg-neutral-50 hover:text-orange-600'
                     }`}
                   >
                     {l.label}

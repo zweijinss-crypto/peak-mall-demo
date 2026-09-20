@@ -109,7 +109,7 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
             {product.category}
           </span>
         </div>
-        <h3 className="text-[13.5px] font-semibold text-neutral-900 mb-2 leading-snug line-clamp-2 min-h-[39px]">
+        <h3 className="text-[14.5px] font-semibold text-neutral-900 mb-2.5 leading-snug line-clamp-2 min-h-[42px] tracking-[-0.005em]">
           {product.name}
         </h3>
         <div className="flex items-baseline gap-2">

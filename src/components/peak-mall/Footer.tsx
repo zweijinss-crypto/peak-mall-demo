@@ -71,9 +71,9 @@ const Footer: FC<FooterProps> = ({
       <div className="max-w-[1280px] mx-auto px-5">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-5 md:gap-9 pb-9">
           <div>
-            <h3 className="text-white text-[14.5px] font-bold mb-4 relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
+            <h4 className="text-white text-[15px] font-bold mb-5 tracking-[-0.01em] relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
               {brand.name}
-            </h3>
+            </h4>
             <p className="text-[13px] leading-[1.9] mb-4">{brand.intro}</p>
             <div className="flex gap-2.5">
               {['f', 'X', 'in', 'IG'].map((s) => (
@@ -86,9 +86,9 @@ const Footer: FC<FooterProps> = ({
 
           {columns.map((col, i) => (
             <div key={i}>
-              <h3 className="text-white text-[14.5px] font-bold mb-4 relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
+              <h4 className="text-white text-[15px] font-bold mb-5 tracking-[-0.01em] relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
                 {col.title}
-              </h3>
+              </h4>
               <ul className="space-y-2.5">
                 {col.links.map((l, j) => (
                   <li key={j}>
@@ -102,9 +102,9 @@ const Footer: FC<FooterProps> = ({
           ))}
 
           <div>
-            <h3 className="text-white text-[14.5px] font-bold mb-4 relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
+            <h4 className="text-white text-[15px] font-bold mb-5 tracking-[-0.01em] relative after:content-[''] after:block after:w-6 after:h-0.75 after:bg-orange-500 after:rounded-sm after:mt-2.5">
               {COPY.footer.col4}
-            </h3>
+            </h4>
             <ul className="space-y-2.5">
               <li><a className="text-[13px] hover:text-orange-500 cursor-pointer">{contact.telegram}</a></li>
               <li>服务时间: {contact.hours}</li>
