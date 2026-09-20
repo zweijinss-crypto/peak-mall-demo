@@ -54,6 +54,7 @@ const PayRecordsClient: FC = () => {
   const ordersInStore = usePeakStore((s) => s.orders);
   const [mounted, setMounted] = useState(false);
   const [exported, setExported] = useState(false);
+  const [exportedRows, setExportedRows] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<Set<PaymentRecord['status']>>(new Set());
@@ -165,6 +166,7 @@ const PayRecordsClient: FC = () => {
     const stamp = new Date().toISOString().slice(0, 10);
     const suffix = isFiltering ? '-filtered' : '';
     downloadCSV(`pay-records-${stamp}${suffix}.csv`, csv);
+    setExportedRows(rows.length);
     setExported(true);
     window.setTimeout(() => setExported(false), 1800);
   }
@@ -383,11 +385,19 @@ const PayRecordsClient: FC = () => {
               >
                 <span aria-hidden>↓</span>
                 {exported ? t.payRecords.exportDone : t.payRecords.export}
+                {exported && exportedRows != null && (
+                  <span className="ml-0.5 tabular-nums opacity-90">({exportedRows})</span>
+                )}
               </button>
             </div>
           </div>
-          <div className="px-5 py-1.5 bg-ink-50/40 border-b border-ink-100 text-[11px] text-ink-500">
-            {t.payRecords.exportNote}
+          <div className="px-5 py-1.5 bg-ink-50/40 border-b border-ink-100 text-[11px] text-ink-500 flex items-center gap-3 flex-wrap">
+            <span>{t.payRecords.exportNote}</span>
+            {exported && exportedRows != null && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold tabular-nums">
+                ✓ {t.payRecords.exportedRows(exportedRows)}
+              </span>
+            )}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[12.5px]">

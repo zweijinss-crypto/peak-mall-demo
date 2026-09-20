@@ -304,6 +304,7 @@ export const COPY = {
     export: '导出 CSV',
     exportNote: '仅含公开字段:BIN / 品牌 / 末四位 / 金额 / 状态 / 时间,不导出真实卡号 / CVV / 地址 / 邮箱。',
     exportDone: '已导出',
+    exportedRows: (n: number) => `已导出 ${n} 条`,
     searchPlaceholder: '搜索订单号 / BIN / 末四位...',
     filterBrand: '品牌',
     filterStatus: '状态',

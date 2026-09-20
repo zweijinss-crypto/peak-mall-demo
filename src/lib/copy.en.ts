@@ -298,6 +298,7 @@ export const COPY_EN = {
     export: 'Export CSV',
     exportNote: 'Public fields only: BIN / brand / last4 / amount / status / timestamp. Real card number, CVV, address and email are never exported.',
     exportDone: 'Exported',
+    exportedRows: (n: number) => `Exported ${n} rows`,
     searchPlaceholder: 'Search order ID / BIN / last 4...',
     filterBrand: 'Brand',
     filterStatus: 'Status',
