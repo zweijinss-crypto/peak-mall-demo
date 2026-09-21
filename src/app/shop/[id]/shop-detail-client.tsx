@@ -652,15 +652,28 @@ function DetailTabs({
   chromeIsEn: boolean;
   t: ReturnType<typeof useT>;
 }) {
-  const [active, setActive] = useState<'features' | 'specs' | 'reviews' | 'shipping'>('features');
+  const [active, setActive] = useState<'features' | 'specs' | 'reviews' | 'shipping' | 'qa'>('features');
   // v29: reviews sort/filter/helpful state
   const [reviewSort, setReviewSort] = useState<'latest' | 'helpful' | 'ratingDesc'>('latest');
   const [reviewFilter, setReviewFilter] = useState<'all' | 'withPic' | 'five' | 'four' | 'verified'>('all');
   const [helpfulClicks, setHelpfulClicks] = useState<Record<number, boolean>>({});
+  // v31: Q&A state (UI-only, no persistence)
+  const [qaFilter, setQaFilter] = useState<'all' | 'unanswered'>('all');
+  const [qaAskOpen, setQaAskOpen] = useState(false);
+  const [qaAnswerOpen, setQaAnswerOpen] = useState<number | null>(null);
+  // v31: reviews photo wall lightbox
+  const [photoWallIdx, setPhotoWallIdx] = useState<number | null>(null);
+  // v31: nested replies state per review
+  const [reviewReplyOpen, setReviewReplyOpen] = useState<number | null>(null);
+  // v31: local Q&A data (UI-only)
+  type QA = { id: number; asker: string; date: string; question: string; answers: { author: string; isSeller: boolean; date: string; body: string }[]; helpful: number };
+  const [localQAs, setLocalQAs] = useState<QA[]>([]);
+  const chrome = usePageChrome('home', 'home');
   const tabs: { key: typeof active; label: string }[] = [
     { key: 'features', label: t.product.featuresLabel },
     { key: 'specs', label: t.product.specsLabel },
     { key: 'reviews', label: t.product.reviewsLabel },
+    { key: 'qa', label: t.product.qaTitle },
     { key: 'shipping', label: t.product.shippingLabel },
   ];
 
@@ -849,6 +862,40 @@ function DetailTabs({
               </label>
             </div>
 
+            {/* v31: 买家的实拍图聚合墙 */}
+            {(() => {
+              const photoReviews = FAKE_REVIEWS.filter((r) => !!r.withPic);
+              if (photoReviews.length === 0) return null;
+              const ph = ['/covers/p10.svg', '/covers/p11.svg', '/covers/p13.svg', '/covers/p15.svg', '/covers/p16.svg'];
+              return (
+                <div className="mb-6">
+                  <div className="flex items-baseline justify-between mb-3">
+                    <h3 className="text-[14px] font-bold text-ink-900">{t.product.photoWallLabel}</h3>
+                    <span className="text-[11.5px] text-ink-500">{t.product.photoWallCount(photoReviews.length)}</span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                    {photoReviews.map((r, i) => {
+                      const cover = ph[i % ph.length];
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setPhotoWallIdx(i)}
+                          aria-label={chromeIsEn ? `View photo from ${r.name}` : `查看 ${r.name} 的实拍图`}
+                          className="aspect-square bg-ink-100 rounded-md overflow-hidden border border-ink-100 hover:border-orange-700/40 transition-colors relative group"
+                        >
+                          <Image src={cover} alt={r.name} width={120} height={120} className="w-full h-full object-cover" />
+                          <span className="absolute bottom-1 right-1 text-[10px] text-white bg-black/60 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            {r.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             {sorted.length === 0 ? (
               <div className="py-12 text-center text-ink-500">
                 <div className="text-[15px] font-semibold text-ink-900 mb-1">{t.product.reviewEmptyTitle}</div>
@@ -893,39 +940,131 @@ function DetailTabs({
                       >
                         👍 {t.product.reviewHelpfulBtn} · {t.product.reviewHelpfulCount(helpfulCount)}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewReplyOpen(reviewReplyOpen === i ? null : i)}
+                        aria-expanded={reviewReplyOpen === i}
+                        className="inline-flex items-center text-[12.5px] font-semibold px-3 py-1 rounded-full border border-ink-200 text-ink-700 hover:border-orange-700 hover:text-orange-700 transition-colors"
+                      >
+                        💬 {chromeIsEn ? 'Reply' : '回复'}
+                      </button>
                     </li>
                   );
                 })}
               </ul>
             )}
+
+            {/* v31: 楼中楼回复表单 */}
+            {reviewReplyOpen !== null && sorted[reviewReplyOpen] && (
+              <ReviewReplyForm
+                reviewerName={sorted[reviewReplyOpen].name}
+                onClose={() => setReviewReplyOpen(null)}
+                chromeIsEn={chromeIsEn}
+                t={t}
+              />
+            )}
+
+            {/* v31: 图片墙 lightbox */}
+            {photoWallIdx !== null && (
+              <PhotoWallLightbox
+                photoReviews={FAKE_REVIEWS.filter((r) => !!r.withPic)}
+                photoWallIdx={photoWallIdx}
+                setPhotoWallIdx={setPhotoWallIdx}
+                onClose={() => setPhotoWallIdx(null)}
+                chromeIsEn={chromeIsEn}
+              />
+            )}
           </div>
         );
       })()}
 
+      {active === 'qa' && (
+        <QASection
+          chromeIsEn={chromeIsEn}
+          t={t}
+          qaFilter={qaFilter}
+          setQaFilter={setQaFilter}
+          qaAskOpen={qaAskOpen}
+          setQaAskOpen={setQaAskOpen}
+          qaAnswerOpen={qaAnswerOpen}
+          setQaAnswerOpen={setQaAnswerOpen}
+          localQAs={localQAs}
+          setLocalQAs={setLocalQAs}
+        />
+      )}
+
       {active === 'shipping' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[900px]">
-          <div>
-            <h3 className="text-[16px] font-bold text-ink-900 mb-2">{chromeIsEn ? 'Shipping' : '配送'}</h3>
-            <ul className="space-y-2 text-[14px] text-ink-700 leading-[1.7]">
-              <li>· {chromeIsEn ? 'Free worldwide shipping over $50' : '满 $50 全球包邮'}</li>
-              <li>· {chromeIsEn ? 'Dispatched within 48 hours from local warehouses' : '本地仓 48 小时内出库'}</li>
-              <li>· {chromeIsEn ? 'Estimated 3–7 business days, 28 countries' : '预计 3–7 个工作日送达 · 28 国'}</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-[16px] font-bold text-ink-900 mb-2">{chromeIsEn ? 'Returns' : '退换'}</h3>
-            <ul className="space-y-2 text-[14px] text-ink-700 leading-[1.7]">
-              <li>· {chromeIsEn ? '7-day no-reason returns' : '7 天无理由退换'}</li>
-              <li>· {chromeIsEn ? 'Return shipping covered by us' : '退货运费由我们承担'}</li>
-              <li>· {chromeIsEn ? 'One-year warranty on all electronics' : '数码商品一年质保'}</li>
-            </ul>
-          </div>
-        </div>
+        <ShippingSection chromeIsEn={chromeIsEn} t={t} />
       )}
 
       {/* v29: FAQ section — always visible, below tabs */}
       <FaqSection t={t} chromeIsEn={chromeIsEn} />
     </section>
+  );
+}
+
+/* Shipping — international logistics overview (UI-only, mirrors the source's shipping panel). */
+function ShippingSection({ chromeIsEn, t }: { chromeIsEn: boolean; t: ReturnType<typeof useT> }) {
+  const rows = chromeIsEn
+    ? [
+        { region: 'East Asia (CN/HK/JP/KR)', eta: '1–3 business days', fee: 'Free over $50, else $5' },
+        { region: 'Southeast Asia (SG/MY/TH/VN/PH/ID)', eta: '2–4 business days', fee: 'Free over $50, else $6' },
+        { region: 'North America (US/CA)', eta: '3–5 business days', fee: 'Free over $80, else $8' },
+        { region: 'Europe (EU/UK/CH)', eta: '4–7 business days', fee: 'Free over $80, else $10' },
+        { region: 'Middle East / Africa / South America', eta: '5–10 business days', fee: '$12 flat' },
+      ]
+    : [
+        { region: '东亚 (中国大陆 / 港澳 / 日韩)', eta: '1–3 个工作日', fee: '满 $50 包邮,否则 $5' },
+        { region: '东南亚 (新马泰越菲印)', eta: '2–4 个工作日', fee: '满 $50 包邮,否则 $6' },
+        { region: '北美 (美国 / 加拿大)', eta: '3–5 个工作日', fee: '满 $80 包邮,否则 $8' },
+        { region: '欧洲 (欧盟 / 英国 / 瑞士)', eta: '4–7 个工作日', fee: '满 $80 包邮,否则 $10' },
+        { region: '中东 / 非洲 / 南美', eta: '5–10 个工作日', fee: '统一 $12' },
+      ];
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="md:col-span-2">
+        <h2 className="text-[18px] font-bold text-ink-900 mb-3">{chromeIsEn ? 'Shipping & Delivery' : '配送说明'}</h2>
+        <div className="overflow-x-auto rounded-md border border-ink-200">
+          <table className="w-full text-[13.5px]">
+            <thead className="bg-ink-50">
+              <tr>
+                <th className="text-left px-4 py-2.5 font-semibold text-ink-700">{chromeIsEn ? 'Region' : '区域'}</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-ink-700">{chromeIsEn ? 'ETA' : '时效'}</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-ink-700">{chromeIsEn ? 'Fee' : '运费'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i} className="border-t border-ink-200">
+                  <td className="px-4 py-2.5 text-ink-800">{r.region}</td>
+                  <td className="px-4 py-2.5 text-ink-700">{r.eta}</td>
+                  <td className="px-4 py-2.5 text-ink-700">{r.fee}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-[12.5px] text-ink-500 leading-relaxed">
+          {chromeIsEn
+            ? 'Customs duties are included in the product price for the regions above. Remote-area surcharges may apply; the carrier will contact you before delivery.'
+            : '上述区域关税已包含在商品价格中,无需另行支付。偏远地区可能产生附加费,配送前承运商会与您联系。'}
+        </p>
+      </div>
+      <aside className="md:col-span-1 space-y-4">
+        <div className="rounded-md bg-orange-50/60 border border-orange-100 px-4 py-3.5">
+          <div className="text-[13px] font-semibold text-orange-700 mb-1">{chromeIsEn ? 'Order cutoff' : '截单时间'}</div>
+          <p className="text-[12.5px] text-ink-700 leading-relaxed">
+            {chromeIsEn ? 'Daily 16:00 (Asia/Shanghai). Orders after cutoff ship next business day.' : '每日 16:00 (北京时间),截单后次日发货。'}
+          </p>
+        </div>
+        <div className="rounded-md bg-ink-50 border border-ink-200 px-4 py-3.5">
+          <div className="text-[13px] font-semibold text-ink-800 mb-1">{chromeIsEn ? 'Tracking' : '物流追踪'}</div>
+          <p className="text-[12.5px] text-ink-700 leading-relaxed">
+            {chromeIsEn ? 'A tracking link is emailed within 24h of dispatch.' : '发货后 24 小时内邮件推送物流单号。'}
+          </p>
+        </div>
+      </aside>
+    </div>
   );
 }
 
@@ -967,6 +1106,335 @@ function FaqSection({ t, chromeIsEn }: { t: ReturnType<typeof useT>; chromeIsEn:
           support@peak-mall.demo
         </a>
       </p>
+    </div>
+  );
+}
+
+/* v31: Q&A section — ask, answer, seller reply */
+function QASection({
+  chromeIsEn,
+  t,
+  qaFilter,
+  setQaFilter,
+  qaAskOpen,
+  setQaAskOpen,
+  qaAnswerOpen,
+  setQaAnswerOpen,
+  localQAs,
+  setLocalQAs,
+}: {
+  chromeIsEn: boolean;
+  t: ReturnType<typeof useT>;
+  qaFilter: 'all' | 'unanswered';
+  setQaFilter: (f: 'all' | 'unanswered') => void;
+  qaAskOpen: boolean;
+  setQaAskOpen: (v: boolean) => void;
+  qaAnswerOpen: number | null;
+  setQaAnswerOpen: (v: number | null) => void;
+  localQAs: { id: number; asker: string; date: string; question: string; answers: { author: string; isSeller: boolean; date: string; body: string }[]; helpful: number }[];
+  setLocalQAs: React.Dispatch<React.SetStateAction<{ id: number; asker: string; date: string; question: string; answers: { author: string; isSeller: boolean; date: string; body: string }[]; helpful: number }[]>>;
+}) {
+  const initialQAs = [
+    {
+      id: 1,
+      asker: '张先生',
+      date: '2026-09-10',
+      question: chromeIsEn
+        ? 'Does this support 2 external monitors at the same time? What ports do I need?'
+        : '能否同时外接 2 个 4K 显示器?需要什么接口线?',
+      answers: [
+        {
+          author: chromeIsEn ? 'PEAK MALL Support' : 'PEAK MALL 官方',
+          isSeller: true,
+          date: '2026-09-10',
+          body: chromeIsEn
+            ? 'Yes — both Thunderbolt 4 ports support dual 4K@60Hz output. Use the included USB-C cable or any TB4 cable. No dock needed.'
+            : '可以。两个雷霆 4 接口都支持双 4K@60Hz 输出。使用随机的 USB-C 线或任意 TB4 线即可,不需要扩展坞。',
+        },
+      ],
+      helpful: 28,
+    },
+    {
+      id: 2,
+      asker: chromeIsEn ? 'Liu W.' : '周小姐',
+      date: '2026-09-04',
+      question: chromeIsEn
+        ? 'Is the keyboard backlit? How many brightness levels?'
+        : '键盘背光有几档?能否调节亮度?',
+      answers: [
+        {
+          author: chromeIsEn ? '陈先生 (verified buyer)' : '陈先生 (已购买家)',
+          isSeller: false,
+          date: '2026-09-05',
+          body: chromeIsEn
+            ? 'Yes, 3 levels (off / low / high). Auto-on when typing in dim light.'
+            : '有的, 3 档(灭 / 暗 / 亮)。在暗环境下会自动点亮。',
+        },
+      ],
+      helpful: 12,
+    },
+    {
+      id: 3,
+      asker: chromeIsEn ? 'Anonymous' : '匿名用户',
+      date: '2026-08-28',
+      question: chromeIsEn
+        ? 'Does it come with a US plug or EU plug? I’m in Germany.'
+        : '电源是美标还是欧标?我在德国。',
+      answers: [],
+      helpful: 4,
+    },
+  ];
+  const allQAs = [...localQAs, ...initialQAs];
+  const filtered = qaFilter === 'unanswered' ? allQAs.filter((q) => q.answers.length === 0) : allQAs;
+  const unansweredCount = allQAs.filter((q) => q.answers.length === 0).length;
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 className="text-[18px] font-bold text-ink-900">{t.product.qaTitle}</h2>
+          <p className="text-[12.5px] text-ink-500 mt-1">{t.product.qaSubtitle}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setQaAskOpen(true)}
+          className="px-4 h-10 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors"
+        >
+          + {t.product.qaAskBtn}
+        </button>
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex gap-2 mb-5">
+        <button
+          type="button"
+          onClick={() => setQaFilter('all')}
+          aria-pressed={qaFilter === 'all'}
+          className={`px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-colors ${
+            qaFilter === 'all' ? 'bg-orange-700 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+          }`}
+        >
+          {t.product.qaAllFilter} · {allQAs.length}
+        </button>
+        <button
+          type="button"
+          onClick={() => setQaFilter('unanswered')}
+          aria-pressed={qaFilter === 'unanswered'}
+          className={`px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-colors ${
+            qaFilter === 'unanswered' ? 'bg-orange-700 text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+          }`}
+        >
+          {t.product.qaUnansweredFilter} · {unansweredCount}
+        </button>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="py-12 text-center text-ink-500">
+          <div className="text-[15px] font-semibold text-ink-900 mb-1">{t.product.qaEmptyTitle}</div>
+          <div className="text-[13px]">{t.product.qaEmptyDesc}</div>
+        </div>
+      ) : (
+        <ul className="space-y-5 max-w-[860px]">
+          {filtered.map((q) => (
+            <li key={q.id} className="border border-ink-100 rounded-lg p-5 hover:border-ink-200 transition-colors">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-[13px] font-bold flex-shrink-0">Q</div>
+                <div className="flex-1">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-[13.5px] font-bold text-ink-900">{q.asker}</span>
+                    <span className="text-[11.5px] text-ink-500">{q.date}</span>
+                  </div>
+                  <p className="text-[14px] text-ink-800 leading-[1.7]">{q.question}</p>
+                  <div className="mt-2 flex items-center gap-3 text-[11.5px] text-ink-500">
+                    <span>👍 {t.product.qaHelpfulCount(q.helpful)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Answers */}
+              {q.answers.length > 0 ? (
+                <ul className="ml-11 mt-3 space-y-3">
+                  {q.answers.map((a, ai) => (
+                    <li key={ai} className="bg-ink-50 rounded-md p-3 border-l-2 border-orange-300">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-[12.5px] font-bold text-ink-900">A · {a.author}</span>
+                        {a.isSeller && (
+                          <span className="inline-flex items-center text-[10.5px] font-extrabold text-white bg-orange-700 px-1.5 py-0.5 rounded">
+                            {t.product.qaSellerBadge}
+                          </span>
+                        )}
+                        <span className="text-[11px] text-ink-500">{a.date}</span>
+                      </div>
+                      <p className="text-[13px] text-ink-700 leading-[1.7]">{a.body}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="ml-11 mt-3 px-3 py-2 bg-rose-50 border border-rose-200 rounded-md text-[12px] text-rose-700 font-semibold inline-flex items-center gap-2">
+                  <span className="inline-block w-1.5 h-1.5 bg-rose-700 rounded-full animate-pulse" />
+                  {chromeIsEn ? 'Awaiting answer · Be the first' : '待解答 · 做第一个答主'}
+                </div>
+              )}
+
+              <div className="ml-11 mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setQaAnswerOpen(qaAnswerOpen === q.id ? null : q.id)}
+                  className="text-[12px] text-orange-700 font-semibold hover:underline"
+                >
+                  {t.product.qaAnswerBtn}
+                </button>
+              </div>
+
+              {qaAnswerOpen === q.id && (
+                <QaAnswerForm
+                  onSubmit={(author, body) => {
+                    setLocalQAs((prev) => {
+                      const found = prev.find((x) => x.id === q.id);
+                      if (found) {
+                        return prev.map((x) =>
+                          x.id === q.id ? { ...x, answers: [...x.answers, { author, isSeller: author.includes('官方') || author.includes('Support'), date: '2026-09-21', body }] } : x
+                        );
+                      } else {
+                        // attach to initial QA
+                        const target = filtered.find((x) => x.id === q.id);
+                        if (target) {
+                          target.answers.push({ author, isSeller: author.includes('官方') || author.includes('Support'), date: '2026-09-21', body });
+                        }
+                        return prev;
+                      }
+                    });
+                    setQaAnswerOpen(null);
+                  }}
+                  chromeIsEn={chromeIsEn}
+                  t={t}
+                />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {qaAskOpen && (
+        <QaAskModal
+          onSubmit={(asker, question) => {
+            setLocalQAs((prev) => [
+              { id: Date.now(), asker, date: '2026-09-21', question, answers: [], helpful: 0 },
+              ...prev,
+            ]);
+            setQaAskOpen(false);
+          }}
+          onClose={() => setQaAskOpen(false)}
+          chromeIsEn={chromeIsEn}
+          t={t}
+        />
+      )}
+    </div>
+  );
+}
+
+function QaAnswerForm({ onSubmit, chromeIsEn, t }: { onSubmit: (author: string, body: string) => void; chromeIsEn: boolean; t: ReturnType<typeof useT> }) {
+  const [author, setAuthor] = useState('');
+  const [body, setBody] = useState('');
+  return (
+    <div className="ml-11 mt-3 p-3 bg-orange-50/60 rounded-md border border-orange-100">
+      <input
+        type="text"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+        placeholder={t.product.qaAskNamePlaceholder}
+        aria-label={t.product.qaAskNameLabel}
+        className="w-full mb-2 px-3 py-2 text-[13px] border border-ink-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-orange-700/30"
+        maxLength={20}
+      />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value.slice(0, 300))}
+        placeholder={t.product.qaAnswerPlaceholder}
+        aria-label={t.product.qaAnswerPlaceholder}
+        rows={2}
+        className="w-full px-3 py-2 text-[13px] border border-ink-200 rounded-md bg-white resize-none focus:outline-none focus:ring-2 focus:ring-orange-700/30"
+      />
+      <div className="flex items-center justify-between mt-2">
+        <span className="text-[11px] text-ink-500">{body.length}/300</span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onSubmit(author || (chromeIsEn ? 'Anonymous' : '匿名用户'), body)}
+            disabled={!body.trim()}
+            className="px-3 py-1.5 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 text-white text-[12px] font-bold rounded-md transition-colors"
+          >
+            {t.product.qaAnswerSubmit}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QaAskModal({ onSubmit, onClose, chromeIsEn, t }: { onSubmit: (asker: string, question: string) => void; onClose: () => void; chromeIsEn: boolean; t: ReturnType<typeof useT> }) {
+  const [asker, setAsker] = useState('');
+  const [question, setQuestion] = useState('');
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.product.qaAskTitle}
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg p-6 max-w-[520px] w-full shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-[18px] font-bold text-ink-900 mb-1">{t.product.qaAskTitle}</h3>
+        <p className="text-[12px] text-ink-500 mb-4">{t.product.qaSubtitle}</p>
+        <input
+          type="text"
+          value={asker}
+          onChange={(e) => setAsker(e.target.value)}
+          placeholder={t.product.qaAskNamePlaceholder}
+          aria-label={t.product.qaAskNameLabel}
+          className="w-full mb-3 px-3 py-2 text-[14px] border border-ink-200 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-orange-700/30"
+          maxLength={20}
+        />
+        <textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value.slice(0, 200))}
+          placeholder={t.product.qaPlaceholder}
+          aria-label={t.product.qaPlaceholder}
+          rows={4}
+          className="w-full px-3 py-2 text-[14px] border border-ink-200 rounded-md bg-white resize-none focus:outline-none focus:ring-2 focus:ring-orange-700/30"
+          autoFocus
+        />
+        <div className="flex items-center justify-between mt-2 mb-4">
+          <span className="text-[11px] text-ink-500">{t.product.qaCharLimit(question.length)}</span>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 h-10 bg-white border border-ink-300 hover:bg-ink-50 text-ink-700 text-[13px] font-semibold rounded-md transition-colors"
+          >
+            {t.product.qaCancelBtn}
+          </button>
+          <button
+            type="button"
+            onClick={() => onSubmit(asker || (chromeIsEn ? 'Anonymous' : '匿名用户'), question)}
+            disabled={!question.trim()}
+            className="px-4 h-10 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 text-white text-[13px] font-bold rounded-md transition-colors"
+          >
+            {t.product.qaSubmitBtn}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1264,3 +1732,90 @@ function Lightbox({
     </div>
   );
 }
+
+
+/* v31: 楼中楼回复表单 — UI-only stub (real form was scoped out in v30) */
+function ReviewReplyForm({
+  reviewerName,
+  onClose,
+  chromeIsEn,
+  t,
+}: {
+  reviewerName: string;
+  onClose: () => void;
+  chromeIsEn: boolean;
+  t: ReturnType<typeof useT>;
+}) {
+  return (
+    <div className="mt-4 rounded-md border border-ink-200 bg-ink-50/60 p-4 max-w-[820px]">
+      <div className="flex items-baseline justify-between mb-2">
+        <div className="text-[13px] font-semibold text-ink-900">
+          {chromeIsEn ? `Reply to ${reviewerName}` : `回复 ${reviewerName}`}
+        </div>
+        <button type="button" onClick={onClose} className="text-[12px] text-ink-500 hover:text-ink-800">
+          {chromeIsEn ? 'Close' : '关闭'}
+        </button>
+      </div>
+      <textarea
+        rows={3}
+        aria-label={chromeIsEn ? 'Your reply' : '回复内容'}
+        placeholder={chromeIsEn ? 'Write a public reply...' : '写下您的回复...'}
+        className="w-full rounded-md border border-ink-200 bg-white px-3 py-2 text-[13.5px] text-ink-800"
+      />
+      <div className="mt-2 flex justify-end">
+        <button
+          type="button"
+          className="bg-orange-700 hover:bg-orange-800 text-white text-[12.5px] font-semibold px-3.5 py-1.5 rounded-md"
+        >
+          {chromeIsEn ? 'Post reply' : '发表回复'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* v31: 图片墙 lightbox — UI-only stub */
+function PhotoWallLightbox({
+  photoReviews,
+  photoWallIdx,
+  setPhotoWallIdx,
+  onClose,
+  chromeIsEn,
+}: {
+  photoReviews: Review[];
+  photoWallIdx: number;
+  setPhotoWallIdx: (n: number | null) => void;
+  onClose: () => void;
+  chromeIsEn: boolean;
+}) {
+  const r = photoReviews[photoWallIdx] || photoReviews[0];
+  if (!r) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={chromeIsEn ? 'Photo viewer' : '图片查看器'}
+      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-md p-6 max-w-[480px] w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="aspect-square rounded-md bg-ink-100 mb-3 flex items-center justify-center text-[64px]">
+          📷
+        </div>
+        <div className="text-[13px] text-ink-700">{r.name}</div>
+        <div className="text-[12px] text-ink-500">{r.title}</div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 text-[12.5px] text-ink-500 hover:text-ink-800"
+        >
+          {chromeIsEn ? 'Close' : '关闭'}
+        </button>
+      </div>
+    </div>
+  );
+}
+

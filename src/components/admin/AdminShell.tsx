@@ -10,8 +10,21 @@ import { logout } from '@/lib/admin/auth';
 /**
  * AdminShell — shared layout chrome for every /admin/* page.
  *
- * Dark sidebar (mirrors source site's #1c1c1c nav) + light main area with
- * role badge + reset-data + back-to-shop buttons in the top bar.
+ * Layout mirrors the source site's left nav:
+ *   ┌─────────────────────────────────┐
+ *   │ 品牌(品牌名 + 角色)              │   ← .brand  padding 20px 22px
+ *   ├─────────────────────────────────┤
+ *   │ nav group                       │   ← .nav-group  uppercase 11px
+ *   │   nav-item icon + label         │   ← .nav-item  padding 10px 22px
+ *   │   nav-item                      │
+ *   ├─────────────────────────────────┤
+ *   │ … (flex-1 fills remaining)       │
+ *   ├─────────────────────────────────┤
+ *   │ user@ + logout                  │   ← .side-foot  pinned bottom
+ *   └─────────────────────────────────┘
+ *
+ * Why flex-col + flex-1 on the nav wrapper: a fixed min-h leaves a half-black
+ * bar at the bottom of short viewports. Letting nav grow fills the gap.
  */
 export function AdminShell({ active, children }: { active: AdminKey; children: React.ReactNode }) {
   const pathname = usePathname() ?? '';
@@ -32,24 +45,38 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
   };
 
   const handleBackToShop = () => {
-    const msg = isEn ? 'Leave the admin and go back to the shop?' : '确认离开管理后台,返回前台商城?';
     if (typeof window === 'undefined') return;
-    if (window.confirm(msg)) {
+    if (window.confirm(isEn ? 'Leave the admin and go back to the shop?' : '确认离开管理后台,返回前台商城?')) {
       window.location.href = isEn ? '/en' : '/';
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-120px)] flex flex-col md:flex-row">
-      <aside className="w-full md:w-[236px] md:min-h-[calc(100vh-120px)] bg-[#1c1c1c] text-neutral-100 md:flex-shrink-0">
+    <div className="flex flex-col md:flex-row min-h-screen bg-neutral-50">
+      {/* Sidebar — dark, full-height column with brand on top + footer pinned */}
+      <aside className="w-full md:w-[236px] md:flex-shrink-0 bg-[#1c1c1c] text-neutral-100 flex flex-col md:min-h-screen md:sticky md:top-0">
+        {/* Brand block — mirrors source .brand: 20px 22px padding, brand name bold, role label muted */}
         <div className="px-[22px] py-5 border-b border-white/10">
-          <div className="text-[17px] font-bold leading-tight">{t.admin.roleAdmin}</div>
-          <small className="block text-[11px] font-normal text-neutral-200 mt-1">{t.admin.roleSwitchHint}</small>
+          <Link href="/" className="block group">
+            <div className="text-[18px] font-bold leading-tight tracking-wide text-white group-hover:text-neutral-200 transition-colors">
+              顶峰商城
+            </div>
+            <small className="block text-[11px] font-normal text-neutral-300 mt-1 tracking-wider">
+              PEAK MALL · {t.admin.roleAdmin}
+            </small>
+          </Link>
+          {/* Demo notice — small chip pinned under the brand so users know it's mock data */}
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5">
+            <span aria-hidden="true">●</span>
+            <span>{t.admin.demoBadge}</span>
+          </div>
         </div>
-        <nav className="py-2">
+
+        {/* Nav groups — flex-1 fills the middle so .side-foot stays at the bottom */}
+        <nav className="flex-1 py-2 overflow-y-auto">
           {ADMIN_GROUPS.map((g, gi) => (
             <div key={gi} className="mb-1">
-              <div className="px-[22px] py-2 text-[11px] uppercase tracking-wider text-neutral-300 font-semibold">
+              <div className="px-[22px] pt-3 pb-1.5 text-[10.5px] uppercase tracking-[0.08em] text-neutral-400 font-semibold">
                 {t.admin[g.labelKey]}
               </div>
               {g.items.map((item) => {
@@ -59,12 +86,16 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
                   <Link
                     key={item.key}
                     href={localizedHref}
-                    className={`flex items-center gap-2.5 px-[22px] py-[10px] text-[14px] cursor-pointer transition-colors ${
-                      isActive ? 'bg-white/10 text-white font-semibold' : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+                    className={`flex items-center gap-2.5 px-[22px] py-[10px] text-[13.5px] transition-colors ${
+                      isActive
+                        ? 'bg-white/10 text-white font-semibold border-l-[3px] border-orange-500'
+                        : 'text-neutral-300 hover:bg-white/5 hover:text-white border-l-[3px] border-transparent'
                     }`}
                     aria-current={isActive ? 'page' : undefined}
                   >
-                    <span aria-hidden="true">{item.icon}</span>
+                    <span aria-hidden="true" className="text-[15px] leading-none">
+                      {item.icon}
+                    </span>
                     <span>{t.admin[item.key].title}</span>
                   </Link>
                 );
@@ -72,34 +103,49 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
             </div>
           ))}
         </nav>
+
+        {/* Side footer — mirrors source .side-foot: user label + logout button, pinned bottom */}
+        <div className="px-[22px] py-4 border-t border-white/10 bg-[#161616]">
+          <div className="text-[12px] text-neutral-200 mb-2 truncate" title={t.admin.userSystem}>
+            {t.admin.userSystem}
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full px-3 py-1.5 text-[12px] font-medium rounded-md border border-white/15 text-neutral-100 hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5"
+          >
+            <span aria-hidden="true">⎋</span>
+            <span>{t.admin.logout}</span>
+          </button>
+        </div>
       </aside>
-      <main className="flex-1 bg-neutral-50 p-4 md:p-6 min-w-0">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <span className="inline-flex items-center gap-2 text-[11.5px] uppercase tracking-wider text-neutral-500 font-semibold">
-            <span aria-hidden="true" className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>{t.admin.roleAdmin}</span>
-          </span>
+
+      {/* Main content area */}
+      <main className="flex-1 p-4 md:p-6 min-w-0">
+        {/* Topbar — slim: only meta + reset/back. Logout moved to sidebar footer. */}
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+          <div className="flex items-center gap-3 text-[12px] text-neutral-500">
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-medium text-neutral-700">{t.admin.online}</span>
+            </span>
+            <span className="text-neutral-300">·</span>
+            <span>{t.admin.topbarHint}</span>
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleBackToShop}
-              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
+              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white transition-colors"
             >
               ← {t.admin.backToShop}
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
+              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white transition-colors"
             >
               ↻ {t.admin.resetData}
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white"
-            >
-              ⎋ {t.admin.logout}
             </button>
           </div>
         </div>
