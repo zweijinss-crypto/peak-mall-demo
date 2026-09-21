@@ -1398,6 +1398,13 @@ export const COPY_EN = {
       commissionOn: 'Enable commission settlement',
       autoApprove: 'Auto-approve withdrawals',
       saveAll: 'Save all',
+      // validation
+      rangeErr: 'Rate must be between 0 and 100',
+      minWdErr: 'Minimum withdrawal must be ≥ 0',
+      // feedback
+      savedToast: 'Rules saved',
+      noChanges: 'No changes to save',
+      unsaved: 'Unsaved changes',
     },
     comm: {
       title: 'Commission ledger',

@@ -1371,6 +1371,13 @@ export const COPY = {
       commissionOn: '开启佣金结算',
       autoApprove: '提现免审核（自动通过）',
       saveAll: '保存全部设置',
+      // validation
+      rangeErr: '佣金/费率必须在 0–100 之间',
+      minWdErr: '最低提现金额必须 ≥ 0',
+      // feedback
+      savedToast: '已保存佣金规则',
+      noChanges: '没有需要保存的修改',
+      unsaved: '有未保存的修改',
     },
     comm: {
       title: '佣金流水',
