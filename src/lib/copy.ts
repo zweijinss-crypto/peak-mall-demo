@@ -136,6 +136,13 @@ export const COPY = {
     demoBannerTitle: '演示账号',
     demoBannerBody: '演示项目：任意有效邮箱 + 至少 6 位密码即可登录。推荐使用页面提示的示例账号体验。',
     demoCredsHint: '示例：01@demo.com / 123456',
+    // v40: 登录/管理后台合页 — tab 切换
+    tabUser: '用户登录',
+    tabAdmin: '管理员登录',
+    adminPanelTitle: '管理员通道',
+    adminPanelSub: '演示账号：admin / admin123',
+    switchToAdmin: '管理员入口 →',
+    switchToUser: '← 用户登录',
   },
   cta: {
     addToCart: '加入购物车',

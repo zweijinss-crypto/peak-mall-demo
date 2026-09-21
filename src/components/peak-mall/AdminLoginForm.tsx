@@ -1,19 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+/**
+ * AdminLoginForm — 从原 admin/login-client 抽出的管理员登录表单
+ *
+ * 设计:
+ * - 复用 admin/lib/auth.login() 函数
+ * - 登录成功 → /admin/dashboard
+ * - a11y:label htmlFor + input id + role=alert + focus ring
+ * - demo 凭据提示(admin/admin123)放在表单底部,符合 zh 站点 admin 风格
+ */
+
+import { useEffect, useState, type FC, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthed, login } from '@/lib/admin/auth';
 import { useT } from '@/lib/use-t';
-import Link from 'next/link';
 
-/**
- * Admin login page — client-side mock gate.
- *
- * Hard-coded demo credentials: admin / admin123. After a successful sign-in
- * we redirect to /admin/dashboard. Anyone already authed is auto-bounced
- * to the dashboard so they can't see the form again.
- */
-export default function LoginClient() {
+export interface AdminLoginFormProps {
+  /** 登录成功后跳转路径(默认 /admin/dashboard) */
+  redirectTo?: string;
+}
+
+const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboard' }) => {
   const router = useRouter();
   const t = useT();
   const [username, setUsername] = useState('');
@@ -23,36 +30,36 @@ export default function LoginClient() {
 
   useEffect(() => {
     if (isAuthed()) {
-      router.replace('/admin/dashboard');
+      router.replace(redirectTo);
       return;
     }
     setChecking(false);
-  }, [router]);
+  }, [router, redirectTo]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const res = login(username.trim(), password);
     if (!res.ok) {
       setError(res.error ?? t.admin.loginErrorBad);
       return;
     }
-    router.replace('/admin/dashboard');
+    router.replace(redirectTo);
   };
 
   if (checking) {
     return (
-      <div className="min-h-[calc(100vh-120px)] flex items-center justify-center text-[13px] text-neutral-500">
+      <div className="min-h-[calc(100vh-220px)] flex items-center justify-center text-[13px] text-neutral-500">
         {t.admin.loginChecking}
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-120px)] flex items-center justify-center px-4 py-10 bg-neutral-50">
+    <div className="flex items-center justify-center px-4 py-10 bg-neutral-50">
       <form
         onSubmit={submit}
+        aria-labelledby="admin-login-title"
         className="w-full max-w-[400px] bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 space-y-4"
-        aria-labelledby="login-title"
       >
         <header className="space-y-1.5">
           <div className="flex items-center gap-2">
@@ -61,18 +68,20 @@ export default function LoginClient() {
               {t.admin.roleAdmin}
             </span>
           </div>
-          <h1 id="login-title" className="text-[20px] font-extrabold text-neutral-900">
-            {t.admin.loginTitle}
-          </h1>
-          <p className="text-[12.5px] text-neutral-600 leading-relaxed">{t.admin.loginIntro}</p>
+          <h2 id="admin-login-title" className="text-[20px] font-extrabold text-neutral-900">
+            {t.auth.adminPanelTitle ?? t.admin.loginTitle}
+          </h2>
+          <p className="text-[12.5px] text-neutral-600 leading-relaxed">
+            {t.auth.adminPanelSub ?? t.admin.loginIntro}
+          </p>
         </header>
 
         <div className="space-y-1.5">
-          <label htmlFor="login-username" className="block text-[12px] text-neutral-700 font-medium">
+          <label htmlFor="admin-login-username" className="block text-[12px] text-neutral-700 font-medium">
             {t.admin.loginUsername}
           </label>
           <input
-            id="login-username"
+            id="admin-login-username"
             type="text"
             autoComplete="username"
             value={username}
@@ -85,11 +94,11 @@ export default function LoginClient() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="login-password" className="block text-[12px] text-neutral-700 font-medium">
+          <label htmlFor="admin-login-password" className="block text-[12px] text-neutral-700 font-medium">
             {t.admin.loginPassword}
           </label>
           <input
-            id="login-password"
+            id="admin-login-password"
             type="password"
             autoComplete="current-password"
             value={password}
@@ -115,11 +124,9 @@ export default function LoginClient() {
         </button>
 
         <p className="text-[11.5px] text-neutral-500 text-center">{t.admin.loginHint}</p>
-
-        <p className="text-[11.5px] text-neutral-500 text-center">
-          ← <Link href="/" className="underline hover:text-neutral-700">{t.admin.backToShop}</Link>
-        </p>
       </form>
     </div>
   );
-}
+};
+
+export default AdminLoginForm;

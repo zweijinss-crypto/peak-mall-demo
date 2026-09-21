@@ -15,6 +15,7 @@ import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
 import { getCurrentUser, logout } from '@/lib/auth';
+import { isAuthed as isAdminAuthed } from '@/lib/admin/auth';
 import SearchSuggestions, { appendHistory } from './SearchSuggestions';
 
 export interface ShopHeaderProps {
@@ -72,8 +73,10 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   const [mobileActiveIndex, setMobileActiveIndex] = useState(-1);
   const [mobileFocus, setMobileFocus] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [adminAuthed, setAdminAuthed] = useState(false);
   useEffect(() => {
     setUserEmail(getCurrentUser()?.email ?? null);
+    setAdminAuthed(isAdminAuthed());
   }, []);
 
   /** S4: 全局 ⌘K / Ctrl+K 唤起搜索 */
@@ -174,6 +177,27 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             <span className="text-neutral-700">{t.header.welcome}</span>
             <span className="w-px h-3 bg-neutral-300" />
             <Link href="/login" className="cursor-pointer hover:text-orange-500">{t.header.login}</Link>
+            {!adminAuthed && !userEmail && (
+              <>
+                <span className="w-px h-3 bg-neutral-300" aria-hidden />
+                <Link
+                  href="/login?tab=admin"
+                  className="cursor-pointer hover:text-orange-500 inline-flex items-center gap-1"
+                  aria-label={t.auth.switchToAdmin ?? '管理员入口'}
+                >
+                  <span aria-hidden>🔒</span>
+                  {t.auth.tabAdmin ?? '管理员登录'}
+                </Link>
+              </>
+            )}
+            {adminAuthed && (
+              <Link
+                href="/admin/dashboard"
+                className="cursor-pointer hover:text-orange-500"
+              >
+                {t.admin.roleAdmin}
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-4">
             {finalNavItems

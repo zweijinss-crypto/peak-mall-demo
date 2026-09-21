@@ -1,12 +1,13 @@
-import LoginClient from './login-client';
-import { Suspense } from 'react';
+/**
+ * /admin/login — 兼容 redirect。
+ *
+ * 设计:统一入口是 /login?tab=admin。这里保留旧 URL 做 redirect,
+ * 避免书签和外部链接失效(团队历史 / 文档)。
+ */
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-static';
 
 export default function Page() {
-  return (
-    <Suspense fallback={<div className="text-neutral-500 text-[13px] p-6">Loading…</div>}>
-      <LoginClient />
-    </Suspense>
-  );
+  redirect('/login?tab=admin');
 }

@@ -2,7 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { AnnouncementBar, ShopHeader, Footer, AuthSplit } from '@/components/peak-mall';
+import {
+  AnnouncementBar,
+  ShopHeader,
+  Footer,
+  AuthSplit,
+  AuthTabs,
+  AdminLoginForm,
+} from '@/components/peak-mall';
 import { fakeLogin, fakeRegister, getCurrentUser } from '@/lib/auth';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
@@ -13,6 +20,7 @@ export default function LoginPage() {
   const chrome = usePageChrome('home', 'home');
   const [error, setError] = useState<string | null>(null);
   const currentUser = getCurrentUser();
+  // 管理员 tab 内 AdminLoginForm 自带已登录检测(自动 redirect 到 /admin/dashboard)
 
   const announceText = t.auth.announce;
 
@@ -51,54 +59,63 @@ export default function LoginPage() {
             </div>
           </div>
         )}
-        <AuthSplit
-          requireInvite={false}
-          i18n={{
-            hero: t.auth.hero,
-            loginTitle: t.auth.loginTitle,
-            registerTitle: t.auth.registerTitle,
-            email: t.auth.email,
-            emailPh: t.auth.emailPh,
-            password: t.auth.password,
-            passwordPh: t.auth.passwordPh,
-            password2: t.auth.password2,
-            password2Ph: t.auth.password2Ph,
-            nickname: t.auth.nickname,
-            nicknamePh: t.auth.nicknamePh,
-            invite: t.auth.invite,
-            invitePh: t.auth.invitePh,
-            remember: t.auth.remember,
-            login: t.auth.login,
-            register: t.auth.register,
-            pwMismatch: t.auth.pwMismatch,
-            errGeneric: t.auth.errGeneric,
-          }}
-          onLogin={async (p) => {
-            setError(null);
-            const r = fakeLogin(p.email, p.password);
-            if (!r.ok) {
-              const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.loginErrorShort : t.auth.loginErrorGeneric;
-              setError(msg);
-              return { ok: false, error: msg };
-            }
-            setTimeout(() => router.push('/profile'), 600);
-            return { ok: true };
-          }}
-          onRegister={async (p) => {
-            setError(null);
-            const r = fakeRegister({ email: p.email, password: p.password, nickname: p.nickname });
-            if (!r.ok) {
-              const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.registerErrorShort : t.auth.registerErrorGeneric;
-              setError(msg);
-              return { ok: false, error: msg };
-            }
-            setTimeout(() => router.push('/profile'), 600);
-            return { ok: true };
-          }}
+
+        <AuthTabs
+          initial="user"
+          userPanel={
+            <>
+              <AuthSplit
+                requireInvite={false}
+                i18n={{
+                  hero: t.auth.hero,
+                  loginTitle: t.auth.loginTitle,
+                  registerTitle: t.auth.registerTitle,
+                  email: t.auth.email,
+                  emailPh: t.auth.emailPh,
+                  password: t.auth.password,
+                  passwordPh: t.auth.passwordPh,
+                  password2: t.auth.password2,
+                  password2Ph: t.auth.password2Ph,
+                  nickname: t.auth.nickname,
+                  nicknamePh: t.auth.nicknamePh,
+                  invite: t.auth.invite,
+                  invitePh: t.auth.invitePh,
+                  remember: t.auth.remember,
+                  login: t.auth.login,
+                  register: t.auth.register,
+                  pwMismatch: t.auth.pwMismatch,
+                  errGeneric: t.auth.errGeneric,
+                }}
+                onLogin={async (p) => {
+                  setError(null);
+                  const r = fakeLogin(p.email, p.password);
+                  if (!r.ok) {
+                    const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.loginErrorShort : t.auth.loginErrorGeneric;
+                    setError(msg);
+                    return { ok: false, error: msg };
+                  }
+                  setTimeout(() => router.push('/profile'), 600);
+                  return { ok: true };
+                }}
+                onRegister={async (p) => {
+                  setError(null);
+                  const r = fakeRegister({ email: p.email, password: p.password, nickname: p.nickname });
+                  if (!r.ok) {
+                    const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.registerErrorShort : t.auth.registerErrorGeneric;
+                    setError(msg);
+                    return { ok: false, error: msg };
+                  }
+                  setTimeout(() => router.push('/profile'), 600);
+                  return { ok: true };
+                }}
+              />
+              {error && (
+                <div className="text-center text-rose-600 text-[13px] -mt-8 mb-8">{error}</div>
+              )}
+            </>
+          }
+          adminPanel={<AdminLoginForm redirectTo="/admin/dashboard" />}
         />
-        {error && (
-          <div className="text-center text-rose-600 text-[13px] -mt-8 mb-8">{error}</div>
-        )}
       </main>
 
       <Footer />

@@ -17,6 +17,12 @@ export type {
   AuthResult,
 } from './AuthSplit';
 
+export { default as AuthTabs } from './AuthTabs';
+export type { AuthTabsProps, AuthTabId } from './AuthTabs';
+
+export { default as AdminLoginForm } from './AdminLoginForm';
+export type { AdminLoginFormProps } from './AdminLoginForm';
+
 export { default as CategoryBar } from './CategoryBar';
 export type { CategoryBarProps } from './CategoryBar';
 
