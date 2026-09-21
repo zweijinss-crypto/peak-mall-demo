@@ -172,7 +172,7 @@ export default function OrderDetailClient({ demoOrder }: Props) {
               </div>
               {o.status === 'pending' && (
                 <button
-                  onClick={() => router.push('/cart')}
+                  onClick={() => router.push(`/pay/${o.id}`)}
                   className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white text-[13.5px] font-bold rounded-md transition-colors mb-2"
                 >
                   {t.orderDetail.payNow}
