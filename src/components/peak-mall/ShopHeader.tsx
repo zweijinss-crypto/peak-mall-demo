@@ -64,6 +64,13 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
+  /** S2: 移动端搜索浮层 */
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileInputRef = useRef<HTMLInputElement | null>(null);
+  const mobileFormRef = useRef<HTMLFormElement | null>(null);
+  const [mobileQ, setMobileQ] = useState('');
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(-1);
+  const [mobileFocus, setMobileFocus] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   useEffect(() => {
     setUserEmail(getCurrentUser()?.email ?? null);
@@ -285,6 +292,21 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               })}
           </nav>
 
+          {/* S2: 移动端搜索触发按钮 — md 以下显示 */}
+          <button
+            onClick={() => {
+              setMobileOpen(true);
+              setMobileQ('');
+              setMobileActiveIndex(-1);
+              // focus input on next tick after render
+              setTimeout(() => mobileInputRef.current?.focus(), 50);
+            }}
+            aria-label={t.header.mobileSearchOpen}
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-md text-[18px] text-neutral-700 hover:bg-neutral-100 hover:text-orange-500 transition-colors"
+          >
+            🔍
+          </button>
+
           {/* Cart + Wish icons */}
           <div className="flex items-center gap-1 ml-auto">
             {userEmail && (
@@ -334,6 +356,101 @@ const ShopHeader: FC<ShopHeaderProps> = ({
           </div>
         </div>
       </header>
+
+      {/* S2: 移动端搜索浮层 — 全屏覆盖 */}
+      {mobileOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t.header.searchAria}
+          className="md:hidden fixed top-0 left-0 right-0 bottom-0 h-[100dvh] w-screen z-[60] bg-white flex flex-col"
+        >
+          <div className="max-w-[1280px] mx-auto w-full px-5 h-[68px] flex items-center gap-3 border-b border-neutral-100 flex-shrink-0">
+            <form
+              ref={mobileFormRef}
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const trimmed = mobileQ.trim();
+                if (!trimmed) return;
+                appendHistory(trimmed);
+                router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+                setMobileOpen(false);
+              }}
+              className="flex-1 flex items-center gap-2 px-3.5 h-[40px] bg-neutral-50 border border-neutral-200 rounded-full focus-within:border-orange-500 focus-within:bg-white transition-colors"
+            >
+              <span aria-hidden="true" className="text-[15px] text-neutral-500">🔍</span>
+              <label htmlFor="peak-mall-search-mobile" className="sr-only">
+                {t.header.searchAria}
+              </label>
+              <input
+                id="peak-mall-search-mobile"
+                ref={mobileInputRef}
+                type="search"
+                value={mobileQ}
+                onChange={(e) => { setMobileQ(e.target.value); setMobileFocus(true); setMobileActiveIndex(-1); }}
+                onFocus={() => setMobileFocus(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setMobileOpen(false);
+                  } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setMobileActiveIndex((i) => (i + 1) % 15);
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setMobileActiveIndex((i) => (i <= 0 ? 14 : i - 1));
+                  }
+                }}
+                placeholder={finalPlaceholder}
+                aria-label={t.header.inputAria}
+                aria-autocomplete="list"
+                aria-expanded={mobileFocus}
+                aria-controls="peak-search-suggestions-mobile"
+                autoComplete="off"
+                className="flex-1 bg-transparent outline-none text-[14px] placeholder:text-neutral-400"
+              />
+              <button
+                type="submit"
+                className="px-3 py-1.5 text-[12px] font-bold text-white bg-orange-700 hover:bg-orange-800 rounded-full transition-colors"
+              >
+                {t.header.submit}
+              </button>
+            </form>
+            <button
+              onClick={() => setMobileOpen(false)}
+              aria-label={t.header.mobileSearchClose}
+              className="w-10 h-10 flex items-center justify-center rounded-md text-[20px] text-neutral-700 hover:bg-neutral-100"
+            >
+              ×
+            </button>
+          </div>
+          {mobileFocus && (
+            <div id="peak-search-suggestions-mobile" className="flex-1 overflow-y-auto px-5 pt-3">
+              <SearchSuggestions
+                query={mobileQ}
+                activeIndex={mobileActiveIndex}
+                onPick={(value) => {
+                  setMobileQ(value);
+                  appendHistory(value);
+                  router.push(`/search?q=${encodeURIComponent(value)}`);
+                  setMobileOpen(false);
+                }}
+                onClose={() => setMobileFocus(false)}
+                inputRef={mobileInputRef}
+                formRef={mobileFormRef}
+                searchAria={t.header.searchAria}
+                sugHistory={t.header.sugHistory}
+                sugHot={t.header.sugHot}
+                sugEmpty={t.header.sugEmpty}
+                sugClear={t.header.sugClear}
+                sugNoHistory={t.header.sugNoHistory}
+                clear={t.header.clear}
+                inline
+              />
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 };

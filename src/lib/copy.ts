@@ -78,6 +78,9 @@ export const COPY = {
     sugClear: '清空',
     sugNoHistory: '暂无搜索历史',
     clear: '清空',
+    /** S2: 移动端搜索条 */
+    mobileSearchOpen: '打开搜索',
+    mobileSearchClose: '关闭搜索',
   },
 
   announcement: {

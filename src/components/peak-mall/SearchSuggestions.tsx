@@ -67,6 +67,8 @@ export interface SearchSuggestionsProps {
   sugClear: string;
   sugNoHistory: string;
   clear: string;
+  /** S2: inline mode for mobile dialog (no absolute + shadow, no max-height). */
+  inline?: boolean;
 }
 
 const SearchSuggestions: FC<SearchSuggestionsProps> = ({
@@ -83,6 +85,7 @@ const SearchSuggestions: FC<SearchSuggestionsProps> = ({
   sugClear,
   sugNoHistory,
   clear,
+  inline,
 }) => {
   const [history, setHistory] = useState<string[]>([]);
   const popoverRef = useRef<HTMLDivElement | null>(null);
@@ -153,7 +156,11 @@ const SearchSuggestions: FC<SearchSuggestionsProps> = ({
       ref={popoverRef}
       role="listbox"
       aria-label={searchAria}
-      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md border border-neutral-200 shadow-lg overflow-hidden z-50 max-h-[420px] overflow-y-auto"
+      className={
+        inline
+          ? 'relative w-full bg-white rounded-md border border-neutral-200 overflow-hidden'
+          : 'absolute top-full left-0 right-0 mt-2 bg-white rounded-md border border-neutral-200 shadow-lg overflow-hidden z-50 max-h-[min(420px,55dvh)] overflow-y-auto'
+      }
     >
       {!hasAny && (
         <div className="px-4 py-6 text-center text-[13px] text-ink-500">{sugEmpty}</div>

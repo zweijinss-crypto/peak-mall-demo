@@ -78,6 +78,9 @@ export const COPY_EN = {
     sugClear: 'Clear',
     sugNoHistory: 'No search history yet',
     clear: 'Clear',
+    /** S2: mobile search bar */
+    mobileSearchOpen: 'Open search',
+    mobileSearchClose: 'Close search',
   },
 
   announcement: {
