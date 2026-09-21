@@ -39,6 +39,27 @@ export const COPY = {
     CAD: 'CAD 加元',
   },
 
+  /** G3: fx 汇率换算器 + 历史图表 */
+  fx: {
+    title: '汇率换算',
+    subtitle: '实时汇率换算 + 7 天走势',
+    convertTitle: '汇率换算',
+    amount: '金额',
+    from: '从',
+    to: '到',
+    result: '结果',
+    rate: '当前汇率',
+    historyTitle: '7 天走势',
+    historyRange: '范围',
+    range7d: '7 天',
+    range30d: '30 天',
+    ratesTitle: '主要汇率',
+    noChange: '持平',
+    upLabel: '涨',
+    downLabel: '跌',
+    lastUpdate: '更新于',
+  },
+
   langLabel: { zh: '中文', en: 'EN' },
 
   header: {

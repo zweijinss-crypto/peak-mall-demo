@@ -39,6 +39,27 @@ export const COPY_EN = {
     CAD: 'CAD C Dollar',
   },
 
+  /** G3: fx converter + history */
+  fx: {
+    title: 'FX rates',
+    subtitle: 'Live converter + 7-day trend',
+    convertTitle: 'Convert',
+    amount: 'Amount',
+    from: 'From',
+    to: 'To',
+    result: 'Result',
+    rate: 'Current rate',
+    historyTitle: '7-day trend',
+    historyRange: 'Range',
+    range7d: '7 days',
+    range30d: '30 days',
+    ratesTitle: 'Major rates',
+    noChange: 'Flat',
+    upLabel: 'up',
+    downLabel: 'down',
+    lastUpdate: 'Updated',
+  },
+
   langLabel: { zh: 'Chinese', en: 'EN' },
 
   header: {
