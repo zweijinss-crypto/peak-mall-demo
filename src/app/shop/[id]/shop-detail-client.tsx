@@ -549,7 +549,13 @@ export default function ShopDetailClient({ id }: { id: string }) {
             {/* CTA — single primary + secondary + wish */}
             <div className="flex gap-2.5 mb-2.5">
               <button
-                onClick={() => router.push('/cart')}
+                onClick={() => {
+                  if (!product) return;
+                  addToCart({ id: product.id, name: product.name, price: Number(product.price), cover: product.cover }, qty);
+                  setAdded(true);
+                  setTimeout(() => setAdded(false), 1500);
+                  router.push('/cart');
+                }}
                 className="flex-1 h-[48px] bg-orange-700 hover:bg-orange-800 text-white text-[14.5px] font-bold rounded-md transition-colors"
               >
                 {t.cta.buyNow}
