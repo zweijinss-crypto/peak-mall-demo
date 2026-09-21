@@ -45,6 +45,7 @@ const AuthTabsInner: FC<AuthTabsProps> = ({ userPanel, adminPanel, initial = 'us
     user: null,
     admin: null,
   });
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   /** URL → state(支持浏览器后退) */
   useEffect(() => {
@@ -68,6 +69,44 @@ const AuthTabsInner: FC<AuthTabsProps> = ({ userPanel, adminPanel, initial = 'us
         window.history.replaceState({}, '', url.toString());
       }
     }
+  }, [active]);
+
+  /**
+   * Focus management — 鼠标点击 tab 切换时,把焦点移到 panel 内的第一个
+   * 可聚焦元素(input / button),让键盘/SR 用户立刻进入新 panel 的内容
+   * 而不是卡在 tab button 上。键盘 Arrow/Home/End 切换时不要抢焦点
+   * (tabRef 已经在 onKey 里显式 focus)。
+   *
+   * 也处理 /login?tab=admin 直达:页面首次渲染后,如果焦点不在 tab 上
+   * (即用户来自外链/刷新),主动把焦点送到 panel 第一个 input。
+   *
+   * Panel 内容可能是异步渲染的(比如 AdminLoginForm 在 useEffect 跑完
+   * 之前显示 loading 占位),所以这里用 rAF + 100ms 重试一次拿焦点。
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!panelRef.current) return;
+    const tryFocus = () => {
+      if (!panelRef.current) return;
+      const first = panelRef.current.querySelector<HTMLElement>(
+        'input, button, select, textarea, a[href]'
+      );
+      if (!first) return;
+      const onTab = tabRefs.current[active] === document.activeElement;
+      const noFocus =
+        document.activeElement === document.body || document.activeElement === null;
+      if (onTab || noFocus) {
+        first.focus({ preventScroll: true });
+      }
+    };
+    // 第一轮等 paint 后立刻试;第二轮 120ms 后再试,给 AdminLoginForm 的
+    // checking → form 状态切换留出时间窗
+    const raf = requestAnimationFrame(tryFocus);
+    const t = window.setTimeout(tryFocus, 120);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+    };
   }, [active]);
 
   const labels: Record<AuthTabId, string> = {
@@ -138,6 +177,7 @@ const AuthTabsInner: FC<AuthTabsProps> = ({ userPanel, adminPanel, initial = 'us
 
       {/* Panel — 仅渲染 active(省 DOM) */}
       <div
+        ref={panelRef}
         role="tabpanel"
         id={`auth-panel-${active}`}
         aria-labelledby={`auth-tab-${active}`}

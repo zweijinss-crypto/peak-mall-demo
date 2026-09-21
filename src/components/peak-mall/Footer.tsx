@@ -83,6 +83,15 @@ const Footer: FC<FooterProps> = ({
   const finalContact = contact ?? DEFAULT_CONTACT;
   const intro = brand?.intro ?? cp.brand.intro ?? '';
 
+  // Telegram: when no real handle is configured the default '@YourSupport'
+  // is a placeholder. Render it as plain text (not a clickable link) so we
+  // don't ship a fake anchor. Real handles come in via the `contact` prop.
+  const telegramHandle = finalContact.telegram.replace(/^@/, '');
+  const telegramIsPlaceholder = telegramHandle === 'YourSupport';
+  const telegramHref = telegramIsPlaceholder
+    ? `mailto:${finalContact.email}?subject=Telegram%20support`
+    : `https://t.me/${telegramHandle}`;
+
   return (
     <footer className="bg-neutral-900 text-neutral-400 pt-12 pb-6">
       <div className="max-w-[1280px] mx-auto px-5">
@@ -96,10 +105,10 @@ const Footer: FC<FooterProps> = ({
               {intro}
             </p>
             <div className="flex gap-2.5">
-              <a href="#" aria-label="f — Facebook" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">f</a>
-              <a href="#" aria-label="X — 社交媒体" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
-              <a href="#" aria-label="in — LinkedIn" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">in</a>
-              <a href="#" aria-label="IG — Instagram" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">IG</a>
+              <a href="/about" aria-label="f — Facebook" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">f</a>
+              <a href="/about" aria-label="X — 社交媒体" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
+              <a href="/about" aria-label="in — LinkedIn" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">in</a>
+              <a href="/about" aria-label="IG — Instagram" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">IG</a>
             </div>
           </div>
           {finalColumns.map((col, idx) => (
@@ -117,9 +126,30 @@ const Footer: FC<FooterProps> = ({
           <div>
             <h3 className="text-white text-[13px] font-bold mb-4 tracking-[0.02em]">{cp.footer.col4}</h3>
             <ul className="space-y-2 text-[12.5px]">
-              <li><span className="text-neutral-400">Telegram:</span> {finalContact.telegram}</li>
+              <li>
+                <span className="text-neutral-400">Telegram:</span>{' '}
+                {telegramIsPlaceholder ? (
+                  <span aria-label={`Telegram handle not configured (placeholder: ${finalContact.telegram})`}>
+                    {finalContact.telegram}
+                  </span>
+                ) : (
+                  <a
+                    href={telegramHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-orange-400 transition-colors"
+                  >
+                    {finalContact.telegram}
+                  </a>
+                )}
+              </li>
               <li><span className="text-neutral-400">{cp.footer.hours(finalContact.hours)}</span></li>
-              <li><span className="text-neutral-400">Email:</span> {finalContact.email}</li>
+              <li>
+                <span className="text-neutral-400">Email:</span>{' '}
+                <a href={`mailto:${finalContact.email}`} className="hover:text-orange-400 transition-colors">
+                  {finalContact.email}
+                </a>
+              </li>
             </ul>
             <div className="mt-5 flex gap-2">
               {payLogos.map((p, i) => (
