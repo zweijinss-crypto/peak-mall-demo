@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="kbBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f2ed"/>
+      <stop offset="1" stop-color="#e5dfd6"/>
+    </linearGradient>
+    <linearGradient id="kbBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3d"/>
+      <stop offset="1" stop-color="#252528"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#kbBg)"/>
+  <!-- Top-down view of the bottom deck -->
+  <rect x="80" y="160" width="640" height="500" rx="18" fill="url(#kbBase)"/>
+  <!-- Keyboard area -->
+  <g font-family="sans-serif" font-size="11" fill="#3a3a3d">
+    <!-- Row 1 (numbers) -->
+    <g transform="translate(120, 220)">
+      <!-- Generate a 14-col × 5-row key matrix -->
+    </g>
+  </g>
+  <!-- Use raw rects for keys -->
+  <g>
+    <!-- Row 1: 14 keys -->
+    <g transform="translate(120, 220)">
+      <g>
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">~ `</text>
+      </g>
+      <g transform="translate(46, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">1</text>
+      </g>
+      <g transform="translate(92, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">2</text>
+      </g>
+      <g transform="translate(138, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">3</text>
+      </g>
+      <g transform="translate(184, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">4</text>
+      </g>
+      <g transform="translate(230, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">5</text>
+      </g>
+      <g transform="translate(276, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">6</text>
+      </g>
+      <g transform="translate(322, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">7</text>
+      </g>
+      <g transform="translate(368, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">8</text>
+      </g>
+      <g transform="translate(414, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">9</text>
+      </g>
+      <g transform="translate(460, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">0</text>
+      </g>
+      <g transform="translate(506, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">-</text>
+      </g>
+      <g transform="translate(552, 0)">
+        <rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+        <text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">=</text>
+      </g>
+    </g>
+    <!-- Row 2: 13 keys (Tab + 12) -->
+    <g transform="translate(120, 262)">
+      <rect width="56" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+      <text x="28" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Tab</text>
+      <g transform="translate(60, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">Q</text></g>
+      <g transform="translate(106, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">W</text></g>
+      <g transform="translate(152, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">E</text></g>
+      <g transform="translate(198, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">R</text></g>
+      <g transform="translate(244, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">T</text></g>
+      <g transform="translate(290, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">Y</text></g>
+      <g transform="translate(336, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">U</text></g>
+      <g transform="translate(382, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">I</text></g>
+      <g transform="translate(428, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">O</text></g>
+      <g transform="translate(474, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">P</text></g>
+      <g transform="translate(520, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">[</text></g>
+      <g transform="translate(566, 0)"><rect width="28" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="14" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">]</text></g>
+    </g>
+    <!-- Row 3: Caps + 11 + Enter -->
+    <g transform="translate(120, 304)">
+      <rect width="64" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+      <text x="32" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Caps</text>
+      <g transform="translate(68, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">A</text></g>
+      <g transform="translate(114, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">S</text></g>
+      <g transform="translate(160, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">D</text></g>
+      <g transform="translate(206, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">F</text></g>
+      <g transform="translate(252, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">G</text></g>
+      <g transform="translate(298, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">H</text></g>
+      <g transform="translate(344, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">J</text></g>
+      <g transform="translate(390, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">K</text></g>
+      <g transform="translate(436, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">L</text></g>
+      <g transform="translate(482, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">;</text></g>
+      <g transform="translate(528, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">'</text></g>
+      <g transform="translate(574, 0)"><rect width="20" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="10" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">↵</text></g>
+    </g>
+    <!-- Row 4: Shift + 10 + Shift -->
+    <g transform="translate(120, 346)">
+      <rect width="84" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+      <text x="42" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Shift</text>
+      <g transform="translate(88, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">Z</text></g>
+      <g transform="translate(134, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">X</text></g>
+      <g transform="translate(180, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">C</text></g>
+      <g transform="translate(226, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">V</text></g>
+      <g transform="translate(272, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">B</text></g>
+      <g transform="translate(318, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">N</text></g>
+      <g transform="translate(364, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">M</text></g>
+      <g transform="translate(410, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">,</text></g>
+      <g transform="translate(456, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">.</text></g>
+      <g transform="translate(502, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#dadada">/</text></g>
+      <g transform="translate(548, 0)"><rect width="46" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="23" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Shift</text></g>
+    </g>
+    <!-- Row 5: Ctrl + Fn + Space + 3 -->
+    <g transform="translate(120, 388)">
+      <rect width="50" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/>
+      <text x="25" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Ctrl</text>
+      <g transform="translate(54, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Fn</text></g>
+      <g transform="translate(100, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">⌘</text></g>
+      <g transform="translate(146, 0)"><rect width="244" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/></g>
+      <g transform="translate(394, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">⌘</text></g>
+      <g transform="translate(440, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Alt</text></g>
+      <g transform="translate(486, 0)"><rect width="42" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="21" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">Ctrl</text></g>
+      <g transform="translate(532, 0)"><rect width="62" height="38" rx="4" fill="#5a5a5d" stroke="#1a1a1d" stroke-width="0.5"/><text x="31" y="24" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#dadada">← →</text></g>
+    </g>
+  </g>
+  <!-- Trackpad -->
+  <rect x="220" y="450" width="360" height="170" rx="10" fill="#252528" stroke="#3a3a3d" stroke-width="1"/>
+  <!-- Speaker grilles -->
+  <g fill="#1a1a1d" opacity="0.5">
+    <circle cx="110" cy="180" r="1"/><circle cx="120" cy="180" r="1"/><circle cx="130" cy="180" r="1"/><circle cx="140" cy="180" r="1"/><circle cx="150" cy="180" r="1"/><circle cx="160" cy="180" r="1"/><circle cx="170" cy="180" r="1"/><circle cx="180" cy="180" r="1"/><circle cx="190" cy="180" r="1"/><circle cx="200" cy="180" r="1"/>
+    <circle cx="600" cy="180" r="1"/><circle cx="610" cy="180" r="1"/><circle cx="620" cy="180" r="1"/><circle cx="630" cy="180" r="1"/><circle cx="640" cy="180" r="1"/><circle cx="650" cy="180" r="1"/><circle cx="660" cy="180" r="1"/><circle cx="670" cy="180" r="1"/><circle cx="680" cy="180" r="1"/><circle cx="690" cy="180" r="1"/>
+  </g>
+  <!-- Caption -->
+  <text x="400" y="700" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#3a3a3d">Backlit Keyboard · Glass Trackpad</text>
+</svg>

@@ -25,6 +25,11 @@ export interface Product {
     ports?: { label: I18nText; value: I18nText }[];
     pkg?: { label: I18nText; value: I18nText }[];
   };
+  /** v30: 图文视频 — 可选 gallery 补充图、video 占位、竞品对比 */
+  galleryImages?: string[];
+  videoPoster?: string;
+  videoCaption?: I18nText;
+  competitors?: { label: I18nText; rows: { label: I18nText; values: I18nText[] }[] };
 }
 
 /** v29: 双语字段;zh 必填,en 可选(未提供时 fallback zh) */

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="portsBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0ede7"/>
+      <stop offset="1" stop-color="#dcd5c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#portsBg)"/>
+  <!-- Left side close-up -->
+  <text x="120" y="60" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3a3a3d">Left side</text>
+  <line x1="100" y1="80" x2="700" y2="80" stroke="#3a3a3d" stroke-width="2"/>
+  <!-- Laptop chassis (cut-out) -->
+  <rect x="80" y="120" width="640" height="100" rx="6" fill="#3a3a3d"/>
+  <!-- Ports on left -->
+  <!-- Power input -->
+  <rect x="120" y="155" width="34" height="30" rx="3" fill="#1a1a1d"/>
+  <rect x="124" y="159" width="26" height="22" rx="2" fill="#252528"/>
+  <text x="137" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a3a3d">Power</text>
+  <!-- HDMI -->
+  <rect x="180" y="155" width="48" height="30" rx="3" fill="#1a1a1d"/>
+  <rect x="186" y="161" width="36" height="18" rx="1" fill="#252528"/>
+  <text x="204" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a3a3d">HDMI 2.1</text>
+  <text x="204" y="214" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#7a7a7d">4K@120Hz</text>
+  <!-- USB-A -->
+  <rect x="254" y="155" width="36" height="30" rx="3" fill="#1a1a1d"/>
+  <rect x="260" y="161" width="24" height="14" rx="1" fill="#252528"/>
+  <text x="272" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a3a3d">USB-A 3.2</text>
+  <!-- USB-C / TB4 x2 -->
+  <rect x="316" y="155" width="32" height="30" rx="3" fill="#1a1a1d"/>
+  <rect x="320" y="165" width="24" height="10" rx="5" fill="#252528"/>
+  <text x="332" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a3a3d">TB4 × 2</text>
+  <text x="332" y="214" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#7a7a7d">40Gbps</text>
+  <!-- 3.5mm jack -->
+  <circle cx="380" cy="170" r="11" fill="#1a1a1d"/>
+  <circle cx="380" cy="170" r="6" fill="#252528"/>
+  <text x="380" y="200" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3a3a3d">3.5mm</text>
+  <!-- Right side close-up -->
+  <text x="120" y="290" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3a3a3d">Right side</text>
+  <line x1="100" y1="310" x2="700" y2="310" stroke="#3a3a3d" stroke-width="2"/>
+  <rect x="80" y="350" width="640" height="100" rx="6" fill="#3a3a3d"/>
+  <!-- Indicator LEDs -->
+  <circle cx="120" cy="400" r="3" fill="#28c840"/>
+  <text x="120" y="430" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3a3a3d">Power LED</text>
+  <!-- SD Card slot -->
+  <rect x="160" y="385" width="30" height="30" rx="2" fill="#1a1a1d"/>
+  <rect x="164" y="389" width="22" height="22" rx="1" fill="#252528"/>
+  <text x="175" y="430" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3a3a3d">SD Card</text>
+  <!-- Kensington lock -->
+  <rect x="220" y="385" width="30" height="30" rx="6" fill="#1a1a1d"/>
+  <rect x="228" y="392" width="14" height="16" rx="2" fill="#252528"/>
+  <text x="235" y="430" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3a3a3d">K-Lock</text>
+  <!-- Air vents -->
+  <g fill="#1a1a1d">
+    <rect x="340" y="390" width="40" height="2"/>
+    <rect x="340" y="396" width="40" height="2"/>
+    <rect x="340" y="402" width="40" height="2"/>
+    <rect x="340" y="408" width="40" height="2"/>
+  </g>
+  <text x="360" y="430" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#3a3a3d">Air Vents</text>
+  <!-- Speakers -->
+  <text x="500" y="395" font-family="sans-serif" font-size="11" font-weight="bold" fill="#dadada">Quad Speakers</text>
+  <text x="500" y="412" font-family="sans-serif" font-size="9" fill="#7a7a7d">Dolby Atmos</text>
+  <!-- Bottom view -->
+  <text x="120" y="510" font-family="sans-serif" font-size="16" font-weight="bold" fill="#3a3a3d">Bottom</text>
+  <line x1="100" y1="530" x2="700" y2="530" stroke="#3a3a3d" stroke-width="2"/>
+  <rect x="80" y="560" width="640" height="160" rx="6" fill="#3a3a3d"/>
+  <!-- Rubber feet -->
+  <ellipse cx="140" cy="710" rx="30" ry="5" fill="#1a1a1d"/>
+  <ellipse cx="660" cy="710" rx="30" ry="5" fill="#1a1a1d"/>
+  <text x="140" y="740" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#3a3a3d">Front rubber foot</text>
+  <text x="660" y="740" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#3a3a3d">Back rubber foot</text>
+  <!-- Vent grid bottom -->
+  <g fill="#1a1a1d" opacity="0.6">
+    <rect x="180" y="580" width="3" height="80"/>
+    <rect x="190" y="580" width="3" height="80"/>
+    <rect x="200" y="580" width="3" height="80"/>
+    <rect x="210" y="580" width="3" height="80"/>
+    <rect x="220" y="580" width="3" height="80"/>
+    <rect x="230" y="580" width="3" height="80"/>
+    <rect x="580" y="580" width="3" height="80"/>
+    <rect x="590" y="580" width="3" height="80"/>
+    <rect x="600" y="580" width="3" height="80"/>
+    <rect x="610" y="580" width="3" height="80"/>
+    <rect x="620" y="580" width="3" height="80"/>
+    <rect x="630" y="580" width="3" height="80"/>
+  </g>
+  <text x="400" y="615" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#dadada">Intake vents · Dual fan exhaust</text>
+  <text x="400" y="635" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#7a7a7d">PEAK MALL · Ultra-Slim Business Laptop</text>
+  <!-- Caption -->
+  <text x="400" y="780" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#3a3a3d">Full I/O · No Dongle Needed</text>
+</svg>

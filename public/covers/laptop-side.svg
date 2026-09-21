@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="laptopSideBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f1ec"/>
+      <stop offset="1" stop-color="#e2dcd4"/>
+    </linearGradient>
+    <linearGradient id="laptopSideMetal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4a4a4d"/>
+      <stop offset="0.5" stop-color="#5a5a5d"/>
+      <stop offset="1" stop-color="#3a3a3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#laptopSideBg)"/>
+  <!-- Side profile — closed laptop viewed from side -->
+  <path d="M 100 540 L 700 540 L 690 560 L 110 560 Z" fill="url(#laptopSideMetal)"/>
+  <path d="M 100 540 L 700 540 L 700 230 L 100 230 Z" fill="url(#laptopSideMetal)" opacity="0.95"/>
+  <!-- Edge highlight -->
+  <line x1="100" y1="540" x2="700" y2="540" stroke="#7a7a7d" stroke-width="1"/>
+  <line x1="100" y1="230" x2="700" y2="230" stroke="#1a1a1d" stroke-width="1"/>
+  <!-- Side vent slots (left side near hinge) -->
+  <rect x="135" y="500" width="40" height="2" rx="1" fill="#1a1a1d"/>
+  <rect x="135" y="510" width="40" height="2" rx="1" fill="#1a1a1d"/>
+  <rect x="135" y="520" width="40" height="2" rx="1" fill="#1a1a1d"/>
+  <!-- Ports (right side) -->
+  <rect x="540" y="455" width="14" height="6" rx="1" fill="#1a1a1d"/>
+  <text x="547" y="475" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3a3a3d">USB-A</text>
+  <rect x="565" y="450" width="22" height="6" rx="1" fill="#1a1a1d"/>
+  <text x="576" y="475" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3a3a3d">HDMI</text>
+  <rect x="600" y="448" width="14" height="8" rx="1" fill="#1a1a1d"/>
+  <text x="607" y="475" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3a3a3d">USB-C</text>
+  <rect x="624" y="448" width="14" height="8" rx="1" fill="#1a1a1d"/>
+  <text x="631" y="475" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3a3a3d">TB4</text>
+  <circle cx="660" cy="452" r="5" fill="#1a1a1d"/>
+  <text x="660" y="475" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#3a3a3d">3.5mm</text>
+  <!-- Dimension callout -->
+  <line x1="700" y1="200" x2="700" y2="580" stroke="#999" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="720" y="395" font-family="sans-serif" font-size="11" fill="#3a3a3d">14.9 mm</text>
+  <!-- Bottom rubber feet -->
+  <ellipse cx="170" cy="555" rx="14" ry="3" fill="#1a1a1d"/>
+  <ellipse cx="630" cy="555" rx="14" ry="3" fill="#1a1a1d"/>
+  <!-- Caption -->
+  <text x="400" y="640" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#3a3a3d">14.9 mm Slim · 1.4 kg Light</text>
+  <text x="400" y="665" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#7a7a7d">CNC aluminum · 2 × TB4 · HDMI 2.1 · Wi-Fi 6E</text>
+</svg>

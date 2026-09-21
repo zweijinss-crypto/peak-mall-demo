@@ -69,6 +69,27 @@ export const PRODUCTS: Product[] = [
         { "label": { "zh": "系统", "en": "OS" }, "value": { "zh": "正版 Windows 11 家庭中文版", "en": "Licensed Windows 11 Home" } },
         { "label": { "zh": "认证", "en": "Certifications" }, "value": { "zh": "TPM 2.0 · Energy Star 8.0 · CCC", "en": "TPM 2.0 · Energy Star 8.0 · CCC" } },
       ],
+    },
+    "galleryImages": [
+      "/covers/laptop-front.svg",
+      "/covers/laptop-side.svg",
+      "/covers/laptop-keyboard.svg",
+      "/covers/laptop-ports.svg",
+    ],
+    "videoPoster": "/covers/laptop-front.svg",
+    "videoCaption": { "zh": "产品上手 · 60 秒快速了解", "en": "Product walkthrough · 60s" },
+    "competitors": {
+      "label": { "zh": "Ultra-Slim vs 同价位", "en": "Ultra-Slim vs similar price" },
+      "rows": [
+        { "label": { "zh": "型号", "en": "Model" }, "values": [{ "zh": "Ultra-Slim (本款)", "en": "Ultra-Slim (this)" }, { "zh": "竞品 A", "en": "Competitor A" }, { "zh": "竞品 B", "en": "Competitor B" }] },
+        { "label": { "zh": "CPU", "en": "CPU" }, "values": [{ "zh": "i5-1340P (12 核)", "en": "i5-1340P (12-core)" }, { "zh": "i5-1335U (10 核)", "en": "i5-1335U (10-core)" }, { "zh": "Ryzen 5 7530U (6 核)", "en": "Ryzen 5 7530U (6-core)" }] },
+        { "label": { "zh": "屏幕", "en": "Display" }, "values": [{ "zh": "2.8K OLED 90Hz", "en": "2.8K OLED 90Hz" }, { "zh": "2.2K IPS 60Hz", "en": "2.2K IPS 60Hz" }, { "zh": "FHD IPS 60Hz", "en": "FHD IPS 60Hz" }] },
+        { "label": { "zh": "重量", "en": "Weight" }, "values": [{ "zh": "1.4 kg", "en": "1.4 kg" }, { "zh": "1.6 kg", "en": "1.6 kg" }, { "zh": "1.5 kg", "en": "1.5 kg" }] },
+        { "label": { "zh": "厚度", "en": "Thickness" }, "values": [{ "zh": "14.9 mm", "en": "14.9 mm" }, { "zh": "16.9 mm", "en": "16.9 mm" }, { "zh": "17.5 mm", "en": "17.5 mm" }] },
+        { "label": { "zh": "电池", "en": "Battery" }, "values": [{ "zh": "70Wh / 18h", "en": "70Wh / 18h" }, { "zh": "57Wh / 12h", "en": "57Wh / 12h" }, { "zh": "50Wh / 10h", "en": "50Wh / 10h" }] },
+        { "label": { "zh": "接口", "en": "I/O" }, "values": [{ "zh": "2× TB4 + HDMI", "en": "2× TB4 + HDMI" }, { "zh": "1× USB-C + HDMI", "en": "1× USB-C + HDMI" }, { "zh": "2× USB-C (无 HDMI)", "en": "2× USB-C (no HDMI)" }] },
+        { "label": { "zh": "保修", "en": "Warranty" }, "values": [{ "zh": "1 年 · 28 城上门", "en": "1 year · 28 cities on-site" }, { "zh": "1 年 · 送修", "en": "1 year · ship-in" }, { "zh": "1 年 · 送修", "en": "1 year · ship-in" }] },
+      ],
     }
   },
   {

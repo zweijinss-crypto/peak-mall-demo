@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -100,6 +100,33 @@ export default function ShopDetailClient({ id }: { id: string }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImg, setActiveImg] = useState<number>(0);
+  // v30: 图集体验 — hover zoom + lightbox + 键盘 + 自动轮播
+  const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState(0);
+  const [autoplay, setAutoplay] = useState(true);
+  // v30: SKU 颜色 / 容量 选项 + 服务保障详情 toggle
+  const [variantColor, setVariantColor] = useState<'gray' | 'silver'>('gray');
+  const [variantSize, setVariantSize] = useState<'512GB' | '1TB'>('512GB');
+  const [expandedGuarantee, setExpandedGuarantee] = useState<string | null>(null);
+  // v30: 限时倒计时 — 由创建时间动态计算(伪促销)
+  const [countdown, setCountdown] = useState<{ h: number; m: number; s: number; ended: boolean }>({
+    h: 23, m: 59, s: 59, ended: false,
+  });
+  useEffect(() => {
+    // 每秒递减,到 0 重置为 24h (demo 循环)
+    const id = setInterval(() => {
+      setCountdown((c) => {
+        let { h, m, s } = c;
+        if (s > 0) s--;
+        else if (m > 0) { m--; s = 59; }
+        else if (h > 0) { h--; m = 59; s = 59; }
+        else return { h: 23, m: 59, s: 59, ended: false };
+        return { h, m, s, ended: false };
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
   const addToCart = usePeakStore((s) => s.addToCart);
   const toggleWish = usePeakStore((s) => s.toggleWish);
   const isWished = usePeakStore((s) => s.wishlist.some((w) => w.id === productId));
@@ -111,6 +138,33 @@ export default function ShopDetailClient({ id }: { id: string }) {
     const fillers = PRODUCTS.filter((p) => p.id !== product.id && !sameCat.includes(p)).slice(0, 3 - sameCat.length);
     return ([product, ...sameCat, ...fillers] as Product[]).slice(0, 4);
   }, [product]);
+
+  // v30: 自动轮播 — gallery 长度 > 1 且未 hover 时每 4s 切
+  useEffect(() => {
+    if (!autoplay || gallery.length < 2) return;
+    const id = setInterval(() => {
+      setActiveImg((i) => (i + 1) % gallery.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [autoplay, gallery.length, activeImg]); // activeImg is read inside; reset timer when it changes
+
+  // v30: 全局键盘 ←/→ 切图(不与 lightbox 冲突)
+  useEffect(() => {
+    if (lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if (e.key === 'ArrowLeft') {
+        setActiveImg((i) => (i - 1 + gallery.length) % gallery.length);
+        setAutoplay(false);
+      } else if (e.key === 'ArrowRight') {
+        setActiveImg((i) => (i + 1) % gallery.length);
+        setAutoplay(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxOpen, gallery.length]);
 
   const onAdd = () => {
     if (!product) return;
@@ -211,7 +265,10 @@ export default function ShopDetailClient({ id }: { id: string }) {
                     <button
                       key={`${g.id}-${i}`}
                       type="button"
-                      onClick={() => setActiveImg(i)}
+                      onClick={() => {
+                        setActiveImg(i);
+                        setAutoplay(false);
+                      }}
                       aria-label={chrome.isEn ? `View image ${i + 1} of ${gallery.length}` : `查看图片 ${i + 1} / ${gallery.length}`}
                       aria-current={isActive ? 'true' : undefined}
                       className={`flex-shrink-0 w-[72px] h-[72px] md:w-[80px] md:h-[80px] rounded-md overflow-hidden bg-ink-100 border-2 transition-colors ${
@@ -234,8 +291,38 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 })}
               </div>
 
-              {/* Main image */}
-              <div className="aspect-square bg-ink-100 rounded-md overflow-hidden flex items-center justify-center">
+              {/* Main image — hover zoom + click lightbox */}
+              <div
+                className="group relative aspect-square bg-ink-100 rounded-md overflow-hidden flex items-center justify-center cursor-zoom-in"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setZoomPos({
+                    x: ((e.clientX - rect.left) / rect.width) * 100,
+                    y: ((e.clientY - rect.top) / rect.height) * 100,
+                  });
+                }}
+                onMouseEnter={() => setAutoplay(false)}
+                onMouseLeave={() => {
+                  setZoomPos(null);
+                  setAutoplay(true);
+                }}
+                onClick={() => {
+                  setLightboxImg(activeImg);
+                  setLightboxOpen(true);
+                  setAutoplay(false);
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={chrome.isEn ? `View ${activeImage.name} full screen` : `全屏查看 ${activeImage.name}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setLightboxImg(activeImg);
+                    setLightboxOpen(true);
+                    setAutoplay(false);
+                  }
+                }}
+              >
                 {activeImage.cover?.startsWith('/') || activeImage.cover?.startsWith('http') ? (
                   <Image
                     key={activeImage.cover}
@@ -243,12 +330,43 @@ export default function ShopDetailClient({ id }: { id: string }) {
                     alt={activeImage.name}
                     width={800}
                     height={800}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-opacity"
+                    style={
+                      zoomPos
+                        ? {
+                            transform: 'scale(1.8)',
+                            transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                          }
+                        : undefined
+                    }
                   />
                 ) : (
                   <div className="text-[140px]">📦</div>
                 )}
+
+                {/* Image counter + zoom hint */}
+                <div className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] font-semibold px-2 py-1 rounded pointer-events-none">
+                  {activeImg + 1} / {gallery.length}
+                </div>
+                <div className="absolute top-3 left-3 bg-black/60 text-white text-[10.5px] font-semibold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  {chrome.isEn ? 'Hover to zoom · Click to expand' : '悬停放大 · 点击看全屏'}
+                </div>
               </div>
+            </div>
+
+            {/* v30: 自动轮播开关 + 键盘提示 */}
+            <div className="mt-3 flex items-center justify-between text-[11.5px] text-ink-500">
+              <button
+                type="button"
+                onClick={() => setAutoplay((v) => !v)}
+                aria-pressed={autoplay}
+                className="inline-flex items-center gap-1.5 hover:text-orange-700 transition-colors"
+              >
+                {autoplay ? '⏸' : '▶'} {chrome.isEn ? (autoplay ? 'Pause autoplay' : 'Resume autoplay') : (autoplay ? '暂停轮播' : '开始轮播')}
+              </button>
+              <span className="hidden sm:inline">
+                {chrome.isEn ? 'Tip: press ← → to switch' : '提示: 按 ← → 切换图片'}
+              </span>
             </div>
           </div>
 
@@ -267,10 +385,21 @@ export default function ShopDetailClient({ id }: { id: string }) {
               <span className="text-teal-700 font-semibold">{t.product.inStockShort} {product.stock}</span>
             </div>
 
-            {/* Price card — flat */}
-            <div className="border border-ink-200 rounded-lg p-5 mb-5">
-              <div className="text-[11px] tracking-[2px] uppercase text-ink-500 mb-1.5">{t.label.price}</div>
-              <div className="flex items-baseline gap-3">
+            {/* Price card — flash sale + countdown */}
+            <div className="border border-orange-200 bg-gradient-to-br from-orange-50/60 to-white rounded-lg p-5 mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="inline-flex items-center gap-1 text-[11px] font-extrabold tracking-wide text-orange-700 uppercase">
+                  <span className="inline-block w-1.5 h-1.5 bg-orange-700 rounded-full animate-pulse" />
+                  {t.product.saleBadge} · {t.product.flashSaleTitle}
+                </span>
+                <div className="text-[11.5px] text-ink-700 font-semibold">
+                  {t.product.flashSaleEndsIn}
+                  <span className="ml-1.5 font-mono text-orange-700 tabular-nums">
+                    {String(countdown.h).padStart(2, '0')}:{String(countdown.m).padStart(2, '0')}:{String(countdown.s).padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-[36px] font-bold text-orange-700 leading-none">
                   {sym}{Number(product.price || 0).toFixed(2)}
                 </span>
@@ -279,20 +408,125 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 </span>
                 <span className="ml-auto bg-orange-700 text-white text-[11px] font-bold px-2 py-0.5 rounded">-60%</span>
               </div>
-              <div className="mt-3 pt-3 border-t border-ink-100 text-[12px] text-ink-600">
+              {/* Stock progress bar */}
+              <div className="mt-3">
+                <div className="flex items-center justify-between text-[11.5px] text-ink-600 mb-1.5">
+                  <span className="font-semibold">{t.product.soldProgress(sold, product.stock)}</span>
+                  {product.stock < 20 && (
+                    <span className="text-rose-700 font-bold flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 bg-rose-700 rounded-full animate-pulse" />
+                      {t.product.stockLowHint} · {product.stock}{t.product.stockLowUnit}
+                    </span>
+                  )}
+                </div>
+                <div className="h-1.5 bg-ink-100 rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.min(100, Math.round((sold / (sold + product.stock)) * 100))} aria-valuemin={0} aria-valuemax={100} aria-label={t.product.soldProgress(sold, product.stock)}>
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-orange-700 transition-all duration-700"
+                    style={{ width: `${Math.min(100, Math.round((sold / (sold + product.stock)) * 100))}%` }}
+                  />
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-orange-100/60 text-[12px] text-ink-600">
                 {t.product.freeShipNote}
               </div>
             </div>
 
-            {/* Features */}
-            <ul className="space-y-2 mb-5">
-              {features.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-[13px] text-ink-700">
-                  <span className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-[10px] font-bold">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            {/* Variants — 颜色 + 容量 */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[12px] text-ink-500">{t.product.colorLabel}</span>
+                <span className="text-[11px] text-ink-700 font-semibold">{variantColor === 'gray' ? t.product.colorGray : t.product.colorSilver}</span>
+              </div>
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setVariantColor('gray')}
+                  aria-pressed={variantColor === 'gray'}
+                  className={`flex-1 h-10 rounded-md text-[12.5px] font-semibold border-2 transition-colors ${
+                    variantColor === 'gray' ? 'border-orange-700 text-ink-900 bg-orange-50/40' : 'border-ink-200 text-ink-600 hover:border-ink-300'
+                  }`}
+                >
+                  <span className="inline-block w-3 h-3 rounded-full bg-neutral-700 align-middle mr-1.5" />
+                  {t.product.colorGray}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVariantColor('silver')}
+                  aria-pressed={variantColor === 'silver'}
+                  className={`flex-1 h-10 rounded-md text-[12.5px] font-semibold border-2 transition-colors ${
+                    variantColor === 'silver' ? 'border-orange-700 text-ink-900 bg-orange-50/40' : 'border-ink-200 text-ink-600 hover:border-ink-300'
+                  }`}
+                >
+                  <span className="inline-block w-3 h-3 rounded-full bg-neutral-300 align-middle mr-1.5" />
+                  {t.product.colorSilver}
+                </button>
+              </div>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[12px] text-ink-500">{t.product.sizeLabel}</span>
+                <span className="text-[11px] text-ink-700 font-semibold">{variantSize === '512GB' ? t.product.size512 : t.product.size1tb}</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVariantSize('512GB')}
+                  aria-pressed={variantSize === '512GB'}
+                  className={`flex-1 h-10 rounded-md text-[12.5px] font-semibold border-2 transition-colors ${
+                    variantSize === '512GB' ? 'border-orange-700 text-ink-900 bg-orange-50/40' : 'border-ink-200 text-ink-600 hover:border-ink-300'
+                  }`}
+                >
+                  {t.product.size512}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVariantSize('1TB')}
+                  aria-pressed={variantSize === '1TB'}
+                  className={`flex-1 h-10 rounded-md text-[12.5px] font-semibold border-2 transition-colors ${
+                    variantSize === '1TB' ? 'border-orange-700 text-ink-900 bg-orange-50/40' : 'border-ink-200 text-ink-600 hover:border-ink-300'
+                  }`}
+                >
+                  {t.product.size1tb}
+                </button>
+              </div>
+            </div>
+
+            {/* Service guarantees — expandable */}
+            <div className="mb-5 border border-ink-200 rounded-lg overflow-hidden">
+              <div className="px-4 py-2.5 bg-ink-50 text-[12px] font-bold text-ink-700 tracking-wide">
+                {t.product.guaranteeTitle}
+              </div>
+              {[
+                { key: '7day', label: t.product.guarantee7day, desc: t.product.guarantee7dayDesc, icon: '🔁' },
+                { key: 'auth', label: t.product.guaranteeAuth, desc: t.product.guaranteeAuthDesc, icon: '✓' },
+                { key: 'ship', label: t.product.guaranteeShip, desc: t.product.guaranteeShipDesc, icon: '🚚' },
+                { key: 'warranty', label: t.product.guaranteeWarranty, desc: t.product.guaranteeWarrantyDesc, icon: '🛡' },
+              ].map((g) => {
+                const isOpen = expandedGuarantee === g.key;
+                return (
+                  <div key={g.key} className="border-t border-ink-100">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedGuarantee(isOpen ? null : g.key)}
+                      aria-expanded={isOpen}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-semibold text-ink-800 hover:bg-ink-50/50 transition-colors text-left"
+                    >
+                      <span className="text-[15px]">{g.icon}</span>
+                      <span className="flex-1">{g.label}</span>
+                      <span
+                        aria-hidden="true"
+                        className={`text-ink-400 text-[12px] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      >
+                        ▾
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 pb-3 pl-11 text-[12px] text-ink-600 leading-[1.7]">
+                        {g.desc}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Qty */}
             <div className="mb-5">
@@ -348,6 +582,18 @@ export default function ShopDetailClient({ id }: { id: string }) {
           t={t}
         />
 
+        {/* v30: 图文视频 + 对比表 — 仅产品提供了 galleryImages 时展示 */}
+        {product.galleryImages && product.galleryImages.length > 0 && (
+          <ProductShowcase
+            galleryImages={product.galleryImages}
+            videoPoster={product.videoPoster}
+            videoCaption={chrome.isEn ? (product.videoCaption?.en ?? product.videoCaption?.zh) : product.videoCaption?.zh}
+            competitors={product.competitors}
+            chromeIsEn={chrome.isEn}
+            t={t}
+          />
+        )}
+
         {related.length > 0 && (
           <section className="mt-16">
             <h2 className="text-[20px] md:text-[22px] font-bold text-ink-900 mb-5">
@@ -368,6 +614,20 @@ export default function ShopDetailClient({ id }: { id: string }) {
 
         <ServiceStrip />
       </main>
+
+      {/* v30: Lightbox modal */}
+      {lightboxOpen && (
+        <Lightbox
+          gallery={gallery}
+          lightboxImg={lightboxImg}
+          setLightboxImg={setLightboxImg}
+          onClose={() => {
+            setLightboxOpen(false);
+            setAutoplay(true);
+          }}
+          chromeIsEn={chrome.isEn}
+        />
+      )}
 
       <Footer />
     </>
@@ -707,6 +967,300 @@ function FaqSection({ t, chromeIsEn }: { t: ReturnType<typeof useT>; chromeIsEn:
           support@peak-mall.demo
         </a>
       </p>
+    </div>
+  );
+}
+
+/* v30: 图文视频 + 对比表 — 详情页丰富媒体部分 */
+function ProductShowcase({
+  galleryImages,
+  videoPoster,
+  videoCaption,
+  competitors,
+  chromeIsEn,
+  t,
+}: {
+  galleryImages: string[];
+  videoPoster?: string;
+  videoCaption?: string;
+  competitors?: { label: { zh: string; en?: string }; rows: { label: { zh: string; en?: string }; values: { zh: string; en?: string }[] }[] };
+  chromeIsEn: boolean;
+  t: ReturnType<typeof useT>;
+}) {
+  const pickText = (s: { zh: string; en?: string } | undefined) =>
+    s ? (chromeIsEn ? (s.en ?? s.zh) : s.zh) : '';
+  const [showVideo, setShowVideo] = useState(false);
+
+  return (
+    <section className="mt-16 pt-10 border-t border-ink-200 space-y-12">
+      {/* v30 #3.1 产品图集 — 4 张大图 */}
+      <div>
+        <h2 className="text-[20px] md:text-[22px] font-bold text-ink-900 mb-5">
+          {t.product.productShowcaseLabel}
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {galleryImages.map((src, i) => (
+            <div
+              key={src + i}
+              className="relative aspect-square bg-ink-50 rounded-lg overflow-hidden border border-ink-100 hover:border-orange-700/40 transition-colors group"
+            >
+              {src.startsWith('/') || src.startsWith('http') ? (
+                <Image
+                  src={src}
+                  alt={`Showcase ${i + 1}`}
+                  width={400}
+                  height={400}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[40px]">📦</div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent text-white text-[11px] font-semibold px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {chromeIsEn ? `View ${i + 1}` : `图 ${i + 1}`}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* v30 #3.2 视频位 — poster + ▶ 角标 */}
+      {videoPoster && (
+        <div>
+          <h2 className="text-[20px] md:text-[22px] font-bold text-ink-900 mb-5">
+            {t.product.productVideoLabel}
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowVideo(true)}
+            aria-label={chromeIsEn ? 'Play product video' : '播放产品视频'}
+            className="relative block w-full max-w-[920px] mx-auto aspect-video bg-ink-50 rounded-lg overflow-hidden border border-ink-100 group hover:border-orange-700/40 transition-colors"
+          >
+            {videoPoster.startsWith('/') || videoPoster.startsWith('http') ? (
+              <Image src={videoPoster} alt="Video poster" width={1280} height={720} className="w-full h-full object-cover" />
+            ) : null}
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center transition-transform group-hover:scale-110">
+                <span className="text-orange-700 text-[40px] leading-none ml-2">▶</span>
+              </div>
+            </div>
+            {videoCaption && (
+              <div className="absolute bottom-4 left-4 right-4 text-white text-[14px] font-semibold text-left drop-shadow">
+                {videoCaption}
+              </div>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* v30 #3.3 模拟播放 modal — 没真实视频 */}
+      {showVideo && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={chromeIsEn ? 'Video player' : '视频播放'}
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setShowVideo(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setShowVideo(false)}
+            aria-label={chromeIsEn ? 'Close (Esc)' : '关闭 (Esc)'}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white text-[20px] font-bold flex items-center justify-center"
+          >
+            ×
+          </button>
+          <div className="text-center text-white" onClick={(e) => e.stopPropagation()}>
+            <div className="text-[80px] mb-4">🎬</div>
+            <div className="text-[18px] font-bold mb-2">{chromeIsEn ? 'Video preview unavailable in this demo' : 'Demo 暂不提供视频预览'}</div>
+            <div className="text-[13px] text-white/70">{chromeIsEn ? 'Click anywhere to close' : '点击任意位置关闭'}</div>
+          </div>
+        </div>
+      )}
+
+      {/* v30 #3.4 同价位对比表 */}
+      {competitors && competitors.rows.length > 0 && (
+        <div>
+          <h2 className="text-[20px] md:text-[22px] font-bold text-ink-900 mb-5">
+            {t.product.compareLabel}
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px] border-collapse">
+              <thead>
+                <tr className="bg-ink-50">
+                  <th className="text-left py-3 px-4 font-bold text-ink-900 border-b border-ink-200 sticky left-0 bg-ink-50">
+                    {pickText(competitors.label)}
+                  </th>
+                  {competitors.rows[0].values.map((_, i) => (
+                    <th
+                      key={i}
+                      className={`text-left py-3 px-4 font-bold border-b border-ink-200 ${
+                        i === 0 ? 'bg-orange-50 text-orange-700' : 'text-ink-700'
+                      }`}
+                    >
+                      {i === 0 ? t.product.compareThisRow : `${t.product.compareOther} ${i}`}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {competitors.rows.map((row, ri) => (
+                  <tr key={ri} className="border-b border-ink-100 hover:bg-ink-50/40">
+                    <td className="py-3 px-4 text-ink-500 font-semibold sticky left-0 bg-white">
+                      {pickText(row.label)}
+                    </td>
+                    {row.values.map((v, vi) => (
+                      <td
+                        key={vi}
+                        className={`py-3 px-4 font-semibold ${
+                          vi === 0 ? 'text-orange-700 bg-orange-50/40' : 'text-ink-900'
+                        }`}
+                      >
+                        {pickText(v)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* v30: Lightbox modal — full-screen image viewer with keyboard nav */
+function Lightbox({
+  gallery,
+  lightboxImg,
+  setLightboxImg,
+  onClose,
+  chromeIsEn,
+}: {
+  gallery: Product[];
+  lightboxImg: number;
+  setLightboxImg: (n: number) => void;
+  onClose: () => void;
+  chromeIsEn: boolean;
+}) {
+  // v30: ESC 关 / ←/→ 切图
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') setLightboxImg((lightboxImg - 1 + gallery.length) % gallery.length);
+      else if (e.key === 'ArrowRight') setLightboxImg((lightboxImg + 1) % gallery.length);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxImg, gallery.length, onClose]);
+
+  // focus trap: set focus to close button on mount
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+  }, []);
+
+  const current = gallery[lightboxImg];
+  if (!current) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={chromeIsEn ? 'Image viewer' : '图片查看器'}
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button
+        ref={closeBtnRef}
+        type="button"
+        onClick={onClose}
+        aria-label={chromeIsEn ? 'Close image viewer (Esc)' : '关闭图片查看器 (Esc)'}
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white text-[20px] font-bold flex items-center justify-center transition-colors"
+      >
+        ×
+      </button>
+
+      {/* Image counter */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full">
+        {lightboxImg + 1} / {gallery.length}
+      </div>
+
+      {/* Prev / Next */}
+      {gallery.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxImg((lightboxImg - 1 + gallery.length) % gallery.length);
+            }}
+            aria-label={chromeIsEn ? 'Previous image (←)' : '上一张 (←)'}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white text-[24px] font-bold flex items-center justify-center transition-colors"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxImg((lightboxImg + 1) % gallery.length);
+            }}
+            aria-label={chromeIsEn ? 'Next image (→)' : '下一张 (→)'}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white text-[24px] font-bold flex items-center justify-center transition-colors"
+          >
+            ›
+          </button>
+        </>
+      )}
+
+      {/* Main image */}
+      <div
+        className="relative max-w-[90vw] max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {current.cover?.startsWith('/') || current.cover?.startsWith('http') ? (
+          <Image
+            key={current.cover}
+            src={current.cover}
+            alt={current.name}
+            width={1200}
+            height={1200}
+            className="max-w-[90vw] max-h-[85vh] w-auto h-auto object-contain"
+          />
+        ) : (
+          <div className="text-[180px]">📦</div>
+        )}
+        <div className="text-center text-white/80 text-[12.5px] mt-3">{current.name}</div>
+      </div>
+
+      {/* Thumbnail strip */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto p-1">
+        {gallery.map((g, i) => {
+          const isActive = i === lightboxImg;
+          return (
+            <button
+              key={`${g.id}-${i}`}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxImg(i);
+              }}
+              aria-label={chromeIsEn ? `Jump to image ${i + 1}` : `跳到图片 ${i + 1}`}
+              className={`flex-shrink-0 w-14 h-14 rounded-md overflow-hidden border-2 transition-colors ${
+                isActive ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
+              }`}
+            >
+              {g.cover?.startsWith('/') || g.cover?.startsWith('http') ? (
+                <Image src={g.cover} alt={g.name} width={56} height={56} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-white/10 flex items-center justify-center text-[18px]">📦</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
