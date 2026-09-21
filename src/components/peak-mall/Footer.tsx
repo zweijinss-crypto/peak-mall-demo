@@ -96,10 +96,10 @@ const Footer: FC<FooterProps> = ({
               {intro}
             </p>
             <div className="flex gap-2.5">
-              <a aria-label="facebook" href="#" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">f</a>
-              <a aria-label="x" href="#" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
-              <a aria-label="linkedin" href="#" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">in</a>
-              <a aria-label="instagram" href="#" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">IG</a>
+              <a href="#" aria-label="f — Facebook" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">f</a>
+              <a href="#" aria-label="X — 社交媒体" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
+              <a href="#" aria-label="in — LinkedIn" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">in</a>
+              <a href="#" aria-label="IG — Instagram" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">IG</a>
             </div>
           </div>
           {finalColumns.map((col, idx) => (

@@ -183,7 +183,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 <Link
                   href="/login?tab=admin"
                   className="cursor-pointer hover:text-orange-500 inline-flex items-center gap-1"
-                  aria-label={t.auth.switchToAdmin ?? '管理员入口'}
+                  aria-label={t.auth.tabAdmin ?? '管理员登录'}
                 >
                   <span aria-hidden>🔒</span>
                   {t.auth.tabAdmin ?? '管理员登录'}
@@ -274,6 +274,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               id="peak-mall-search"
               ref={inputRef}
               type="search"
+              role="searchbox"
               value={q}
               onChange={(e) => { setQ(e.target.value); setOpen(true); setActiveIndex(-1); }}
               onFocus={() => setOpen(true)}
@@ -281,7 +282,6 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               placeholder={finalPlaceholder}
               aria-label={t.header.inputAria}
               aria-autocomplete="list"
-              aria-expanded={open}
               aria-controls="peak-search-suggestions"
               autoComplete="off"
               className="flex-1 bg-transparent outline-none text-[13.5px] placeholder:text-neutral-400"
@@ -301,27 +301,27 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               ⌘K
             </kbd>
           </form>
-          {open && (
-            <div id="peak-search-suggestions" className="absolute left-0 right-0 top-full">
-              <SearchSuggestions
-                query={q}
-                activeIndex={activeIndex}
-                onPick={pick}
-                onClose={() => { setOpen(false); setActiveIndex(-1); }}
-                inputRef={inputRef}
-                formRef={formRef}
-                searchAria={t.header.searchAria}
-                sugHistory={t.header.sugHistory}
-                sugHot={t.header.sugHot}
-                sugEmpty={t.header.sugEmpty}
-                sugClear={t.header.sugClear}
-                sugNoHistory={t.header.sugNoHistory}
-                clear={t.header.clear}
-                didYouMean={t.header.didYouMean}
-                didYouMeanSuffix={t.header.didYouMeanSuffix}
-              />
+          <div id="peak-search-suggestions" role="region" aria-label={t.header.searchAria} className={open ? 'absolute left-0 right-0 top-full' : 'hidden'}>
+              {open && (
+                <SearchSuggestions
+                  query={q}
+                  activeIndex={activeIndex}
+                  onPick={pick}
+                  onClose={() => { setOpen(false); setActiveIndex(-1); }}
+                  inputRef={inputRef}
+                  formRef={formRef}
+                  searchAria={t.header.searchAria}
+                  sugHistory={t.header.sugHistory}
+                  sugHot={t.header.sugHot}
+                  sugEmpty={t.header.sugEmpty}
+                  sugClear={t.header.sugClear}
+                  sugNoHistory={t.header.sugNoHistory}
+                  clear={t.header.clear}
+                  didYouMean={t.header.didYouMean}
+                  didYouMeanSuffix={t.header.didYouMeanSuffix}
+                />
+              )}
             </div>
-          )}
           </div>
 
           <nav className="hidden md:flex items-center gap-1 flex-1" aria-label={t.nav.home}>
@@ -445,6 +445,7 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 id="peak-mall-search-mobile"
                 ref={mobileInputRef}
                 type="search"
+                role="searchbox"
                 value={mobileQ}
                 onChange={(e) => { setMobileQ(e.target.value); setMobileFocus(true); setMobileActiveIndex(-1); }}
                 onFocus={() => setMobileFocus(true)}
@@ -462,7 +463,6 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 placeholder={finalPlaceholder}
                 aria-label={t.header.inputAria}
                 aria-autocomplete="list"
-                aria-expanded={mobileFocus}
                 aria-controls="peak-search-suggestions-mobile"
                 autoComplete="off"
                 className="flex-1 bg-transparent outline-none text-[14px] placeholder:text-neutral-400"
