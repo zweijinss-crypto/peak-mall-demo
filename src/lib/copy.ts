@@ -1320,6 +1320,7 @@ export const COPY = {
       copyAddress: '复制地址',
       copied: '已复制',
       copyErr: '复制失败',
+      rangeErr: '费率范围 0–100,直推比例不能超过上限',
       savedToast: '已保存 · 代理 #{id}',
       undoCta: '撤销',
       undoneToast: '已撤销修改',

@@ -38,7 +38,7 @@ function validate(d: DraftRow, t: any): string | null {
   const sub = Number(d.sub_rate);
   const lim = Number(d.sub_rate_limit);
   if ([own, sub, lim].some((n) => !Number.isFinite(n) || n < 0 || n > 100)) {
-    return t.admin.agents.copyErr; // reuse; we'll add a proper key below
+    return t.admin.agents.rangeErr;
   }
   if (sub > lim) {
     return 'sub_rate must be ≤ sub_rate_limit';

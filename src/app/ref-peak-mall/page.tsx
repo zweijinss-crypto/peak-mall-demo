@@ -130,16 +130,16 @@ function RefPeakMallDemoInner() {
                     id: 1, name: cart.c1.name, price: 199, qty: 1,
                     coverEmoji: '🎧', currency: 'USD', subtitle: cart.c1.subtitle,
                   }}
-                  onChangeQty={(id, qty) => console.log('changeQty', id, qty)}
-                  onRemove={(id) => console.log('remove', id)}
+                  onChangeQty={() => { /* ref-peak-mall demo, no-op */ }}
+                  onRemove={() => { /* ref-peak-mall demo, no-op */ }}
                 />
                 <CartLine
                   item={{
                     id: 2, name: products.p2.name, price: 299, qty: 2,
                     coverEmoji: '⌚', currency: 'USD',
                   }}
-                  onChangeQty={(id, qty) => console.log('changeQty', id, qty)}
-                  onRemove={(id) => console.log('remove', id)}
+                  onChangeQty={() => { /* ref-peak-mall demo, no-op */ }}
+                  onRemove={() => { /* ref-peak-mall demo, no-op */ }}
                 />
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--ref-gray-100)]">
                   <span className="text-sm text-[var(--ref-gray-500)]">{t('common.subtotal')}</span>

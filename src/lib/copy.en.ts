@@ -1346,6 +1346,7 @@ export const COPY_EN = {
       copyAddress: 'Copy address',
       copied: 'Copied',
       copyErr: 'Copy failed',
+      rangeErr: 'Rates must be 0–100, and sub rate cannot exceed the limit',
       savedToast: 'Saved · agent #{id}',
       undoCta: 'Undo',
       undoneToast: 'Change reverted',

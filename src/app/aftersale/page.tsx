@@ -26,7 +26,6 @@ const SEED: AfterSaleTicket[] = [
 
 export default function AftersalePage() {
   const t = useT();
-  const cp = useT() as Record<string, any>;
   const router = useRouter();
   const chrome = usePageChrome('aftersale');
   const orders = usePeakStore((s) => s.orders);
@@ -160,7 +159,7 @@ export default function AftersalePage() {
                 onClick={() => setRequestOpen(false)}
                 className="px-5 py-2.5 bg-white border border-ink-200 hover:bg-ink-50 text-ink-700 text-[13.5px] font-bold rounded-md transition-colors"
               >
-                {cp.address.cancel as string}
+                {t.address.cancel as string}
               </button>
             </div>
           </div>

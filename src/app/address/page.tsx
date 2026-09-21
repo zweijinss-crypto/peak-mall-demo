@@ -44,7 +44,6 @@ function validatePhone(p: string): boolean {
 
 export default function AddressPage() {
   const t = useT();
-  const cp = useT() as Record<string, any>;
   const chrome = usePageChrome('address');
   const [list, setList] = useState<Address[]>([]);
   const [editing, setEditing] = useState<Omit<Address, 'id'> | null>(null);

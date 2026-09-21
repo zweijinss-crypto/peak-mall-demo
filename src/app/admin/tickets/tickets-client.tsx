@@ -41,7 +41,7 @@ export function TicketsClient() {
               <tr><Td colSpan={7} className="text-center text-neutral-500 py-6">{t.admin.tickets.empty}</Td></tr>
             ) : (
               tickets.map((x: any) => (
-                <tr key={t.id} className="hover:bg-neutral-50 transition-colors">
+                <tr key={x.id} className="hover:bg-neutral-50 transition-colors">
                   <Td>{x.id}</Td>
                   <Td className="font-mono text-[12px]">{x.order_no}</Td>
                   <Td>@{x.username}</Td>
