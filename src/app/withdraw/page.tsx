@@ -13,6 +13,11 @@ interface WithdrawRow {
   addressLabel: string;
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   createdAt: string; // ISO — static
+  /** C3: optional timeline stamps (static for SSR-safe) */
+  approvedAt?: string;
+  completedAt?: string;
+  rejectedAt?: string;
+  rejectReason?: string;
 }
 
 /** C2: 手续费率 2%,最低手续费 $0.50,上限 $5.00 */
@@ -32,10 +37,34 @@ function calcFee(amount: number): { fee: number; net: number } {
  *  Real product would verify server-side via /api/auth/fund-password. */
 const DEMO_FUND_PWD = '123456';
 
+/** CSV escape — wrap in quotes when value contains comma, quote, or newline.
+ *  Inner quotes doubled. */
+function csvCell(v: string | number): string {
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadCSV(filename: string, rows: string[][]): void {
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 const HISTORY: WithdrawRow[] = [
-  { id: 'W1', amount: 100, addressLabel: 'USDT-TRC20-default', status: 'completed', createdAt: '2024-09-15T03:12:00.000Z' },
+  { id: 'W1', amount: 100, addressLabel: 'USDT-TRC20-default', status: 'completed', createdAt: '2024-09-15T03:12:00.000Z', approvedAt: '2024-09-15T04:00:00.000Z', completedAt: '2024-09-15T05:30:00.000Z' },
   { id: 'W2', amount: 50,  addressLabel: 'USDT-TRC20-default', status: 'pending',   createdAt: '2024-09-19T07:42:00.000Z' },
-  { id: 'W3', amount: 25,  addressLabel: 'Bank-ICBC',          status: 'rejected',  createdAt: '2024-09-08T11:24:00.000Z' },
+  { id: 'W3', amount: 25,  addressLabel: 'Bank-ICBC',          status: 'rejected',  createdAt: '2024-09-08T11:24:00.000Z', rejectedAt: '2024-09-09T09:10:00.000Z', rejectReason: 'Bank account info mismatch' },
+  { id: 'W4', amount: 200, addressLabel: 'BTC-Segwit-backup',  status: 'completed', createdAt: '2024-09-04T02:00:00.000Z', approvedAt: '2024-09-04T03:15:00.000Z', completedAt: '2024-09-04T08:00:00.000Z' },
+  { id: 'W5', amount: 75,  addressLabel: 'Bank-CCB',           status: 'approved',  createdAt: '2024-09-02T11:30:00.000Z', approvedAt: '2024-09-02T13:00:00.000Z' },
+  { id: 'W6', amount: 30,  addressLabel: 'USDT-TRC20-default', status: 'rejected',  createdAt: '2024-08-28T05:20:00.000Z', rejectedAt: '2024-08-28T06:45:00.000Z', rejectReason: 'Below minimum threshold' },
+  { id: 'W7', amount: 60,  addressLabel: 'ETH-ERC20-default',  status: 'completed', createdAt: '2024-08-20T09:15:00.000Z', approvedAt: '2024-08-20T10:00:00.000Z', completedAt: '2024-08-20T14:30:00.000Z' },
 ];
 
 const ADDR_KEY = 'peak_withdraw_addresses';
@@ -56,6 +85,12 @@ export default function WithdrawPage() {
   const [pwdError, setPwdError] = useState<string | null>(null);
   const [pwdShake, setPwdShake] = useState(false);
   const pwdInputRef = useRef<HTMLInputElement | null>(null);
+
+  /** C3: history filter + export */
+  type WithdrawStatusTab = 'all' | WithdrawRow['status'];
+  const [statusTab, setStatusTab] = useState<WithdrawStatusTab>('all');
+  const [search, setSearch] = useState('');
+  const [exportToast, setExportToast] = useState<string | null>(null);
 
   /** C2: live fee preview */
   const parsedAmount = Number(amount);
@@ -87,6 +122,45 @@ export default function WithdrawPage() {
     approved: t.withdraw.statusApproved,
     rejected: t.withdraw.statusRejected,
     completed: t.withdraw.statusCompleted,
+  };
+
+  /** C3: filter rows by status + search (id/address) */
+  const filtered = useMemo(() => {
+    let arr: WithdrawRow[] = HISTORY;
+    if (statusTab !== 'all') arr = arr.filter((r) => r.status === statusTab);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter((r) =>
+        r.id.toLowerCase().includes(q) ||
+        r.addressLabel.toLowerCase().includes(q)
+      );
+    }
+    return arr;
+  }, [statusTab, search]);
+
+  const statusCounts = useMemo(() => {
+    const acc: Record<WithdrawStatusTab, number> = {
+      all: HISTORY.length,
+      pending: 0, approved: 0, rejected: 0, completed: 0,
+    };
+    for (const r of HISTORY) acc[r.status]++;
+    return acc;
+  }, []);
+
+  /** C3: export filtered rows to CSV */
+  const handleExport = () => {
+    const headers = [t.withdraw.date, 'id', t.withdraw.address, t.withdraw.amount, 'status'];
+    const body = filtered.map((r) => [
+      r.createdAt.slice(0, 10),
+      r.id,
+      r.addressLabel,
+      `$${r.amount.toFixed(2)}`,
+      STATUS_LABEL[r.status],
+    ]);
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCSV(`withdrawals-${stamp}.csv`, [headers, ...body]);
+    setExportToast(t.withdraw.exported(filtered.length));
+    window.setTimeout(() => setExportToast(null), 2000);
   };
 
   const openModal = () => {
@@ -306,19 +380,100 @@ export default function WithdrawPage() {
         )}
 
         <h2 className="text-[18px] font-bold text-ink-900 mb-3">{t.withdraw.history}</h2>
+
+        {/* C3: status tabs + search + export */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div role="tablist" className="flex flex-wrap gap-1 bg-ink-50 border border-ink-100 p-1 rounded-md">
+            {([
+              { key: 'all', label: t.withdraw.tabAll },
+              { key: 'pending', label: t.withdraw.statusPending },
+              { key: 'approved', label: t.withdraw.statusApproved },
+              { key: 'rejected', label: t.withdraw.statusRejected },
+              { key: 'completed', label: t.withdraw.statusCompleted },
+            ] as Array<{ key: WithdrawStatusTab; label: string }>).map((tab) => {
+              const active = statusTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setStatusTab(tab.key)}
+                  className={`px-3 py-1.5 text-[12.5px] font-semibold rounded transition-colors flex items-center gap-1.5 ${
+                    active ? 'bg-white text-orange-700 shadow-soft' : 'text-ink-600 hover:text-ink-900'
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`text-[10px] tabular-nums ${active ? 'text-orange-700' : 'text-ink-500'}`}>
+                    {statusCounts[tab.key]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex-1 relative min-w-[180px]">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t.withdraw.searchPlaceholder}
+              aria-label={t.withdraw.searchAria}
+              className="w-full px-3 py-1.5 pl-9 border border-ink-200 rounded-md text-[13px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-[14px]" aria-hidden="true">🔍</span>
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 text-ink-400 hover:text-ink-700"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+            className="px-3 py-1.5 border border-orange-700 text-orange-700 hover:bg-orange-700 hover:text-white text-[12.5px] font-bold rounded transition-colors disabled:border-ink-200 disabled:text-ink-300 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          >
+            ⬇ {t.withdraw.export}
+          </button>
+        </div>
+
+        {exportToast && (
+          <div role="status" className="mb-4 px-4 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]">
+            ✓ {exportToast}
+          </div>
+        )}
+
         {HISTORY.length === 0 ? (
           <div className="bg-white rounded-xl py-10 text-center border border-ink-100 text-ink-500 text-[13px]">
             {t.withdraw.empty}
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white rounded-xl py-10 text-center border border-ink-100">
+            <div className="text-[40px] mb-3">🔎</div>
+            <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.withdraw.noMatch}</div>
+            <div className="text-[12px] text-ink-500">{t.withdraw.noMatchDesc}</div>
+          </div>
         ) : (
           <div className="space-y-3">
-            {HISTORY.map((r) => (
+            {filtered.map((r) => (
               <article key={r.id} className="bg-white rounded-xl border border-ink-100 px-5 py-4 flex flex-wrap items-center gap-4">
                 <div className="text-[20px] font-extrabold text-orange-700 min-w-[80px]">${r.amount.toFixed(2)}</div>
                 <div className="flex-1 min-w-[160px]">
                   <div className="text-[13px] font-semibold text-ink-900">{r.addressLabel}</div>
-                  <div className="text-[11.5px] text-ink-500 mt-0.5" suppressHydrationWarning>
-                    {new Date(r.createdAt).toISOString().slice(0, 10)}
+                  <div className="text-[11.5px] text-ink-500 mt-0.5 flex flex-wrap items-center gap-x-2">
+                    <span suppressHydrationWarning>{new Date(r.createdAt).toISOString().slice(0, 10)}</span>
+                    <span className="text-ink-300">·</span>
+                    <span className="font-mono text-ink-700">{r.id}</span>
+                    {r.rejectReason && (
+                      <>
+                        <span className="text-ink-300">·</span>
+                        <span className="text-rose-700">⚠ {r.rejectReason}</span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-[11.5px] font-bold ${STATUS_COLOR[r.status]}`}>
