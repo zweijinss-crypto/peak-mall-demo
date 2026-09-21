@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import { useRouter } from 'next/navigation';
 import { useT } from '@/lib/use-t';
 import { PRODUCTS } from '@/data/products';
+import { suggestCorrection } from '@/lib/search-correct';
 
 /**
  * S1: SearchSuggestions — 实时下拉,三段式:
@@ -69,6 +70,9 @@ export interface SearchSuggestionsProps {
   clear: string;
   /** S2: inline mode for mobile dialog (no absolute + shadow, no max-height). */
   inline?: boolean;
+  /** S5: did-you-mean copy */
+  didYouMean?: string;
+  didYouMeanSuffix?: string;
 }
 
 const SearchSuggestions: FC<SearchSuggestionsProps> = ({
@@ -86,6 +90,8 @@ const SearchSuggestions: FC<SearchSuggestionsProps> = ({
   sugNoHistory,
   clear,
   inline,
+  didYouMean,
+  didYouMeanSuffix,
 }) => {
   const [history, setHistory] = useState<string[]>([]);
   const popoverRef = useRef<HTMLDivElement | null>(null);
@@ -115,12 +121,25 @@ const SearchSuggestions: FC<SearchSuggestionsProps> = ({
       .map((p) => ({ type: 'suggest' as const, value: p.name, hint: p.category }));
   })();
 
+  // S5: 拼写纠错 — 联想为空时给个提示
+  const correction = (() => {
+    if (!query.trim() || suggestions.length > 0) return null;
+    // 同时塞单词词 (Laptop / Drone / Earbuds) — 长名 "Ultra-Slim Business Laptop"
+    // 距离超阈被滤掉,需短词词典
+    const dict = Array.from(new Set([
+      ...PRODUCTS.map((p) => p.name),
+      ...PRODUCTS.map((p) => p.category ?? '').filter(Boolean),
+      ...PRODUCTS.flatMap((p) => p.name.split(/\s+/).filter((w) => w.length >= 4)),
+    ]));
+    return suggestCorrection(query.trim(), dict, 2);
+  })();
+
   // 渲染列表(扁平,便于键盘导航)
   type Row = { type: 'suggest' | 'history' | 'hot'; value: string; hint?: string };
   const rows: Row[] = [];
   if (suggestions.length > 0) {
     rows.push(...suggestions);
-  } else if (mounted && query.trim() === '') {
+  } else if (mounted && query.trim() === '' && correction === null) {
     if (history.length > 0) rows.push(...history.map((v) => ({ type: 'history' as const, value: v })));
   }
   // 热门总是出现在最末段
@@ -164,6 +183,19 @@ const SearchSuggestions: FC<SearchSuggestionsProps> = ({
     >
       {!hasAny && (
         <div className="px-4 py-6 text-center text-[13px] text-ink-500">{sugEmpty}</div>
+      )}
+
+      {/* S5: did-you-mean 纠错提示 */}
+      {correction && didYouMean && (
+        <button
+          type="button"
+          onClick={() => onPick(correction)}
+          className="w-full px-4 py-2.5 text-left text-[13px] hover:bg-amber-50 transition-colors flex items-baseline gap-2 border-b border-ink-100"
+        >
+          <span className="text-ink-500 text-[11.5px]">{didYouMean}:</span>
+          <span className="text-orange-700 font-semibold">{correction}</span>
+          <span className="text-ink-500 text-[11.5px]">{didYouMeanSuffix ?? '?'}</span>
+        </button>
       )}
 
       {/* 联想段标题 */}

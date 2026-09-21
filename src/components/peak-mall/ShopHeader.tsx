@@ -293,6 +293,8 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 sugClear={t.header.sugClear}
                 sugNoHistory={t.header.sugNoHistory}
                 clear={t.header.clear}
+                didYouMean={t.header.didYouMean}
+                didYouMeanSuffix={t.header.didYouMeanSuffix}
               />
             </div>
           )}
@@ -478,6 +480,8 @@ const ShopHeader: FC<ShopHeaderProps> = ({
                 sugNoHistory={t.header.sugNoHistory}
                 clear={t.header.clear}
                 inline
+                didYouMean={t.header.didYouMean}
+                didYouMeanSuffix={t.header.didYouMeanSuffix}
               />
             </div>
           )}

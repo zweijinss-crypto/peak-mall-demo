@@ -10,7 +10,66 @@ export const PRODUCTS: Product[] = [
     "cover": "/covers/p16.svg",
     "description": "14-inch ultra-slim laptop with Intel Core i5, 16GB RAM, 512GB SSD, and 18-hour battery life.",
     "status": 1,
-    "created_at": "2026-09-14T11:56:05.000Z"
+    "created_at": "2026-09-14T11:56:05.000Z",
+    "highlights": [
+      { "zh": "13 代 Intel Core i5-1340P · 12 核 16 线程", "en": "13th Gen Intel Core i5-1340P · 12 cores / 16 threads" },
+      { "zh": "16GB LPDDR5 5200MHz · 512GB PCIe 4.0 SSD", "en": "16GB LPDDR5 5200MHz · 512GB PCIe 4.0 SSD" },
+      { "zh": "14 英寸 2.8K OLED · 100% DCI-P3 · 90Hz", "en": "14\" 2.8K OLED · 100% DCI-P3 · 90Hz" },
+      { "zh": "整机仅 1.4kg · 薄至 14.9mm", "en": "Just 1.4kg · as slim as 14.9mm" },
+      { "zh": "70Wh 大电池 · 本地视频续航 18 小时", "en": "70Wh battery · 18h local video playback" },
+    ],
+    "longDescription": [
+      { "zh": "为移动办公而生的超轻薄商务本。全金属机身经过 27 道 CNC 工艺打磨，镁合金骨架在保证强度的同时将整机重量控制在 1.4kg，薄至 14.9mm，放入通勤包几乎无感。", "en": "Built for mobile work. The all-metal body goes through 27-step CNC machining; a magnesium-aluminum skeleton keeps weight at 1.4kg and thickness at 14.9mm — slip it into your commute bag and you barely notice it." },
+      { "zh": "搭载第 13 代 Intel Core i5-1340P 处理器，12 核 16 线程混合架构，睿频最高 4.6GHz，配合 16GB LPDDR5 5200MHz 高频内存与 512GB PCIe 4.0 高速固态，打开大型 Excel、设计稿或虚拟机都能流畅切换。", "en": "Powered by the 13th Gen Intel Core i5-1340P — 12 cores, 16 threads, up to 4.6GHz. Paired with 16GB LPDDR5 5200MHz memory and a 512GB PCIe 4.0 NVMe SSD, switching between heavy Excel sheets, design files, and virtual machines stays smooth." },
+      { "zh": "14 英寸 2.8K OLED 屏幕，2880×1800 高分辨率 + 90Hz 高刷，覆盖 100% DCI-P3 广色域，通过 VESA DisplayHDR True Black 500 认证，无论是深夜追剧还是白天调色，都能呈现准确而饱满的色彩。", "en": "The 14\" 2.8K OLED panel delivers 2880×1800 resolution at 90Hz, covers 100% DCI-P3, and is VESA DisplayHDR True Black 500 certified — accurate, vibrant color whether you're color-grading during the day or watching a movie at night." },
+      { "zh": "70Wh 大电池搭配智能功耗调度，本地 1080p 视频播放最长可达 18 小时，出差一整天不用找插座；30 分钟快充可回血 60%，碎片化时间补能充足。", "en": "A 70Wh battery with intelligent power scheduling delivers up to 18 hours of local 1080p video playback — leave the charger at home for the day. 30 minutes of fast-charge restores about 60% capacity." },
+      { "zh": "接口方面，提供 2× 雷电 4 / USB-C、1× USB-A 3.2、HDMI 2.1 与 3.5mm 耳机孔，无需扩展坞即可外接双 4K 显示器与键鼠；Wi-Fi 6E + 蓝牙 5.3 保证无线连接稳定。", "en": "Ports include 2× Thunderbolt 4 / USB-C, 1× USB-A 3.2, HDMI 2.1, and a 3.5mm audio jack — no dock required to drive dual 4K monitors. Wi-Fi 6E and Bluetooth 5.3 keep wireless rock-solid." },
+      { "zh": "出厂预装正版 Windows 11，支持指纹 + 人脸双生物识别登录，内置 TPM 2.0 安全芯片，商用环境亦可放心使用。", "en": "Ships with a licensed Windows 11, supports fingerprint and facial recognition, and ships with a TPM 2.0 security chip — ready for business deployment out of the box." },
+    ],
+    "specs": {
+      "base": [
+        { "label": { "zh": "产品名称", "en": "Product name" }, "value": { "zh": "Ultra-Slim Business Laptop", "en": "Ultra-Slim Business Laptop" } },
+        { "label": { "zh": "商品编号", "en": "SKU" }, "value": { "zh": "PML-14I5-512-SLV", "en": "PML-14I5-512-SLV" } },
+        { "label": { "zh": "颜色", "en": "Color" }, "value": { "zh": "深空灰 / 银河银", "en": "Space gray / Lunar silver" } },
+        { "label": { "zh": "尺寸", "en": "Dimensions" }, "value": { "zh": "312 × 221 × 14.9 mm", "en": "312 × 221 × 14.9 mm" } },
+        { "label": { "zh": "重量", "en": "Weight" }, "value": { "zh": "1.4 kg", "en": "1.4 kg" } },
+        { "label": { "zh": "材质", "en": "Material" }, "value": { "zh": "航空级铝合金一体成型", "en": "Aerospace-grade unibody aluminum" } },
+      ],
+      "perf": [
+        { "label": { "zh": "处理器", "en": "CPU" }, "value": { "zh": "Intel Core i5-1340P · 12 核 16 线程 · 最高 4.6GHz", "en": "Intel Core i5-1340P · 12 cores / 16 threads · up to 4.6GHz" } },
+        { "label": { "zh": "显卡", "en": "GPU" }, "value": { "zh": "Intel Iris Xe Graphics · 80 EU", "en": "Intel Iris Xe Graphics · 80 EU" } },
+        { "label": { "zh": "内存", "en": "Memory" }, "value": { "zh": "16GB LPDDR5 5200MHz 双通道", "en": "16GB LPDDR5 5200MHz dual-channel" } },
+        { "label": { "zh": "硬盘", "en": "Storage" }, "value": { "zh": "512GB PCIe 4.0 NVMe SSD · 读取 5000MB/s", "en": "512GB PCIe 4.0 NVMe SSD · 5000 MB/s read" } },
+        { "label": { "zh": "散热", "en": "Thermals" }, "value": { "zh": "双风扇 + 双热管 · 47 片 0.1mm 鳍片", "en": "Dual fan + dual heatpipe · 47 0.1mm fins" } },
+      ],
+      "display": [
+        { "label": { "zh": "屏幕尺寸", "en": "Panel size" }, "value": { "zh": "14 英寸 OLED", "en": "14\" OLED" } },
+        { "label": { "zh": "分辨率", "en": "Resolution" }, "value": { "zh": "2880 × 1800 (2.8K)", "en": "2880 × 1800 (2.8K)" } },
+        { "label": { "zh": "刷新率", "en": "Refresh rate" }, "value": { "zh": "90Hz · 0.2ms 响应", "en": "90Hz · 0.2ms response" } },
+        { "label": { "zh": "色域", "en": "Color gamut" }, "value": { "zh": "100% DCI-P3 · 133% sRGB", "en": "100% DCI-P3 · 133% sRGB" } },
+        { "label": { "zh": "亮度 / 对比", "en": "Brightness / contrast" }, "value": { "zh": "500 nits · 1,000,000:1", "en": "500 nits · 1,000,000:1" } },
+        { "label": { "zh": "音频", "en": "Audio" }, "value": { "zh": "四扬声器 · 杜比全景声", "en": "Quad speakers · Dolby Atmos" } },
+      ],
+      "battery": [
+        { "label": { "zh": "电池容量", "en": "Capacity" }, "value": { "zh": "70Wh 高密度锂电", "en": "70Wh high-density lithium" } },
+        { "label": { "zh": "续航", "en": "Endurance" }, "value": { "zh": "本地视频 18h · 办公 12h", "en": "18h video · 12h office work" } },
+        { "label": { "zh": "充电", "en": "Charging" }, "value": { "zh": "65W Type-C PD 快充 · 30 分钟 0→60%", "en": "65W Type-C PD fast-charge · 30 min → 60%" } },
+        { "label": { "zh": "充电器", "en": "Charger" }, "value": { "zh": "65W 氮化镓 · 折叠插脚", "en": "65W GaN · foldable prongs" } },
+      ],
+      "ports": [
+        { "label": { "zh": "USB-C", "en": "USB-C" }, "value": { "zh": "2 × 雷电 4 (40Gbps · 支持充电 + 视频输出)", "en": "2 × Thunderbolt 4 (40Gbps · charging + video)" } },
+        { "label": { "zh": "USB-A", "en": "USB-A" }, "value": { "zh": "1 × USB-A 3.2 Gen2 (10Gbps)", "en": "1 × USB-A 3.2 Gen2 (10Gbps)" } },
+        { "label": { "zh": "视频输出", "en": "Video output" }, "value": { "zh": "HDMI 2.1 · 支持 4K@120Hz", "en": "HDMI 2.1 · supports 4K@120Hz" } },
+        { "label": { "zh": "音频", "en": "Audio" }, "value": { "zh": "3.5mm 二合一耳机麦口", "en": "3.5mm combo headphone/mic" } },
+        { "label": { "zh": "无线", "en": "Wireless" }, "value": { "zh": "Wi-Fi 6E · 蓝牙 5.3", "en": "Wi-Fi 6E · Bluetooth 5.3" } },
+      ],
+      "pkg": [
+        { "label": { "zh": "包装清单", "en": "In the box" }, "value": { "zh": "主机 ×1 · 65W 电源适配器 ×1 · 双语快速上手指南 ×1 · 保修卡 ×1", "en": "Main unit ×1 · 65W adapter ×1 · bilingual quick-start ×1 · warranty card ×1" } },
+        { "label": { "zh": "保修", "en": "Warranty" }, "value": { "zh": "主机 1 年 · 电池 6 个月 · 全国 28 城上门维修", "en": "1 year (main) · 6 months (battery) · on-site in 28 cities" } },
+        { "label": { "zh": "系统", "en": "OS" }, "value": { "zh": "正版 Windows 11 家庭中文版", "en": "Licensed Windows 11 Home" } },
+        { "label": { "zh": "认证", "en": "Certifications" }, "value": { "zh": "TPM 2.0 · Energy Star 8.0 · CCC", "en": "TPM 2.0 · Energy Star 8.0 · CCC" } },
+      ],
+    }
   },
   {
     "id": 48,

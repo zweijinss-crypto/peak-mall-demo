@@ -13,7 +13,22 @@ export interface Product {
   description?: string;
   status?: number;
   created_at?: string;
+  /** v29: 详情丰满化 — 可选;不填时由 category 默认模板兜底。
+   * 数组项使用 I18nText 以支持中英双语,组件按当前 lang 取值。 */
+  highlights?: I18nText[];
+  longDescription?: I18nText[];
+  specs?: {
+    base?: { label: I18nText; value: I18nText }[];
+    perf?: { label: I18nText; value: I18nText }[];
+    display?: { label: I18nText; value: I18nText }[];
+    battery?: { label: I18nText; value: I18nText }[];
+    ports?: { label: I18nText; value: I18nText }[];
+    pkg?: { label: I18nText; value: I18nText }[];
+  };
 }
+
+/** v29: 双语字段;zh 必填,en 可选(未提供时 fallback zh) */
+export type I18nText = { zh: string; en?: string };
 
 export interface CurrencyOption {
   code: CurrencyCode;

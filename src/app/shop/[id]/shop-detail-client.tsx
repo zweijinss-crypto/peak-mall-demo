@@ -22,14 +22,29 @@ const SYMBOLS: Record<CurrencyCode, string> = {
   USD: '$', CNY: '¥', EUR: '€', GBP: '£', JPY: '¥', KRW: '₩', AUD: 'A$', CAD: 'C$',
 };
 
-const FAKE_REVIEWS = [
+type Review = {
+  name: string;
+  role: string;
+  stars: number;
+  date: string;
+  title: string;
+  body: string;
+  helpful: number;
+  withPic?: boolean;
+  verified?: boolean;
+};
+
+const FAKE_REVIEWS: Review[] = [
   {
     name: '陈先生',
     role: '北京 · 数码爱好者',
     stars: 5,
     date: '2026-09-12',
     title: '出乎意料的好',
-    body: '本来抱着试试看的心态,结果很满意。做工扎实,手感不错,客服回复也快。',
+    body: '本来抱着试试看的心态,结果很满意。做工扎实,手感不错,客服回复也快。出差背了三天,重量是真的轻,屏幕色准也赞。',
+    helpful: 42,
+    withPic: true,
+    verified: true,
   },
   {
     name: 'Liu W.',
@@ -37,7 +52,9 @@ const FAKE_REVIEWS = [
     stars: 5,
     date: '2026-08-29',
     title: 'Great value for money',
-    body: 'Shipping took 4 days from overseas warehouse. Packaging was solid. Would buy again.',
+    body: 'Shipping took 4 days from the overseas warehouse. Packaging was solid — the laptop itself is gorgeous, almost a MacBook competitor at half the price. Keyboard travel is shallow but typing is satisfying.',
+    helpful: 31,
+    verified: true,
   },
   {
     name: '王女士',
@@ -45,7 +62,28 @@ const FAKE_REVIEWS = [
     stars: 4,
     date: '2026-08-15',
     title: '性价比高',
-    body: '整体满意,比专柜便宜不少。扣一星是因为说明书不太全,新手可能需要摸索一下。',
+    body: '整体满意,比专柜便宜不少。扣一星是因为说明书不太全,新手可能需要摸索一下。客服给了一个新手指南视频链接,瞬间解决了。',
+    helpful: 18,
+    verified: true,
+  },
+  {
+    name: 'Marcus L.',
+    role: 'Berlin · Software Engineer',
+    stars: 5,
+    date: '2026-08-02',
+    title: 'Perfect for remote work',
+    body: 'Runs VS Code, Docker, and two IDEs side by side without breaking a sweat. 18-hour battery means I leave the charger at home. Build quality feels premium.',
+    helpful: 27,
+    withPic: true,
+  },
+  {
+    name: '周小姐',
+    role: '广州 · 研究生',
+    stars: 4,
+    date: '2026-07-21',
+    title: '适合学生',
+    body: '价格对预算友好,跑 R 跟 Python 都顺。内存 16GB 够用,后面想升级 SSD 也很方便。',
+    helpful: 9,
   },
 ];
 
@@ -355,6 +393,10 @@ function DetailTabs({
   t: ReturnType<typeof useT>;
 }) {
   const [active, setActive] = useState<'features' | 'specs' | 'reviews' | 'shipping'>('features');
+  // v29: reviews sort/filter/helpful state
+  const [reviewSort, setReviewSort] = useState<'latest' | 'helpful' | 'ratingDesc'>('latest');
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'withPic' | 'five' | 'four' | 'verified'>('all');
+  const [helpfulClicks, setHelpfulClicks] = useState<Record<number, boolean>>({});
   const tabs: { key: typeof active; label: string }[] = [
     { key: 'features', label: t.product.featuresLabel },
     { key: 'specs', label: t.product.specsLabel },
@@ -362,11 +404,30 @@ function DetailTabs({
     { key: 'shipping', label: t.product.shippingLabel },
   ];
 
-  const featureBody = chromeIsEn
-    ? (product.description || 'A carefully selected piece, ready to ship from our global warehouses.')
-    : (product.description || '一件精挑细选的好物,从全球仓库发货,直送到您手中。');
+  // v29: highlights + 多段描述 (默认 4 段模板,商品提供 longDescription 时覆盖)
+  const defaultHighlights = chromeIsEn
+    ? ['Hand-checked before shipping', '7-day no-reason returns', 'One-year warranty']
+    : ['出库前逐一复核', '7 天无理由退换', '一年质保'];
+  const defaultParas = chromeIsEn ? [
+    'A carefully selected piece, ready to ship from our global warehouses.',
+    'Every piece is hand-checked by our team before shipping. If anything feels off within 7 days, we cover return shipping — no questions asked.',
+    'Free worldwide shipping over $50, 3–7 day delivery to 28 countries.',
+    'One-year warranty on electronics. Authorized service centers in major cities.',
+  ] : [
+    '一件精挑细选的好物,从全球仓库发货,直送到您手中。',
+    '每一件商品出库前均由我们团队逐一复核。如有任不满意,7 天内可无理由退换,运费我们承担。',
+    '满 $50 全球包邮 · 预计 3–7 个工作日送达 28 国。',
+    '数码商品一年质保 · 主要城市均有授权服务点。',
+  ];
+  const highlights = product.highlights && product.highlights.length > 0
+    ? product.highlights.map((h) => (chromeIsEn ? (h.en ?? h.zh) : h.zh))
+    : defaultHighlights;
+  const longDesc = product.longDescription && product.longDescription.length > 0
+    ? product.longDescription.map((p) => (chromeIsEn ? (p.en ?? p.zh) : p.zh))
+    : defaultParas;
 
-  const specs: { label: string; value: string }[] = [
+  // v29: specs 分组 — 商品提供 specs 时用，否则用 6 行基础模板
+  const fallbackSpecs = [
     { label: t.product.skuLabel, value: `#${String(product.id).padStart(4, '0')}` },
     { label: t.product.categoryLabel, value: categoryLabel },
     { label: t.label.price, value: `$${Number(product.price || 0).toFixed(2)}` },
@@ -374,6 +435,18 @@ function DetailTabs({
     { label: t.product.soldLabel, value: `${sold} ${t.label.pcs}` },
     { label: t.product.addedOnLabel, value: dateStr },
   ];
+  const pickText = (s: { zh: string; en?: string } | undefined) =>
+    s ? (chromeIsEn ? (s.en ?? s.zh) : s.zh) : '';
+  const specsGroups: { key: string; label: string; items: { label: string; value: string }[] }[] = product.specs
+    ? [
+        { key: 'base', label: t.product.specsGroupBase, items: (product.specs.base ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+        { key: 'perf', label: t.product.specsGroupPerf, items: (product.specs.perf ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+        { key: 'display', label: t.product.specsGroupDisplay, items: (product.specs.display ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+        { key: 'battery', label: t.product.specsGroupBattery, items: (product.specs.battery ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+        { key: 'ports', label: t.product.specsGroupPorts, items: (product.specs.ports ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+        { key: 'pkg', label: t.product.specsGroupPackage, items: (product.specs.pkg ?? []).map((x) => ({ label: pickText(x.label), value: pickText(x.value) })) },
+      ].filter((g) => g.items.length > 0)
+    : [{ key: 'base', label: t.product.specsGroupBase, items: fallbackSpecs }];
 
   return (
     <section className="border-t border-ink-200 pt-10">
@@ -399,15 +472,27 @@ function DetailTabs({
       {active === 'features' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
+            <h2 className="text-[18px] font-bold text-ink-900 mb-3">{t.product.highlightsLabel}</h2>
+            <ul className="mb-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {highlights.map((h, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2.5 rounded-md bg-orange-50/60 border border-orange-100 px-3.5 py-2.5 text-[13.5px] text-ink-800 leading-snug"
+                >
+                  <span className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-orange-700 text-white flex items-center justify-center text-[11px] font-bold">✓</span>
+                  {h}
+                </li>
+              ))}
+            </ul>
+
             <h2 className="text-[18px] font-bold text-ink-900 mb-3">{t.product.featuresLabel}</h2>
-            <p className="text-[15px] text-ink-700 leading-[1.85]">{featureBody}</p>
-            <p className="text-[15px] text-ink-700 leading-[1.85] mt-3">
-              {chromeIsEn
-                ? 'Every piece is hand-checked by our team before shipping. If anything feels off within 7 days, we cover return shipping — no questions asked.'
-                : '每一件商品出库前均由我们团队逐一复核。如有任不满意,7 天内可无理由退换,运费我们承担。'}
-            </p>
+            <div className="text-[15px] text-ink-700 leading-[1.85] space-y-3">
+              {longDesc.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
           </div>
-          <aside className="bg-ink-50 rounded-lg p-5 text-[13px] text-ink-600">
+          <aside className="bg-ink-50 rounded-lg p-5 text-[13px] text-ink-600 self-start">
             <div className="font-semibold text-ink-900 mb-2">{chromeIsEn ? 'In the box' : '包装清单'}</div>
             <ul className="space-y-1.5">
               <li>· {chromeIsEn ? 'Main unit' : '主机 ×1'}</li>
@@ -419,45 +504,143 @@ function DetailTabs({
       )}
 
       {active === 'specs' && (
-        <div className="max-w-[720px]">
-          <h2 className="text-[18px] font-bold text-ink-900 mb-4">{t.product.specsLabel}</h2>
-          <dl className="divide-y divide-ink-100 border-y border-ink-100">
-            {specs.map((s) => (
-              <div key={s.label} className="grid grid-cols-3 gap-4 py-3 text-[13.5px]">
-                <dt className="text-ink-500">{s.label}</dt>
-                <dd className="col-span-2 text-ink-900 font-semibold">{s.value}</dd>
+        <div className="max-w-[820px]">
+          <h2 className="text-[18px] font-bold text-ink-900 mb-5">{t.product.specsLabel}</h2>
+          <div className="space-y-6">
+            {specsGroups.map((g) => (
+              <div key={g.key}>
+                <h3 className="text-[13.5px] font-bold text-orange-700 tracking-wide uppercase mb-2.5">{g.label}</h3>
+                <dl className="divide-y divide-ink-100 border-y border-ink-100">
+                  {g.items.map((s, i) => (
+                    <div key={`${g.key}-${i}`} className="grid grid-cols-3 gap-4 py-3 text-[13.5px]">
+                      <dt className="text-ink-500">{s.label}</dt>
+                      <dd className="col-span-2 text-ink-900 font-semibold leading-relaxed">{s.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             ))}
-          </dl>
+          </div>
         </div>
       )}
 
-      {active === 'reviews' && (
-        <div>
-          <div className="flex items-baseline gap-3 mb-6">
-            <h2 className="text-[18px] font-bold text-ink-900">{t.product.reviewsLabel}</h2>
-            <span className="text-[13px] text-ink-500">{t.product.reviewsSummary(sold)}</span>
-            <span className="text-[20px] font-bold text-orange-700">4.9</span>
-            <span className="text-amber-500">★★★★★</span>
+      {active === 'reviews' && (() => {
+        // 筛选
+        const filtered = FAKE_REVIEWS.filter((r) => {
+          if (reviewFilter === 'withPic') return !!r.withPic;
+          if (reviewFilter === 'five') return r.stars === 5;
+          if (reviewFilter === 'four') return r.stars === 4;
+          if (reviewFilter === 'verified') return !!r.verified;
+          return true;
+        });
+        // 排序
+        const sorted = [...filtered].sort((a, b) => {
+          if (reviewSort === 'latest') return b.date.localeCompare(a.date);
+          if (reviewSort === 'helpful') return b.helpful - a.helpful;
+          return b.stars - a.stars;
+        });
+        const filterChips: { key: typeof reviewFilter; label: string }[] = [
+          { key: 'all', label: t.product.reviewFilterAll },
+          { key: 'verified', label: t.product.reviewFilterVerified },
+          { key: 'withPic', label: t.product.reviewFilterWithPic },
+          { key: 'five', label: t.product.reviewFilterFiveStar },
+          { key: 'four', label: t.product.reviewFilterFourStar },
+        ];
+        return (
+          <div>
+            <div className="flex items-baseline gap-3 mb-5 flex-wrap">
+              <h2 className="text-[18px] font-bold text-ink-900">{t.product.reviewsLabel}</h2>
+              <span className="text-[13px] text-ink-500">{t.product.reviewsSummary(sold)}</span>
+              <span className="text-[20px] font-bold text-orange-700">4.9</span>
+              <span className="text-amber-500">★★★★★</span>
+            </div>
+
+            {/* Filter chips + Sort dropdown */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-5 border-b border-ink-100">
+              <div className="flex flex-wrap gap-2">
+                {filterChips.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setReviewFilter(c.key)}
+                    aria-pressed={reviewFilter === c.key}
+                    className={`px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-colors ${
+                      reviewFilter === c.key
+                        ? 'bg-orange-700 text-white'
+                        : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 text-[12.5px] text-ink-600">
+                <span>{t.product.reviewSortLabel}:</span>
+                <select
+                  value={reviewSort}
+                  onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
+                  aria-label={t.product.reviewSortLabel}
+                  className="bg-white border border-ink-200 rounded-md px-2 py-1 text-[12.5px] font-semibold text-ink-900 focus:outline-none focus:ring-2 focus:ring-orange-700/30"
+                >
+                  <option value="latest">{t.product.reviewSortLatest}</option>
+                  <option value="helpful">{t.product.reviewSortHelpful}</option>
+                  <option value="ratingDesc">{t.product.reviewSortRatingDesc}</option>
+                </select>
+              </label>
+            </div>
+
+            {sorted.length === 0 ? (
+              <div className="py-12 text-center text-ink-500">
+                <div className="text-[15px] font-semibold text-ink-900 mb-1">{t.product.reviewEmptyTitle}</div>
+                <div className="text-[13px]">{t.product.reviewEmptyDesc}</div>
+              </div>
+            ) : (
+              <ul className="space-y-6 max-w-[820px]">
+                {sorted.map((r, i) => {
+                  const clicked = !!helpfulClicks[i];
+                  const helpfulCount = r.helpful + (clicked ? 1 : 0);
+                  return (
+                    <li key={i} className="border-b border-ink-100 pb-6 last:border-b-0">
+                      <div className="flex items-baseline justify-between mb-1.5 gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[14px] font-bold text-ink-900">{r.name}</span>
+                          <span className="text-amber-500 text-[12px] tracking-wider">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</span>
+                          {r.verified && (
+                            <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded">
+                              ✓ {t.product.reviewFilterVerified}
+                            </span>
+                          )}
+                          {r.withPic && (
+                            <span className="inline-flex items-center text-[11px] font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded">
+                              📷
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[12px] text-ink-500">{r.date}</span>
+                      </div>
+                      <div className="text-[12px] text-ink-500 mb-2">{r.role}</div>
+                      <div className="text-[14px] font-semibold text-ink-900 mb-1">{r.title}</div>
+                      <p className="text-[14px] text-ink-700 leading-[1.7] mb-3">{r.body}</p>
+                      <button
+                        type="button"
+                        onClick={() => setHelpfulClicks((s) => ({ ...s, [i]: !s[i] }))}
+                        aria-pressed={clicked}
+                        className={`inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-3 py-1 rounded-full border transition-colors ${
+                          clicked
+                            ? 'bg-orange-700 text-white border-orange-700'
+                            : 'bg-white text-ink-700 border-ink-200 hover:border-orange-700 hover:text-orange-700'
+                        }`}
+                      >
+                        👍 {t.product.reviewHelpfulBtn} · {t.product.reviewHelpfulCount(helpfulCount)}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
-          <ul className="space-y-6 max-w-[760px]">
-            {FAKE_REVIEWS.map((r, i) => (
-              <li key={i} className="border-b border-ink-100 pb-6 last:border-b-0">
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-ink-900">{r.name}</span>
-                    <span className="text-amber-500 text-[12px] tracking-wider">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</span>
-                  </div>
-                  <span className="text-[12px] text-ink-500">{r.date}</span>
-                </div>
-                <div className="text-[12px] text-ink-500 mb-2">{r.role}</div>
-                <div className="text-[14px] font-semibold text-ink-900 mb-1">{r.title}</div>
-                <p className="text-[14px] text-ink-700 leading-[1.7]">{r.body}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        );
+      })()}
 
       {active === 'shipping' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[900px]">
@@ -479,6 +662,51 @@ function DetailTabs({
           </div>
         </div>
       )}
+
+      {/* v29: FAQ section — always visible, below tabs */}
+      <FaqSection t={t} chromeIsEn={chromeIsEn} />
     </section>
+  );
+}
+
+/* v29: FAQ — native <details> accordion (a11y friendly, no extra JS state) */
+function FaqSection({ t, chromeIsEn }: { t: ReturnType<typeof useT>; chromeIsEn: boolean }) {
+  const faqs: { q: string; a: string }[] = [
+    { q: t.product.faqShipping, a: t.product.faqShippingA },
+    { q: t.product.faqReturn, a: t.product.faqReturnA },
+    { q: t.product.faqWarranty, a: t.product.faqWarrantyA },
+    { q: t.product.faqInvoice, a: t.product.faqInvoiceA },
+    { q: t.product.faqOverseas, a: t.product.faqOverseasA },
+    { q: t.product.faqBulk, a: t.product.faqBulkA },
+  ];
+  return (
+    <div className="mt-12 pt-10 border-t border-ink-200">
+      <h2 className="text-[18px] font-bold text-ink-900 mb-5">{t.product.faqLabel}</h2>
+      <div className="max-w-[820px] divide-y divide-ink-100 border-y border-ink-100">
+        {faqs.map((f, i) => (
+          <details
+            key={i}
+            className="group py-1"
+          >
+            <summary className="flex items-center justify-between gap-4 py-3.5 cursor-pointer list-none text-[14.5px] font-semibold text-ink-900 hover:text-orange-700 transition-colors">
+              <span className="flex-1">{f.q}</span>
+              <span
+                aria-hidden="true"
+                className="flex-shrink-0 w-6 h-6 rounded-full bg-ink-100 group-open:bg-orange-700 text-ink-600 group-open:text-white flex items-center justify-center text-[14px] font-bold transition-all group-open:rotate-45"
+              >
+                +
+              </span>
+            </summary>
+            <p className="pb-4 pr-10 text-[13.5px] text-ink-700 leading-[1.8]">{f.a}</p>
+          </details>
+        ))}
+      </div>
+      <p className="mt-6 text-[12.5px] text-ink-500">
+        {chromeIsEn ? 'Still have questions? Reach our team at ' : '还有其它疑问?联系我们客服: '}
+        <a href="mailto:support@peak-mall.demo" className="text-orange-700 font-semibold hover:underline">
+          support@peak-mall.demo
+        </a>
+      </p>
+    </div>
   );
 }
