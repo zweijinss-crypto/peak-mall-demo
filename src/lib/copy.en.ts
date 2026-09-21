@@ -1316,6 +1316,15 @@ export const COPY_EN = {
       deleteBody: (n: number) => `Delete ${n} member${n > 1 ? 's' : ''}? This cannot be undone.`,
       deleteHint: 'Tip: freeze keeps the record; delete removes it permanently.',
       confirmDelete: 'Confirm delete',
+      // toasts
+      bulkFrozenToast: (n: number) => `Froze ${n} member${n > 1 ? 's' : ''}`,
+      bulkUnfrozenToast: (n: number) => `Unfroze ${n} member${n > 1 ? 's' : ''}`,
+      bulkDeletedToast: (n: number) => `Deleted ${n} member${n > 1 ? 's' : ''}`,
+      frozenToast: 'Frozen',
+      unfrozenToast: 'Unfrozen',
+      addedToast: 'Member added',
+      roleChangedToast: 'Role changed',
+      pwdResetToast: 'Password reset (demo)',
     },
     agents: {
       title: 'Agents — rate adjustment',

@@ -1289,6 +1289,15 @@ export const COPY = {
       deleteBody: (n: number) => `确认删除这 ${n} 位用户？删除后不可恢复。`,
       deleteHint: '提示：冻结会保留用户记录，删除会从用户列表彻底移除。',
       confirmDelete: '确认删除',
+      // toasts
+      bulkFrozenToast: (n: number) => `已冻结 ${n} 位用户`,
+      bulkUnfrozenToast: (n: number) => `已解冻 ${n} 位用户`,
+      bulkDeletedToast: (n: number) => `已删除 ${n} 位用户`,
+      frozenToast: '已冻结',
+      unfrozenToast: '已解冻',
+      addedToast: '已添加新用户',
+      roleChangedToast: '已切换角色',
+      pwdResetToast: '密码已重置（演示）',
     },
     agents: {
       title: '代理管理 — 费率调节',

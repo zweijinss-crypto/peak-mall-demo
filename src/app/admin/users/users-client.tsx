@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
@@ -38,6 +38,18 @@ export function UsersClient() {
   const [detailId, setDetailId] = useState<number | null>(null);
   const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
 
+  // Toast — single-flight 3s auto-dismiss; aligns with wd / agents pattern.
+  const [toast, setToast] = useState<{ kind: 'success' | 'info' | 'danger'; text: string } | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+  }, []);
+  const showToast = (kind: 'success' | 'info' | 'danger', text: string) => {
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+    setToast({ kind, text });
+    toastTimerRef.current = window.setTimeout(() => setToast(null), 3000);
+  };
+
   if (!mounted) return <div className="text-neutral-500 text-[13px]">Loading…</div>;
 
   const detail = detailId !== null ? users.find((u: any) => u.id === detailId) ?? null : null;
@@ -73,16 +85,25 @@ export function UsersClient() {
 
   const setStatus = (ids: number[], status: 'active' | 'frozen') => {
     const idSet = new Set(ids);
+    const n = ids.length;
     setUsers(users.map((u: any) => (idSet.has(u.id) ? { ...u, status } : u)));
+    showToast(
+      status === 'frozen' ? 'info' : 'success',
+      n > 1
+        ? (status === 'frozen' ? t.admin.users.bulkFrozenToast(n) : t.admin.users.bulkUnfrozenToast(n))
+        : (status === 'frozen' ? t.admin.users.frozenToast : t.admin.users.unfrozenToast)
+    );
   };
 
   const setRole = (id: number, role: 'fx' | 'agent') => {
     setUsers(users.map((u: any) => (u.id === id ? { ...u, role } : u)));
+    showToast('info', t.admin.users.roleChangedToast);
   };
 
   const requestDelete = (ids: number[]) => setDeletingIds(ids);
   const confirmDelete = () => {
     if (!deletingIds) return;
+    const n = deletingIds.length;
     const idSet = new Set(deletingIds);
     setUsers(users.filter((u: any) => !idSet.has(u.id)));
     setSelected((prev) => {
@@ -91,6 +112,7 @@ export function UsersClient() {
       return next;
     });
     setDeletingIds(null);
+    showToast('danger', t.admin.users.bulkDeletedToast(n));
   };
 
   const add = () => {
@@ -110,6 +132,7 @@ export function UsersClient() {
         balance: 0,
       },
     ]);
+    showToast('success', t.admin.users.addedToast);
   };
 
   return (
@@ -433,6 +456,21 @@ export function UsersClient() {
           </div>
         )}
       </Modal>
+
+      {/* Toast — bulk + single ops feedback */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 text-[13px] rounded-lg shadow-lg text-white ${
+            toast.kind === 'success' ? 'bg-emerald-700'
+            : toast.kind === 'danger' ? 'bg-rose-700'
+            : 'bg-neutral-900'
+          }`}
+        >
+          {toast.text}
+        </div>
+      )}
     </div>
   );
 }
