@@ -81,6 +81,9 @@ export const COPY_EN = {
     /** S2: mobile search bar */
     mobileSearchOpen: 'Open search',
     mobileSearchClose: 'Close search',
+    /** S4: global shortcut hint */
+    shortcutHint: '⌘K',
+    shortcutHintLabel: 'Press ⌘K to search',
   },
 
   announcement: {

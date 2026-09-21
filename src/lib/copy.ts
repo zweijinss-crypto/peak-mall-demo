@@ -81,6 +81,9 @@ export const COPY = {
     /** S2: 移动端搜索条 */
     mobileSearchOpen: '打开搜索',
     mobileSearchClose: '关闭搜索',
+    /** S4: 全局快捷键提示 */
+    shortcutHint: '⌘K',
+    shortcutHintLabel: '按 ⌘K 快速搜索',
   },
 
   announcement: {

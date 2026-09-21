@@ -76,6 +76,31 @@ const ShopHeader: FC<ShopHeaderProps> = ({
     setUserEmail(getCurrentUser()?.email ?? null);
   }, []);
 
+  /** S4: 全局 ⌘K / Ctrl+K 唤起搜索 */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onKey = (e: KeyboardEvent) => {
+      // Cmd+K (mac) / Ctrl+K (windows/linux)
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        if (window.matchMedia('(max-width: 767px)').matches) {
+          // 移动: 打开 overlay
+          setMobileOpen(true);
+          setMobileQ('');
+          setMobileActiveIndex(-1);
+          setTimeout(() => mobileInputRef.current?.focus(), 50);
+        } else {
+          // 桌面: focus input + 打开 dropdown
+          inputRef.current?.focus();
+          setOpen(true);
+          setActiveIndex(-1);
+        }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   const finalBrand: BrandInfo = brand ?? { name: t.brand.name, slogan: t.brand.slogan };
 
   const finalNavItems: NavItem[] = navItems ?? [
@@ -244,6 +269,13 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             >
               {t.header.submit}
             </button>
+            {/* S4: ⌘K hint */}
+            <kbd
+              aria-hidden="true"
+              className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10.5px] font-mono font-bold text-ink-500 bg-white border border-ink-200 rounded min-w-[28px] justify-center"
+            >
+              ⌘K
+            </kbd>
           </form>
           {open && (
             <div id="peak-search-suggestions" className="absolute left-0 right-0 top-full">
