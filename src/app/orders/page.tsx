@@ -154,20 +154,6 @@ export default function OrdersPage() {
               </div>
             </div>
           </div>
-          {totalCount > 0 && (
-            <div className="grid grid-cols-5 border-t border-ink-100 divide-x divide-ink-100">
-              {(['pending', 'paid', 'shipped', 'delivered', 'cancelled'] as Order['status'][]).map((s) => (
-                <div key={s} className="px-4 py-2.5">
-                  <div className={`inline-block px-1.5 py-0.5 rounded-full text-[10px] font-bold mb-1 ${STATUS_MAP[s].color}`}>
-                    {STATUS_MAP[s].label}
-                  </div>
-                  <div className="text-[16px] font-bold text-ink-900 leading-none tabular-nums">
-                    {statusCounts[s]}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </section>
 
         {/* Toast */}
