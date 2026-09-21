@@ -26,6 +26,7 @@ export interface AdminProduct {
   description: string;
   cover: string;
   status: boolean; // true = 上架
+  created_at: string;
 }
 
 export interface AdminOrder {
@@ -131,12 +132,12 @@ export interface AdminSupportCfg {
 /* ──────────────── Seed ──────────────── */
 
 export const SEED_PRODUCTS: AdminProduct[] = [
-  { id: 1, name: '笔记本 Pro 14', category: '数码电子', price: 1299, stock: 28, description: '14 寸高清屏,16GB RAM', cover: '💻', status: true },
-  { id: 2, name: '降噪耳机 WH-5', category: '数码电子', price: 289, stock: 64, description: '主动降噪 40dB,无线', cover: '🎧', status: true },
-  { id: 3, name: '扫地机器人 S2', category: '智能家居', price: 599, stock: 19, description: '激光导航 · 自动回充', cover: '🤖', status: true },
-  { id: 4, name: '机械键盘 K1', category: '数码电子', price: 199, stock: 0, description: '青轴 · RGB', cover: '⌨️', status: false },
-  { id: 5, name: '智能手表 W3', category: '智能家居', price: 459, stock: 31, description: '运动健康 · 14 天续航', cover: '⌚', status: true },
-  { id: 6, name: '便携相机 C6', category: '数码电子', price: 899, stock: 12, description: '4K 录制 · 防抖', cover: '📷', status: true },
+  { id: 1, name: '笔记本 Pro 14', category: '数码电子', price: 1299, stock: 28, description: '14 寸高清屏,16GB RAM', cover: '💻', status: true, created_at: '2026-08-12 10:23:00' },
+  { id: 2, name: '降噪耳机 WH-5', category: '数码电子', price: 289, stock: 64, description: '主动降噪 40dB,无线', cover: '🎧', status: true, created_at: '2026-08-15 14:05:11' },
+  { id: 3, name: '扫地机器人 S2', category: '智能家居', price: 599, stock: 19, description: '激光导航 · 自动回充', cover: '🤖', status: true, created_at: '2026-08-20 09:42:33' },
+  { id: 4, name: '机械键盘 K1', category: '数码电子', price: 199, stock: 0, description: '青轴 · RGB', cover: '⌨️', status: false, created_at: '2026-08-25 16:18:00' },
+  { id: 5, name: '智能手表 W3', category: '智能家居', price: 459, stock: 31, description: '运动健康 · 14 天续航', cover: '⌚', status: true, created_at: '2026-09-01 11:30:45' },
+  { id: 6, name: '便携相机 C6', category: '数码电子', price: 899, stock: 12, description: '4K 录制 · 防抖', cover: '📷', status: true, created_at: '2026-09-08 18:55:21' },
 ];
 
 export const SEED_ORDERS: AdminOrder[] = [
