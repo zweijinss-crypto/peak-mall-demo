@@ -89,7 +89,7 @@ export default function FundPasswordClient() {
           </label>
           {msg && (
             <div
-              role="status"
+              role={msg.kind === 'ok' ? 'status' : 'alert'}
               className={
                 'px-3 py-2 rounded-md text-[12.5px] border ' +
                 (msg.kind === 'ok'

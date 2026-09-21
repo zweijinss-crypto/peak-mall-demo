@@ -180,8 +180,8 @@ export function RulesClient() {
       {/* Toast */}
       {toast && (
         <div
-          role="status"
-          aria-live="polite"
+          role={toast.kind === 'danger' ? 'alert' : 'status'}
+          aria-live={toast.kind === 'danger' ? 'assertive' : 'polite'}
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 text-[13px] rounded-lg shadow-lg text-white ${
             toast.kind === 'success' ? 'bg-emerald-700'
             : toast.kind === 'danger' ? 'bg-rose-700'

@@ -183,7 +183,7 @@ export function WdClient() {
                     <Td muted>{w.processed_at || '—'}</Td>
                     <Td muted className="max-w-[180px] truncate">
                       {w.bound_address ? w.bound_address : <span className="text-neutral-700">{t.admin.wd.unbound}</span>}
-                      {mismatch && <div className="text-rose-600 font-semibold mt-1">{t.admin.wd.addrMismatch}</div>}
+                      {mismatch && <div role="alert" className="text-rose-600 font-semibold mt-1">{t.admin.wd.addrMismatch}</div>}
                     </Td>
                     <Td className="whitespace-nowrap">
                       {w.status === 'pending' && (
@@ -246,7 +246,7 @@ export function WdClient() {
               }`}
             />
             {reasonError && (
-              <p id="wd-reject-error" className="mt-1 text-[11.5px] text-rose-600 font-medium">
+              <p id="wd-reject-error" role="alert" className="mt-1 text-[11.5px] text-rose-600 font-medium">
                 {t.admin.wd.rejectReasonRequired}
               </p>
             )}
@@ -334,8 +334,8 @@ export function WdClient() {
       {/* Toast — confirm approve / reject / pay */}
       {toast && (
         <div
-          role="status"
-          aria-live="polite"
+          role={toast.kind === 'danger' ? 'alert' : 'status'}
+          aria-live={toast.kind === 'danger' ? 'assertive' : 'polite'}
           className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 text-[13px] rounded-lg shadow-lg text-white ${
             toast.kind === 'success' ? 'bg-emerald-700'
             : toast.kind === 'danger' ? 'bg-rose-700'
