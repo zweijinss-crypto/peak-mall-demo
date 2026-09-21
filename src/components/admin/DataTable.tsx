@@ -8,7 +8,7 @@
  * tickets) uses this same look. Centralizing keeps hover/focus/scroll behavior
  * consistent without copying 60 lines of className to each table.
  */
-import type { ReactNode } from 'react';
+import type { ReactNode, HTMLAttributes } from 'react';
 
 export function DataTable({
   children,
@@ -47,15 +47,18 @@ export function Td({
   className = '',
   colSpan,
   muted,
+  title,
 }: {
   children: ReactNode;
   className?: string;
   colSpan?: number;
   muted?: boolean;
+  title?: string;
 }) {
   return (
     <td
       colSpan={colSpan}
+      title={title}
       className={`px-3 py-2.5 text-[13px] border-b border-neutral-100 ${muted ? 'text-neutral-500' : 'text-neutral-800'} ${className}`}
     >
       {children}

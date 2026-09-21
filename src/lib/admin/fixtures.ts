@@ -43,6 +43,10 @@ export interface AdminOrder {
   contact_name?: string;
   address?: string;
   created_at: string; // ISO slice(0,19)
+  updated_at?: string;
+  cancel_reason?: string;
+  refunded?: boolean;
+  refund_at?: string;
 }
 
 export interface AdminUser {
