@@ -673,6 +673,9 @@ export const COPY = {
     referredBy: '推广人',
     tier: '层级',
     viewOrder: '查看订单',
+    /** B8: 单笔导出 */
+    exportRow: '导出这笔',
+    rowExported: '单笔已导出',
   },
   withdraw: {
     title: '提现中心',

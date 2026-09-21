@@ -116,6 +116,23 @@ export default function CommissionsPage() {
     window.setTimeout(() => setExportToast(null), 2000);
   };
 
+  /** B8: 单笔佣金导出 — 只导当前打开的 modal 对应那一行 */
+  const handleExportRow = (row: CommissionRow) => {
+    const headers = [t.commissions.order, t.commissions.source, t.commissions.rate, t.commissions.amount, t.commissions.date, 'status'];
+    const body = [[
+      row.order,
+      SOURCE_LABEL[row.source],
+      row.rate,
+      `$${row.amount.toFixed(2)}`,
+      row.date.slice(0, 10),
+      row.status === 'settled' ? t.commissions.statusSettled : t.commissions.statusPending,
+    ]];
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCSV(`commission-${row.order}-${stamp}.csv`, [headers, ...body]);
+    setExportToast(t.commissions.rowExported);
+    window.setTimeout(() => setExportToast(null), 2000);
+  };
+
   return (
     <UserShell>
       <PageBanner
@@ -347,6 +364,12 @@ export default function CommissionsPage() {
                 className="flex-1 py-2.5 border border-ink-200 text-ink-700 hover:bg-ink-50 text-[13.5px] font-bold rounded-md transition-colors"
               >
                 {t.commissions.detailClose}
+              </button>
+              <button
+                onClick={() => handleExportRow(selected)}
+                className="flex-1 py-2.5 border border-orange-700 text-orange-700 hover:bg-orange-700 hover:text-white text-[13.5px] font-bold rounded-md transition-colors"
+              >
+                ⬇ {t.commissions.exportRow}
               </button>
               <a
                 href={`/orders/?order=${encodeURIComponent(selected.order)}`}

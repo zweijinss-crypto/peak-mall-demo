@@ -563,6 +563,9 @@ export const COPY_EN = {
     referredBy: 'Referred by',
     tier: 'Tier',
     viewOrder: 'View order',
+    /** B8: per-row export */
+    exportRow: 'Export this',
+    rowExported: 'Single row exported',
   },
   withdraw: {
     title: 'Withdraw',
