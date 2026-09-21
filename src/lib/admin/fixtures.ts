@@ -20,13 +20,20 @@ export type UserRole = 'fx' | 'agent';
 export interface AdminProduct {
   id: number;
   name: string;
+  sku: string;
   category: string;
-  price: number;
+  price: number; // 售价
+  comparePrice?: number; // 划线价(展示原价)
+  cost?: number; // 成本(管理员可见)
   stock: number;
+  stockAlert: number; // 库存阈值:≤此值提示补货
   description: string;
-  cover: string;
+  images: string[]; // 多图(图标 emoji 或 URL)
+  cover: string; // 主图(图标 emoji),从 images[0] 取或独立
   status: boolean; // true = 上架
+  seoSlug?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface AdminOrder {
@@ -136,12 +143,114 @@ export interface AdminSupportCfg {
 /* ──────────────── Seed ──────────────── */
 
 export const SEED_PRODUCTS: AdminProduct[] = [
-  { id: 1, name: '笔记本 Pro 14', category: '数码电子', price: 1299, stock: 28, description: '14 寸高清屏,16GB RAM', cover: '💻', status: true, created_at: '2026-08-12 10:23:00' },
-  { id: 2, name: '降噪耳机 WH-5', category: '数码电子', price: 289, stock: 64, description: '主动降噪 40dB,无线', cover: '🎧', status: true, created_at: '2026-08-15 14:05:11' },
-  { id: 3, name: '扫地机器人 S2', category: '智能家居', price: 599, stock: 19, description: '激光导航 · 自动回充', cover: '🤖', status: true, created_at: '2026-08-20 09:42:33' },
-  { id: 4, name: '机械键盘 K1', category: '数码电子', price: 199, stock: 0, description: '青轴 · RGB', cover: '⌨️', status: false, created_at: '2026-08-25 16:18:00' },
-  { id: 5, name: '智能手表 W3', category: '智能家居', price: 459, stock: 31, description: '运动健康 · 14 天续航', cover: '⌚', status: true, created_at: '2026-09-01 11:30:45' },
-  { id: 6, name: '便携相机 C6', category: '数码电子', price: 899, stock: 12, description: '4K 录制 · 防抖', cover: '📷', status: true, created_at: '2026-09-08 18:55:21' },
+  {
+    id: 1,
+    name: '笔记本 Pro 14',
+    sku: 'NB-PRO-14-2026',
+    category: '数码电子',
+    price: 1299,
+    comparePrice: 1499,
+    cost: 980,
+    stock: 28,
+    stockAlert: 5,
+    description: '## 卖点\n- 14 寸高清屏\n- 16GB RAM\n- 1TB SSD\n\n## 售后\n7 天无理由 · 1 年保修',
+    images: ['💻', '🖥️', '⌨️'],
+    cover: '💻',
+    status: true,
+    seoSlug: 'notebook-pro-14',
+    created_at: '2026-08-12 10:23:00',
+    updated_at: '2026-08-12 10:23:00',
+  },
+  {
+    id: 2,
+    name: '降噪耳机 WH-5',
+    sku: 'HP-WH5-BLK',
+    category: '数码电子',
+    price: 289,
+    comparePrice: 399,
+    cost: 150,
+    stock: 64,
+    stockAlert: 10,
+    description: '主动降噪 40dB · 无线蓝牙 5.3 · 续航 30h',
+    images: ['🎧', '🎵'],
+    cover: '🎧',
+    status: true,
+    seoSlug: 'anc-headphone-wh5',
+    created_at: '2026-08-15 14:05:11',
+    updated_at: '2026-08-15 14:05:11',
+  },
+  {
+    id: 3,
+    name: '扫地机器人 S2',
+    sku: 'RB-S2-LDS',
+    category: '智能家居',
+    price: 599,
+    comparePrice: 799,
+    cost: 320,
+    stock: 19,
+    stockAlert: 5,
+    description: '激光导航 · 自动回充 · 200ml 电控水箱',
+    images: ['🤖', '🧹'],
+    cover: '🤖',
+    status: true,
+    seoSlug: 'robot-vacuum-s2',
+    created_at: '2026-08-20 09:42:33',
+    updated_at: '2026-08-20 09:42:33',
+  },
+  {
+    id: 4,
+    name: '机械键盘 K1',
+    sku: 'KB-K1-BLU',
+    category: '数码电子',
+    price: 199,
+    comparePrice: 249,
+    cost: 95,
+    stock: 0,
+    stockAlert: 5,
+    description: '青轴 · RGB · 87 键',
+    images: ['⌨️'],
+    cover: '⌨️',
+    status: false,
+    seoSlug: 'mech-keyboard-k1',
+    created_at: '2026-08-25 16:18:00',
+    updated_at: '2026-08-25 16:18:00',
+  },
+  {
+    id: 5,
+    name: '智能手表 W3',
+    sku: 'WT-W3-BLK',
+    category: '智能家居',
+    price: 459,
+    comparePrice: 599,
+    cost: 220,
+    stock: 31,
+    stockAlert: 8,
+    description: '运动健康 · 14 天续航 · 5ATM 防水',
+    images: ['⌚', '📱'],
+    cover: '⌚',
+    status: true,
+    seoSlug: 'smartwatch-w3',
+    created_at: '2026-09-01 11:30:45',
+    updated_at: '2026-09-01 11:30:45',
+  },
+  {
+    id: 6,
+    name: '便携相机 C6',
+    sku: 'CAM-C6-4K',
+    category: '数码电子',
+    price: 899,
+    comparePrice: 1199,
+    cost: 510,
+    stock: 12,
+    stockAlert: 5,
+    description: '4K 录制 · 六轴防抖 · 翻转屏',
+    images: ['📷', '🎥'],
+    cover: '📷',
+    status: true,
+    seoSlug: 'camera-c6',
+    created_at: '2026-09-08 18:55:21',
+    updated_at: '2026-09-08 18:55:21',
+  },
 ];
 
 export const SEED_ORDERS: AdminOrder[] = [
