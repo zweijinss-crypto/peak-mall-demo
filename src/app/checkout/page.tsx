@@ -14,6 +14,9 @@ import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
 const ADDR_KEY = 'peak_addresses';
+/** E1: 记住上次选的地址 + 支付方式 */
+const ADDR_PICK_KEY = 'peak_checkout_picked_addr';
+const METHOD_KEY = 'peak_checkout_payment_method';
 
 interface Address {
   id: string;
@@ -76,9 +79,36 @@ export default function CheckoutPage() {
     setMounted(true);
     const all = loadAddrs();
     setAddresses(all);
-    const def = all.find((a) => a.isDefault);
-    setPickedAddrId(def?.id ?? all[0]?.id ?? null);
+    // E1: 优先记住上次选的地址 → 默认地址 → 第一个
+    const picked = typeof window !== 'undefined' ? localStorage.getItem(ADDR_PICK_KEY) : null;
+    const exists = picked && all.find((a) => a.id === picked);
+    if (exists) setPickedAddrId(picked);
+    else {
+      const def = all.find((a) => a.isDefault);
+      setPickedAddrId(def?.id ?? all[0]?.id ?? null);
+    }
+    // E1: 还原上次选择的支付方式
+    const savedMethod = typeof window !== 'undefined' ? localStorage.getItem(METHOD_KEY) : null;
+    if (savedMethod === 'visa' || savedMethod === 'mastercard') {
+      setMethod(savedMethod as PaymentMethod);
+    }
   }, []);
+
+  /** E1: 选择地址时写入 localStorage, 下次进来自动恢复 */
+  const pickAddress = (id: string | null) => {
+    setPickedAddrId(id);
+    if (id && typeof window !== 'undefined') {
+      localStorage.setItem(ADDR_PICK_KEY, id);
+    }
+  };
+
+  /** E1: 选择支付方式时写入 localStorage */
+  const pickMethod = (m: PaymentMethod) => {
+    setMethod(m);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(METHOD_KEY, m);
+    }
+  };
 
   useEffect(() => {
     if (mounted && cart.length === 0 && !pendingOrder && !justPaid.current) {
@@ -245,7 +275,7 @@ export default function CheckoutPage() {
                     return (
                       <li key={a.id}>
                         <button
-                          onClick={() => setPickedAddrId(a.id)}
+                          onClick={() => pickAddress(a.id)}
                           aria-pressed={picked}
                           disabled={!!pendingOrder}
                           className={`w-full text-left p-3.5 rounded-lg border-2 transition-colors ${
@@ -315,7 +345,7 @@ export default function CheckoutPage() {
                     return (
                       <button
                         key={m.key}
-                        onClick={() => setMethod(m.key)}
+                        onClick={() => pickMethod(m.key)}
                         aria-pressed={picked}
                         className={`text-left p-3.5 rounded-lg border-2 transition-colors ${
                           picked
@@ -360,7 +390,7 @@ export default function CheckoutPage() {
                     return (
                       <button
                         key={m.key}
-                        onClick={() => { setMethod(m.key); setPayError(null); }}
+                        onClick={() => { pickMethod(m.key); setPayError(null); }}
                         aria-pressed={picked}
                         className={`px-3 py-2 text-[12.5px] font-bold rounded-md border transition-colors flex items-center gap-1.5 ${
                           picked
