@@ -1300,6 +1300,13 @@ export const COPY = {
       colAction: '操作',
       save: '保存',
       empty: '暂无代理',
+      saved: '已保存',
+      copyAddress: '复制地址',
+      copied: '已复制',
+      copyErr: '复制失败',
+      savedToast: '已保存 · 代理 #{id}',
+      undoCta: '撤销',
+      undoneToast: '已撤销修改',
     },
     invite: {
       title: '邀请码管理',

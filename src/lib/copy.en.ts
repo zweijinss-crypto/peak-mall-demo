@@ -1327,6 +1327,13 @@ export const COPY_EN = {
       colAction: 'Action',
       save: 'Save',
       empty: 'No agents yet.',
+      saved: 'Saved',
+      copyAddress: 'Copy address',
+      copied: 'Copied',
+      copyErr: 'Copy failed',
+      savedToast: 'Saved · agent #{id}',
+      undoCta: 'Undo',
+      undoneToast: 'Change reverted',
     },
     invite: {
       title: 'Invite codes',
