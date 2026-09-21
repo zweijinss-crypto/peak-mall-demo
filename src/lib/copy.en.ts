@@ -71,6 +71,13 @@ export const COPY_EN = {
     orderStatus: 'Order status',
     logout: 'Sign out',
     logoutAria: 'Sign out',
+    /** S1: search suggestions dropdown */
+    sugHistory: 'Recent',
+    sugHot: 'Popular categories',
+    sugEmpty: 'No suggestions',
+    sugClear: 'Clear',
+    sugNoHistory: 'No search history yet',
+    clear: 'Clear',
   },
 
   announcement: {

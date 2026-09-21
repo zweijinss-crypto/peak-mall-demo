@@ -34,6 +34,8 @@ export type { ServiceStripProps } from './ServiceStrip';
 
 export { default as ShopHeader } from './ShopHeader';
 export type { ShopHeaderProps } from './ShopHeader';
+export { default as SearchSuggestions } from './SearchSuggestions';
+export { appendHistory } from './SearchSuggestions';
 
 export { default as SupportWidget } from './SupportWidget';
 export type { SupportWidgetProps } from './SupportWidget';

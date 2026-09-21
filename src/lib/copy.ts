@@ -71,6 +71,13 @@ export const COPY = {
     orderStatus: '订单状态',
     logout: '退出',
     logoutAria: '退出登录',
+    /** S1: 搜索建议下拉 */
+    sugHistory: '最近搜索',
+    sugHot: '热门分类',
+    sugEmpty: '暂无搜索建议',
+    sugClear: '清空',
+    sugNoHistory: '暂无搜索历史',
+    clear: '清空',
   },
 
   announcement: {

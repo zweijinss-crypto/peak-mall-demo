@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, type FC } from 'react';
+import { useState, useEffect, useRef, type FC } from 'react';
 import type {
   BrandInfo,
   CurrencyCode,
@@ -15,6 +15,7 @@ import { COPY } from '@/lib/copy';
 import { useT } from '@/lib/use-t';
 import { usePeakStore } from '@/lib/store';
 import { getCurrentUser, logout } from '@/lib/auth';
+import SearchSuggestions, { appendHistory } from './SearchSuggestions';
 
 export interface ShopHeaderProps {
   brand?: BrandInfo;
@@ -58,6 +59,11 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   const wishCount = usePeakStore((s) => s.wishlist.length);
   const [q, setQ] = useState(initialQuery);
   useEffect(() => setQ(initialQuery), [initialQuery]);
+  /** S1: 搜索建议下拉状态 */
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   useEffect(() => {
     setUserEmail(getCurrentUser()?.email ?? null);
@@ -90,12 +96,41 @@ const ShopHeader: FC<ShopHeaderProps> = ({
   const finalPlaceholder = searchPlaceholder ?? t.hero.searchPlaceholder;
   const finalLang = lang ?? 'zh';
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const trimmed = q.trim();
     if (!trimmed) return;
+    appendHistory(trimmed);
     if (onSearch) onSearch(trimmed);
     else router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    setOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const pick = (value: string) => {
+    setQ(value);
+    setOpen(false);
+    setActiveIndex(-1);
+    appendHistory(value);
+    if (onSearch) onSearch(value);
+    else router.push(`/search?q=${encodeURIComponent(value)}`);
+  };
+
+  /** 键盘导航:ArrowDown/Up/Tab 在联想/历史/热门中导航 */
+  const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+    // 估算总行数 — 复用 SearchSuggestions 的状态不好逆推,走个近似:最多 5 联想 + 8 历史 + 2 热门 = 15
+    const maxRows = 15;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % maxRows);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => (i <= 0 ? maxRows - 1 : i - 1));
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+      setActiveIndex(-1);
+    }
   };
 
   return (
@@ -167,11 +202,13 @@ const ShopHeader: FC<ShopHeaderProps> = ({
           </Link>
 
           {/* Search */}
+          <div className="hidden md:flex flex-1 max-w-[480px] relative">
           <form
+            ref={formRef}
             role="search"
             onSubmit={submit}
             aria-label={t.header.searchAria}
-            className="hidden md:flex flex-1 max-w-[480px] items-center gap-2 px-3.5 h-[40px] bg-neutral-50 border border-neutral-200 rounded-full focus-within:border-orange-500 focus-within:bg-white transition-colors"
+            className="flex w-full items-center gap-2 px-3.5 h-[40px] bg-neutral-50 border border-neutral-200 rounded-full focus-within:border-orange-500 focus-within:bg-white transition-colors"
           >
             <span aria-hidden="true" className="text-[15px] text-neutral-500">🔍</span>
             <label htmlFor="peak-mall-search" className="sr-only">
@@ -179,11 +216,18 @@ const ShopHeader: FC<ShopHeaderProps> = ({
             </label>
             <input
               id="peak-mall-search"
+              ref={inputRef}
               type="search"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => { setQ(e.target.value); setOpen(true); setActiveIndex(-1); }}
+              onFocus={() => setOpen(true)}
+              onKeyDown={handleKey}
               placeholder={finalPlaceholder}
               aria-label={t.header.inputAria}
+              aria-autocomplete="list"
+              aria-expanded={open}
+              aria-controls="peak-search-suggestions"
+              autoComplete="off"
               className="flex-1 bg-transparent outline-none text-[13.5px] placeholder:text-neutral-400"
             />
             <button
@@ -194,6 +238,26 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               {t.header.submit}
             </button>
           </form>
+          {open && (
+            <div id="peak-search-suggestions" className="absolute left-0 right-0 top-full">
+              <SearchSuggestions
+                query={q}
+                activeIndex={activeIndex}
+                onPick={pick}
+                onClose={() => { setOpen(false); setActiveIndex(-1); }}
+                inputRef={inputRef}
+                formRef={formRef}
+                searchAria={t.header.searchAria}
+                sugHistory={t.header.sugHistory}
+                sugHot={t.header.sugHot}
+                sugEmpty={t.header.sugEmpty}
+                sugClear={t.header.sugClear}
+                sugNoHistory={t.header.sugNoHistory}
+                clear={t.header.clear}
+              />
+            </div>
+          )}
+          </div>
 
           <nav className="hidden md:flex items-center gap-1 flex-1" aria-label={t.nav.home}>
             {finalNavItems
