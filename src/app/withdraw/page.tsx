@@ -57,6 +57,22 @@ function downloadCSV(filename: string, rows: string[][]): void {
   URL.revokeObjectURL(url);
 }
 
+/** C4: 时间线行 — 完成=绿,拒绝=红 */
+function TimelineRow({ done, label, time, danger }: { done: boolean; label: string; time?: string; danger?: boolean }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span
+        className={`w-3 h-3 rounded-full flex-shrink-0 ${
+          done ? (danger ? 'bg-rose-500' : 'bg-emerald-500') : 'bg-ink-200'
+        }`}
+        aria-hidden="true"
+      />
+      <span className={`flex-1 ${done ? 'text-ink-900' : 'text-ink-400'}`}>{label}</span>
+      {time ? <span className="text-[11px] text-ink-500 tabular-nums" suppressHydrationWarning>{new Date(time).toISOString().slice(0, 10)}</span> : null}
+    </li>
+  );
+}
+
 const HISTORY: WithdrawRow[] = [
   { id: 'W1', amount: 100, addressLabel: 'USDT-TRC20-default', status: 'completed', createdAt: '2024-09-15T03:12:00.000Z', approvedAt: '2024-09-15T04:00:00.000Z', completedAt: '2024-09-15T05:30:00.000Z' },
   { id: 'W2', amount: 50,  addressLabel: 'USDT-TRC20-default', status: 'pending',   createdAt: '2024-09-19T07:42:00.000Z' },
@@ -92,6 +108,22 @@ export default function WithdrawPage() {
   const [search, setSearch] = useState('');
   const [exportToast, setExportToast] = useState<string | null>(null);
 
+  /** C4: 详情 modal — selectedId = 当前打开的提现 id, null = 关闭 */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [copyFlash, setCopyFlash] = useState<string | null>(null);
+  const selected = selectedId ? HISTORY.find((r) => r.id === selectedId) ?? null : null;
+
+  /** C4: 复制地址到剪贴板 */
+  const handleCopyAddress = async (label: string) => {
+    try {
+      await navigator.clipboard.writeText(label);
+      setCopyFlash(t.withdraw.addressCopied);
+      window.setTimeout(() => setCopyFlash(null), 1800);
+    } catch {
+      /* clipboard 不可用时静默 */
+    }
+  };
+
   /** C2: live fee preview */
   const parsedAmount = Number(amount);
   const available = 21.50;
@@ -124,6 +156,9 @@ export default function WithdrawPage() {
     completed: t.withdraw.statusCompleted,
   };
 
+  /** C4: 单笔提现 fee (用全局 calcFee 函数) */
+  const getFeeInfo = (amt: number) => calcFee(amt);
+
   /** C3: filter rows by status + search (id/address) */
   const filtered = useMemo(() => {
     let arr: WithdrawRow[] = HISTORY;
@@ -149,7 +184,7 @@ export default function WithdrawPage() {
 
   /** C3: export filtered rows to CSV */
   const handleExport = () => {
-    const headers = [t.withdraw.date, 'id', t.withdraw.address, t.withdraw.amount, 'status'];
+    const headers = [t.withdraw.date, 'id', t.withdraw.address, t.withdraw.amountCol, 'status'];
     const body = filtered.map((r) => [
       r.createdAt.slice(0, 10),
       r.id,
@@ -460,7 +495,19 @@ export default function WithdrawPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((r) => (
-              <article key={r.id} className="bg-white rounded-xl border border-ink-100 px-5 py-4 flex flex-wrap items-center gap-4">
+              <article
+                key={r.id}
+                onClick={() => setSelectedId(r.id)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedId(r.id);
+                  }
+                }}
+                aria-label={`${r.id} — $${r.amount.toFixed(2)} — ${STATUS_LABEL[r.status]}`}
+                className="bg-white rounded-xl border border-ink-100 px-5 py-4 flex flex-wrap items-center gap-4 cursor-pointer hover:shadow-soft hover:border-orange-300 focus:outline-none focus-visible:border-orange-500 transition-all"
+              >
                 <div className="text-[20px] font-extrabold text-orange-700 min-w-[80px]">${r.amount.toFixed(2)}</div>
                 <div className="flex-1 min-w-[160px]">
                   <div className="text-[13px] font-semibold text-ink-900">{r.addressLabel}</div>
@@ -483,6 +530,121 @@ export default function WithdrawPage() {
             ))}
           </div>
         )}
+
+      {/* C4: 详情 modal */}
+      {selected && (() => {
+        const { fee, net } = getFeeInfo(selected.amount);
+        return (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="withdrawDetailTitle"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+            onClick={(e) => { if (e.target === e.currentTarget) setSelectedId(null); }}
+          >
+            <div className="bg-white rounded-2xl w-full max-w-[480px] p-6 shadow-float max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="min-w-0">
+                  <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">
+                    {t.withdraw.detailTitle}
+                  </div>
+                  <h3 id="withdrawDetailTitle" className="text-[18px] font-extrabold text-ink-900 font-mono truncate">
+                    {selected.id}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setSelectedId(null)}
+                  aria-label={t.withdraw.detailClose}
+                  className="w-8 h-8 flex-shrink-0 text-ink-400 hover:text-ink-700 hover:bg-ink-50 rounded-md transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className={`inline-flex items-center gap-1.5 mb-4 px-2.5 py-1 rounded-full text-[11.5px] font-bold ${
+                selected.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                selected.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                selected.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                'bg-rose-100 text-rose-700'
+              }`}>
+                {selected.status === 'completed' ? '✓' : selected.status === 'rejected' ? '✗' : '⏱'} {STATUS_LABEL[selected.status]}
+              </div>
+
+              {/* 金额明细 */}
+              <div className="bg-ink-50 border border-ink-100 rounded-md p-4 space-y-2.5 text-[13px]">
+                <div className="flex justify-between gap-3">
+                  <span className="text-ink-500">{t.withdraw.amount}</span>
+                  <span className="text-ink-900 font-semibold tabular-nums">${selected.amount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-ink-500">{t.withdraw.networkFee} <span className="text-ink-400 text-[11.5px]">{t.withdraw.feeRate}</span></span>
+                  <span className="text-rose-700 font-semibold tabular-nums">−${fee.toFixed(2)}</span>
+                </div>
+                <div className="border-t border-ink-200 pt-2.5 flex justify-between gap-3">
+                  <span className="text-ink-700 font-bold">{t.withdraw.net}</span>
+                  <span className="text-emerald-700 font-extrabold tabular-nums text-[15px]">${net.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* 地址 */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold">{t.withdraw.address}</span>
+                  <button
+                    onClick={() => handleCopyAddress(selected.addressLabel)}
+                    className="text-[11.5px] text-orange-700 hover:text-orange-800 font-semibold"
+                  >
+                    📋 {t.withdraw.copyAddress}
+                  </button>
+                </div>
+                <div className="px-3 py-2 bg-white border border-ink-100 rounded-md font-mono text-[12.5px] text-ink-900 break-all">
+                  {selected.addressLabel}
+                </div>
+              </div>
+
+              {/* 时间线 */}
+              <div className="mt-4">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-2">
+                  {t.withdraw.timeline}
+                </div>
+                <ol className="space-y-2 text-[12.5px]">
+                  <TimelineRow done label={t.withdraw.timelineApplied} time={selected.createdAt} />
+                  {(selected.status === 'approved' || selected.status === 'completed') && (
+                    <TimelineRow done label={t.withdraw.timelineApproved} time={selected.approvedAt} />
+                  )}
+                  {selected.status === 'completed' && (
+                    <TimelineRow done label={t.withdraw.timelineCompleted} time={selected.completedAt} />
+                  )}
+                  {selected.status === 'rejected' && (
+                    <TimelineRow done label={t.withdraw.timelineRejected} time={selected.rejectedAt} danger />
+                  )}
+                </ol>
+              </div>
+
+              {/* 拒绝原因 */}
+              {selected.status === 'rejected' && selected.rejectReason && (
+                <div className="mt-4 px-3 py-2 bg-rose-50 border border-rose-200 rounded-md text-[12px] text-rose-800">
+                  ⚠ {t.withdraw.rejectReason}: <span className="font-semibold">{selected.rejectReason}</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => setSelectedId(null)}
+                className="mt-5 w-full py-2.5 border border-ink-200 text-ink-700 hover:bg-ink-50 text-[13.5px] font-bold rounded-md transition-colors"
+              >
+                {t.withdraw.detailClose}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* C4: copy flash toast */}
+      {copyFlash && (
+        <div role="status" className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold z-50">
+          ✓ {copyFlash}
+        </div>
+      )}
       </UserShell>
 
     </>
