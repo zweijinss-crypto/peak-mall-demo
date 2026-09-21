@@ -52,9 +52,15 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 md:pl-[236px]">
       {/* Sidebar — dark, full-height column with brand on top + footer pinned */}
-      <aside className="w-full md:w-[236px] md:flex-shrink-0 bg-[#1c1c1c] text-neutral-100 flex flex-col md:min-h-screen md:sticky md:top-0">
+      {/* Why fixed (not sticky): sticky on a flex item lets the bottom fall
+          behind the viewport when the user scrolls a long page, exposing
+          the page background where the sidebar should be. position:fixed
+          pins the sidebar to the viewport so it always covers the full
+          height regardless of how long main content is. The wrapper uses
+          md:pl-[236px] to reserve space for the fixed sidebar. */}
+      <aside className="bg-[#1c1c1c] text-neutral-100 flex flex-col w-full md:w-[236px] md:fixed md:top-0 md:left-0 md:h-screen md:overflow-y-auto">
         {/* Brand block — mirrors source .brand: 20px 22px padding, brand name bold, role label muted */}
         <div className="px-[22px] py-5 border-b border-white/10">
           <Link href="/" className="block group">
