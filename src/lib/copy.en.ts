@@ -236,6 +236,9 @@ export const COPY_EN = {
     discountLabel: 'Discount',
     /** Available hints */
     couponHints: 'Try SAVE10 (10% off) / FREESHIP (free shipping) / VIP20 ($20 off $200+)',
+    /** G1: last coupon reuse */
+    lastCoupon: (code: string) => `Last used ${code}`,
+    lastCouponReuse: 'Apply again',
   },
 
   search: {

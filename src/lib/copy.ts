@@ -337,6 +337,9 @@ export const COPY = {
     discountLabel: '优惠折扣',
     /** 可用优惠码提示 */
     couponHints: '试试 SAVE10 (9 折) / FREESHIP (免运费) / VIP20 (满 $200 减 $20)',
+    /** G1: 上次优惠码复用 */
+    lastCoupon: (code: string) => `上次用过 ${code}`,
+    lastCouponReuse: '再次使用',
   },
 
   search: {

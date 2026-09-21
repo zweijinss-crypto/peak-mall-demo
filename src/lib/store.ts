@@ -101,6 +101,8 @@ interface PeakStore {
   applyCoupon: (code: CouponCode) => boolean;
   /** 移除优惠券 */
   removeCoupon: () => void;
+  /** G1: 最近用过的优惠码 — placeOrder 后保留,供下次一键复用 */
+  lastCouponCode: CouponCode | null;
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
   /** 取消订单(仅 pending 可取消) */
@@ -120,6 +122,7 @@ export const usePeakStore = create<PeakStore>()(
       locale: 'zh',
       currency: 'USD',
       coupon: null,
+      lastCouponCode: null,
 
       addToCart: (item, qty = 1) =>
         set((s) => {
@@ -161,7 +164,7 @@ export const usePeakStore = create<PeakStore>()(
       applyCoupon: (code) => {
         const valid: CouponCode[] = ['SAVE10', 'FREESHIP', 'VIP20'];
         if (!valid.includes(code)) return false;
-        set({ coupon: { code, appliedAt: Date.now() } });
+        set({ coupon: { code, appliedAt: Date.now() }, lastCouponCode: code });
         return true;
       },
 
@@ -228,7 +231,7 @@ export const usePeakStore = create<PeakStore>()(
           total: s.cart.reduce((sum, c) => sum + c.price * c.qty, 0),
           status: 'pending',
         };
-        set({ orders: [order, ...s.orders], cart: [], coupon: null });
+        set({ orders: [order, ...s.orders], cart: [], coupon: null, lastCouponCode: s.coupon?.code ?? s.lastCouponCode });
         return order;
       },
 
@@ -245,6 +248,7 @@ export const usePeakStore = create<PeakStore>()(
         locale: s.locale,
         currency: s.currency,
         coupon: s.coupon,
+        lastCouponCode: s.lastCouponCode,
       }),
     }
   )

@@ -25,6 +25,7 @@ export default function CartPage() {
   const chrome = usePageChrome('cart');
   const cart = usePeakStore((s) => s.cart);
   const coupon = usePeakStore((s) => s.coupon);
+  const lastCouponCode = usePeakStore((s) => s.lastCouponCode);
   const updateQty = usePeakStore((s) => s.updateQty);
   const remove = usePeakStore((s) => s.removeFromCart);
   const clear = usePeakStore((s) => s.clearCart);
@@ -61,8 +62,8 @@ export default function CartPage() {
   const shipping = shippingFree ? 0 : 5;
   const grandTotal = Math.max(0, subtotal - discount + shipping);
 
-  const handleApplyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
+  const handleApplyCoupon = (overrideCode?: string) => {
+    const code = (overrideCode ?? couponInput).trim().toUpperCase();
     if (!code) {
       setCouponMsg({ kind: 'error', text: t.cart.couponInvalid });
       return;
@@ -241,6 +242,21 @@ export default function CartPage() {
                   </div>
                 ) : (
                   <>
+                    {/* G1: 上次用过 X [再次使用] — placeOrder 后保留,一键复用 */}
+                    {lastCouponCode && lastCouponCode !== couponInput.trim().toUpperCase() && (
+                      <div className="mb-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md flex items-center gap-2 text-[12.5px]">
+                        <span className="text-amber-800">
+                          🔖 {t.cart.lastCoupon(lastCouponCode)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleApplyCoupon(lastCouponCode)}
+                          className="ml-auto px-2.5 py-1 bg-amber-700 hover:bg-amber-800 text-white text-[11.5px] font-bold rounded transition-colors"
+                        >
+                          {t.cart.lastCouponReuse}
+                        </button>
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       <input
                         type="text"
