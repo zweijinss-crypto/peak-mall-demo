@@ -14,17 +14,21 @@ interface CommissionRow {
   status: 'settled' | 'pending';
   /** ISO date string — static seed avoids hydration mismatch */
   date: string;
+  /** B7: detail modal extra fields */
+  productName: string;
+  orderAmount: number;
+  referredBy: string;
 }
 
 const ROWS: CommissionRow[] = [
-  { id: 'C1', order: 'ORD-7841', source: 'Direct',  amount: 4.50, rate: '5%',  status: 'settled', date: '2024-09-19T03:12:00.000Z' },
-  { id: 'C2', order: 'ORD-7815', source: 'Level 1', amount: 2.10, rate: '3%',  status: 'settled', date: '2024-09-15T07:42:00.000Z' },
-  { id: 'C3', order: 'ORD-7798', source: 'Level 2', amount: 1.35, rate: '1.5%',status: 'pending', date: '2024-09-11T11:24:00.000Z' },
-  { id: 'C4', order: 'ORD-7780', source: 'Direct',  amount: 7.20, rate: '5%',  status: 'settled', date: '2024-09-08T09:05:00.000Z' },
-  { id: 'C5', order: 'ORD-7754', source: 'Level 1', amount: 0.95, rate: '3%',  status: 'pending', date: '2024-09-05T15:30:00.000Z' },
-  { id: 'C6', order: 'ORD-7721', source: 'Direct',  amount: 5.40, rate: '5%',  status: 'settled', date: '2024-09-01T10:00:00.000Z' },
-  { id: 'C7', order: 'ORD-7700', source: 'Direct',  amount: 3.10, rate: '5%',  status: 'settled', date: '2024-08-25T10:00:00.000Z' },
-  { id: 'C8', order: 'ORD-7680', source: 'Level 2', amount: 0.85, rate: '1.5%',status: 'settled', date: '2024-08-10T10:00:00.000Z' },
+  { id: 'C1', order: 'ORD-7841', source: 'Direct',  amount: 4.50, rate: '5%',  status: 'settled', date: '2024-09-19T03:12:00.000Z', productName: 'Ultra-Slim Business Laptop', orderAmount: 90.00,  referredBy: 'Diana Chen' },
+  { id: 'C2', order: 'ORD-7815', source: 'Level 1', amount: 2.10, rate: '3%',  status: 'settled', date: '2024-09-15T07:42:00.000Z', productName: 'Magnetic Cable Organizer',   orderAmount: 70.00,  referredBy: 'Mike Liu' },
+  { id: 'C3', order: 'ORD-7798', source: 'Level 2', amount: 1.35, rate: '1.5%',status: 'pending', date: '2024-09-11T11:24:00.000Z', productName: 'Foldable Camera Drone',       orderAmount: 90.00,  referredBy: 'Sara Wang' },
+  { id: 'C4', order: 'ORD-7780', source: 'Direct',  amount: 7.20, rate: '5%',  status: 'settled', date: '2024-09-08T09:05:00.000Z', productName: '4K Action Camera',            orderAmount: 144.00, referredBy: 'Diana Chen' },
+  { id: 'C5', order: 'ORD-7754', source: 'Level 1', amount: 0.95, rate: '3%',  status: 'pending', date: '2024-09-05T15:30:00.000Z', productName: 'Smart Fitness Band',          orderAmount: 31.67,  referredBy: 'Tom Zhao' },
+  { id: 'C6', order: 'ORD-7721', source: 'Direct',  amount: 5.40, rate: '5%',  status: 'settled', date: '2024-09-01T10:00:00.000Z', productName: 'Bluetooth Selfie Stick',      orderAmount: 108.00, referredBy: 'Diana Chen' },
+  { id: 'C7', order: 'ORD-7700', source: 'Direct',  amount: 3.10, rate: '5%',  status: 'settled', date: '2024-08-25T10:00:00.000Z', productName: 'Mini Bluetooth Speaker',      orderAmount: 62.00,  referredBy: 'Diana Chen' },
+  { id: 'C8', order: 'ORD-7680', source: 'Level 2', amount: 0.85, rate: '1.5%',status: 'settled', date: '2024-08-10T10:00:00.000Z', productName: 'Portable USB Mini Fan',       orderAmount: 56.67,  referredBy: 'Sara Wang' },
 ];
 
 type StatusTab = 'all' | CommissionRow['status'];
@@ -60,6 +64,10 @@ export default function CommissionsPage() {
   const [month, setMonth] = useState<string>('all');
   const [source, setSource] = useState<string>('all');
   const [exportToast, setExportToast] = useState<string | null>(null);
+
+  /** B7: detail modal — selectedId = 当前打开的佣金 id, null = 关闭 */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = selectedId ? ROWS.find((r) => r.id === selectedId) ?? null : null;
 
   const months = useMemo(() => {
     const set = new Set<string>();
@@ -224,7 +232,19 @@ export default function CommissionsPage() {
             </thead>
             <tbody>
               {filtered.map((r) => (
-                <tr key={r.id} className="border-t border-ink-100 hover:bg-ink-50">
+                <tr
+                  key={r.id}
+                  onClick={() => setSelectedId(r.id)}
+                  className="border-t border-ink-100 hover:bg-ink-50 cursor-pointer focus:outline-none focus-visible:bg-orange-50"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedId(r.id);
+                    }
+                  }}
+                  aria-label={`${r.order} — ${SOURCE_LABEL[r.source]} — $${r.amount.toFixed(2)}`}
+                >
                   <td className="px-4 py-3 font-mono text-ink-900">{r.order}</td>
                   <td className="px-4 py-3 text-ink-700">{SOURCE_LABEL[r.source]}</td>
                   <td className="px-4 py-3 text-right text-ink-700">{r.rate}</td>
@@ -241,6 +261,101 @@ export default function CommissionsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* B7: detail modal */}
+      {selected && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="commissionDetailTitle"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedId(null); }}
+        >
+          <div className="bg-white rounded-2xl w-full max-w-[480px] p-6 shadow-float">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">
+                  {t.commissions.detailTitle}
+                </div>
+                <h3 id="commissionDetailTitle" className="text-[18px] font-extrabold text-ink-900 font-mono truncate">
+                  {selected.order}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedId(null)}
+                aria-label={t.commissions.detailClose}
+                className="w-8 h-8 flex-shrink-0 text-ink-400 hover:text-ink-700 hover:bg-ink-50 rounded-md transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={`inline-flex items-center gap-1.5 mb-4 px-2.5 py-1 rounded-full text-[11.5px] font-bold ${
+              selected.status === 'settled' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+            }`}>
+              {selected.status === 'settled' ? '✓' : '⏱'} {selected.status === 'settled' ? t.commissions.statusSettled : t.commissions.statusPending}
+            </div>
+
+            {/* 佣金明细 */}
+            <div className="bg-ink-50 border border-ink-100 rounded-md p-4 space-y-2.5 text-[13px]">
+              <div className="flex justify-between gap-3">
+                <span className="text-ink-500">{t.commissions.product}</span>
+                <span className="text-ink-900 font-semibold text-right truncate ml-3">{selected.productName}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-ink-500">{t.commissions.orderAmount}</span>
+                <span className="text-ink-900 font-semibold tabular-nums">${selected.orderAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-ink-500">{t.commissions.commissionRate}</span>
+                <span className="text-ink-900 font-semibold tabular-nums">{selected.rate}</span>
+              </div>
+              <div className="border-t border-ink-200 pt-2.5 flex justify-between gap-3">
+                <span className="text-ink-700 font-bold">{t.commissions.commissionAmount}</span>
+                <span className="text-orange-700 font-extrabold tabular-nums text-[15px]">${selected.amount.toFixed(2)}</span>
+              </div>
+              {selected.status === 'settled' && (
+                <div className="flex justify-between gap-3 text-[11.5px]">
+                  <span className="text-ink-500">{t.commissions.settledAt}</span>
+                  <span className="text-ink-700 tabular-nums">{new Date(selected.date).toISOString().slice(0, 10)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* 来源信息 */}
+            <div className="mt-4">
+              <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-2">
+                {t.commissions.sourceInfo}
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-[12.5px]">
+                <div className="bg-white border border-ink-100 rounded-md p-3">
+                  <div className="text-ink-500 mb-0.5">{t.commissions.referredBy}</div>
+                  <div className="text-ink-900 font-bold truncate">{selected.referredBy}</div>
+                </div>
+                <div className="bg-white border border-ink-100 rounded-md p-3">
+                  <div className="text-ink-500 mb-0.5">{t.commissions.tier}</div>
+                  <div className="text-ink-900 font-bold">{SOURCE_LABEL[selected.source]}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={() => setSelectedId(null)}
+                className="flex-1 py-2.5 border border-ink-200 text-ink-700 hover:bg-ink-50 text-[13.5px] font-bold rounded-md transition-colors"
+              >
+                {t.commissions.detailClose}
+              </button>
+              <a
+                href={`/orders/?order=${encodeURIComponent(selected.order)}`}
+                className="flex-1 py-2.5 bg-orange-700 hover:bg-orange-800 text-white text-[13.5px] font-bold rounded-md transition-colors text-center"
+              >
+                {t.commissions.viewOrder} →
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </UserShell>
