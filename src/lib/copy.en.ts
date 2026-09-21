@@ -1437,6 +1437,10 @@ export const COPY_EN = {
       confirmPay: 'Confirm paid',
       paidTitle: 'Confirm payout',
       paidBody: 'This will mark the request as paid and deduct the amount from the user balance.',
+      // toasts
+      approvedToast: (id: number) => `Approved withdrawal #${id}`,
+      rejectedToast: (id: number) => `Rejected withdrawal #${id}`,
+      paidToast: (id: number) => `Marked paid #${id}`,
     },
     wdCenter: {
       title: 'Withdrawals',

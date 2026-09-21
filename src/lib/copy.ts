@@ -1411,6 +1411,10 @@ export const COPY = {
       confirmPay: '确认到账',
       paidTitle: '确认已到账',
       paidBody: '标记该申请已实际到账。此操作会从用户余额中扣除提现金额。',
+      // toasts
+      approvedToast: (id: number) => `已通过提现 #${id}`,
+      rejectedToast: (id: number) => `已驳回提现 #${id}`,
+      paidToast: (id: number) => `已到账 #${id}`,
     },
     wdCenter: {
       title: '提现中心',

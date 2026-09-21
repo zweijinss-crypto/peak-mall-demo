@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DataTable, Th, Td } from '@/components/admin/DataTable';
 import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
@@ -9,6 +9,14 @@ import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 import { Modal } from '@/components/admin/Modal';
+
+// Shared button classes — admin-wide emerald/rose + ghost + focus rings.
+const BTN_APPROVE = 'px-2 py-0.5 text-[11px] font-medium rounded bg-emerald-700 text-white hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 transition-colors mr-1';
+const BTN_REJECT = 'px-2 py-0.5 text-[11px] font-medium rounded bg-rose-600 text-white hover:bg-rose-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1 transition-colors';
+const BTN_PAID = 'px-2 py-0.5 text-[11px] font-medium rounded bg-emerald-700 text-white hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 transition-colors';
+const BTN_GHOST = 'px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-1 transition-colors';
+const BTN_CONFIRM_EMERALD = 'px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 transition-colors';
+const BTN_CONFIRM_ROSE = 'px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-rose-600 text-white hover:bg-rose-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1 transition-colors';
 
 const STATUS_KIND: Record<WdStatus, StatusKind> = {
   pending: 'pending',
@@ -42,6 +50,18 @@ export function WdClient() {
   const [payingId, setPayingId] = useState<number | null>(null);
   const [reasonError, setReasonError] = useState(false);
 
+  // Toast state — auto-dismiss 3s. Mirrors agents/products undo pattern.
+  const [toast, setToast] = useState<{ kind: 'success' | 'info' | 'danger'; text: string } | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+  }, []);
+  const showToast = (kind: 'success' | 'info' | 'danger', text: string) => {
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+    setToast({ kind, text });
+    toastTimerRef.current = window.setTimeout(() => setToast(null), 3000);
+  };
+
   if (!mounted) return <div className="text-neutral-500 text-[13px]">Loading…</div>;
 
   const locale = isEn ? 'en' : 'zh';
@@ -57,14 +77,16 @@ export function WdClient() {
 
   const handleConfirmApprove = () => {
     if (approvingId === null) return;
+    const id = approvingId;
     setWd(
       wd.map((w: any) =>
-        w.id === approvingId
+        w.id === id
           ? { ...w, status: 'approved' as const, processed_at: now() }
           : w,
       ),
     );
     setApprovingId(null);
+    showToast('success', t.admin.wd.approvedToast(id));
   };
 
   const handleConfirmReject = () => {
@@ -74,9 +96,10 @@ export function WdClient() {
       setReasonError(true);
       return;
     }
+    const id = rejectingId;
     setWd(
       wd.map((w: any) =>
-        w.id === rejectingId
+        w.id === id
           ? { ...w, status: 'rejected' as const, reject_reason: reason, processed_at: now() }
           : w,
       ),
@@ -84,6 +107,7 @@ export function WdClient() {
     setRejectingId(null);
     setRejectReason('');
     setReasonError(false);
+    showToast('danger', t.admin.wd.rejectedToast(id));
   };
 
   const handleConfirmPay = () => {
@@ -93,6 +117,7 @@ export function WdClient() {
       setPayingId(null);
       return;
     }
+    const id = payingId;
     // Deduct from the matching user balance (match by username).
     const updatedUsers = users.map((u: any) =>
       u.username === target.username
@@ -102,12 +127,13 @@ export function WdClient() {
     setUsers(updatedUsers);
     setWd(
       wd.map((w: any) =>
-        w.id === payingId
+        w.id === id
           ? { ...w, status: 'paid' as const, paid_at: now() }
           : w,
       ),
     );
     setPayingId(null);
+    showToast('success', t.admin.wd.paidToast(id));
   };
 
   // Resolve modal target row — kept in render so amount/fee labels stay live.
@@ -162,12 +188,12 @@ export function WdClient() {
                     <Td className="whitespace-nowrap">
                       {w.status === 'pending' && (
                         <>
-                          <button onClick={() => approve(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700 mr-1">{t.admin.wd.approve}</button>
-                          <button onClick={() => reject(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-rose-600 text-white hover:bg-rose-700">{t.admin.wd.reject}</button>
+                          <button type="button" onClick={() => approve(w.id)} className={BTN_APPROVE}>{t.admin.wd.approve}</button>
+                          <button type="button" onClick={() => reject(w.id)} className={BTN_REJECT}>{t.admin.wd.reject}</button>
                         </>
                       )}
                       {w.status === 'approved' && (
-                        <button onClick={() => markPaid(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.wd.markPaid}</button>
+                        <button type="button" onClick={() => markPaid(w.id)} className={BTN_PAID}>{t.admin.wd.markPaid}</button>
                       )}
                       {(w.status === 'paid' || w.status === 'rejected') && (
                         <span className="text-neutral-700 text-[11px]">{t.admin.wd.view}</span>
@@ -232,14 +258,14 @@ export function WdClient() {
                   setRejectReason('');
                   setReasonError(false);
                 }}
-                className="px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 transition-colors"
+                className={BTN_GHOST}
               >
                 {t.admin.wd.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmReject}
-                className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-rose-600 text-white hover:bg-rose-700 transition-colors"
+                className={BTN_CONFIRM_ROSE}
               >
                 {t.admin.wd.confirmReject}
               </button>
@@ -289,14 +315,14 @@ export function WdClient() {
               <button
                 type="button"
                 onClick={() => setApprovingId(null)}
-                className="px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 transition-colors"
+                className={BTN_GHOST}
               >
                 {t.admin.wd.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmApprove}
-                className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-700 transition-colors"
+                className={BTN_CONFIRM_EMERALD}
               >
                 {t.admin.wd.confirmApprove}
               </button>
@@ -304,6 +330,21 @@ export function WdClient() {
           </div>
         )}
       </Modal>
+
+      {/* Toast — confirm approve / reject / pay */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 text-[13px] rounded-lg shadow-lg text-white ${
+            toast.kind === 'success' ? 'bg-emerald-700'
+            : toast.kind === 'danger' ? 'bg-rose-700'
+            : 'bg-neutral-900'
+          }`}
+        >
+          {toast.text}
+        </div>
+      )}
 
       {/* Pay modal — confirms balance deduction */}
       <Modal
@@ -328,14 +369,14 @@ export function WdClient() {
               <button
                 type="button"
                 onClick={() => setPayingId(null)}
-                className="px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 transition-colors"
+                className={BTN_GHOST}
               >
                 {t.admin.wd.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmPay}
-                className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-700 transition-colors"
+                className={BTN_CONFIRM_EMERALD}
               >
                 {t.admin.wd.confirmPay}
               </button>
