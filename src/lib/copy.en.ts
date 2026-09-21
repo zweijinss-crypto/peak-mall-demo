@@ -1524,4 +1524,24 @@ export const COPY_EN = {
       none: 'None yet',
     },
   },
+  /** v41: agent dashboard copy */
+  agentDash: {
+    title: 'Agent Dashboard',
+    balance: 'My balance',
+    quickActions: 'Quick actions',
+    withdraw: 'Withdraw',
+    bindAddress: 'Bind payout address',
+    commDetail: 'Commissions',
+    teamMgmt: 'Team',
+  },
+  /** v41: fx dashboard alias (same strings as agent) */
+  fxDash: {
+    title: 'Affiliate Dashboard',
+    balance: 'My balance',
+    quickActions: 'Quick actions',
+    withdraw: 'Withdraw',
+    bindAddress: 'Bind payout address',
+    commDetail: 'Commissions',
+    teamMgmt: 'Team',
+  },
 } as const;

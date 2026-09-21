@@ -8,15 +8,7 @@ import Link from 'next/link';
 export default function AgentDashboardPage() {
   const t = useT();
   const chrome = usePageChrome('commissions');
-  const tDash = (t as Record<string, any>).fxDash || (t as Record<string, any>).agentDash || {
-    title: '分销商中心',
-    balance: '我的余额',
-    quickActions: '快捷操作',
-    withdraw: '提现中心',
-    bindAddress: '绑定提现地址',
-    commDetail: '佣金明细',
-    teamMgmt: '团队管理',
-  };
+  const tDash = (t as Record<string, any>).fxDash;
 
   return (
     <>

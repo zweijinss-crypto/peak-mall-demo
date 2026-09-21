@@ -8,15 +8,7 @@ import Link from 'next/link';
 export default function AgentDashboardPage() {
   const t = useT();
   const chrome = usePageChrome('commissions');
-  const tDash = (t as Record<string, any>).agentDash || {
-    title: 'Agent Dashboard',
-    balance: 'My balance',
-    quickActions: 'Quick actions',
-    withdraw: 'Withdraw',
-    bindAddress: 'Bind payout address',
-    commDetail: 'Commissions',
-    teamMgmt: 'Team',
-  };
+  const tDash = (t as Record<string, any>).agentDash;
 
   return (
     <>

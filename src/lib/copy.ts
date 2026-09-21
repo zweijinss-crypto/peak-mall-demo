@@ -1499,4 +1499,24 @@ export const COPY = {
       none: '尚未生成',
     },
   },
+  /** v41: 代理 / 分销中心首页文案 */
+  agentDash: {
+    title: '分销商中心',
+    balance: '我的余额',
+    quickActions: '快捷操作',
+    withdraw: '提现中心',
+    bindAddress: '绑定提现地址',
+    commDetail: '佣金明细',
+    teamMgmt: '团队管理',
+  },
+  /** v41: 分销中心 alias (fx page 共用同一组文案) */
+  fxDash: {
+    title: '分销商中心',
+    balance: '我的余额',
+    quickActions: '快捷操作',
+    withdraw: '提现中心',
+    bindAddress: '绑定提现地址',
+    commDetail: '佣金明细',
+    teamMgmt: '团队管理',
+  },
 } as const;
