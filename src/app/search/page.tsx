@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AnnouncementBar,
@@ -129,8 +130,44 @@ function SearchInner() {
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
           >
             {results.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} highlight={q} />
             ))}
+          </section>
+        ) : !q ? (
+          /* S3: 未输入 — 热门 + 分类入口 */
+          <section aria-label={t.search.title} className="space-y-6">
+            <div className="bg-white rounded-xl border border-ink-100 p-6">
+              <div className="text-[12px] font-bold text-ink-500 tracking-wider uppercase mb-3">
+                {t.search.hot}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {t.search.hotTags.map((tag: string) => (
+                  <button
+                    key={tag}
+                    onClick={() => router.push(`/search?q=${encodeURIComponent(tag)}`)}
+                    className="px-3.5 py-1.5 bg-ink-50 hover:bg-orange-50 text-[13px] text-ink-700 hover:text-orange-700 rounded-full border border-ink-100 hover:border-orange-200 transition-colors"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-ink-100 p-6">
+              <div className="text-[12px] font-bold text-ink-500 tracking-wider uppercase mb-3">
+                {chrome.isEn ? 'Browse categories' : '热门分类'}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['数码电子', '家用电器'].map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/?cat=${encodeURIComponent(cat)}`}
+                    className="px-4 py-2 bg-ink-50 hover:bg-orange-50 text-[13px] text-ink-700 hover:text-orange-700 rounded-md border border-ink-100 hover:border-orange-200 transition-colors"
+                  >
+                    {cat}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </section>
         ) : q ? (
           /* Empty state */

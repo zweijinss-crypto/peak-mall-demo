@@ -12,6 +12,8 @@ export interface ProductCardProps {
   product: Product;
   onClick?: (id: number) => void;
   currency?: CurrencyCode;
+  /** S3: substring to highlight in product.name (case-insensitive). */
+  highlight?: string;
 }
 
 const COVER_EMOJI = '📦';
@@ -25,7 +27,7 @@ function currencySymbol(c: CurrencyCode): string {
   return SYMBOLS[c] || '$';
 }
 
-const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' }) => {
+const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD', highlight }) => {
   const t = useT();
   const router = useRouter();
   const categoryLabel = useCategoryLabel(product.category);
@@ -114,7 +116,7 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
           </span>
         </div>
         <h3 className="text-[14.5px] font-semibold text-neutral-900 mb-2.5 leading-snug line-clamp-2 min-h-[42px] tracking-[-0.005em]">
-          {product.name}
+          {highlight ? <Highlight text={product.name} query={highlight} /> : product.name}
         </h3>
         <div className="flex items-baseline gap-2">
           <span className="text-orange-700 text-[17px] font-extrabold">
@@ -147,3 +149,30 @@ const ProductCard: FC<ProductCardProps> = ({ product, onClick, currency = 'USD' 
 };
 
 export default ProductCard;
+
+/** S3: Highlight matching substring inside product name. */
+function Highlight({ text, query }: { text: string; query: string }) {
+  const q = query.trim();
+  if (!q) return <>{text}</>;
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  const parts: React.ReactNode[] = [];
+  let i = 0;
+  let idx = lower.indexOf(needle);
+  let key = 0;
+  while (idx !== -1) {
+    if (idx > i) parts.push(<span key={key++}>{text.slice(i, idx)}</span>);
+    parts.push(
+      <mark
+        key={key++}
+        className="bg-amber-200 text-neutral-900 px-0.5 rounded-sm"
+      >
+        {text.slice(idx, idx + needle.length)}
+      </mark>,
+    );
+    i = idx + needle.length;
+    idx = lower.indexOf(needle, i);
+  }
+  if (i < text.length) parts.push(<span key={key++}>{text.slice(i)}</span>);
+  return <>{parts}</>;
+}
