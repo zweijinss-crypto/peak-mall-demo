@@ -35,7 +35,7 @@ const SupportWidget: FC<SupportWidgetProps> = ({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 z-50 group flex items-center gap-3 bg-white border border-ink-200 shadow-float rounded-2xl pl-3 pr-4 py-2.5 hover:shadow-2xl hover:-translate-y-0.5 transition-all max-w-[300px]"
+      className="fixed bottom-5 right-5 z-50 group flex items-center gap-3 bg-white border border-ink-200 shadow-float rounded-2xl pl-3 pr-4 py-2.5 hover:shadow-2xl hover:-translate-y-0.5 transition-all max-w-[300px] min-h-[44px] max-md:bottom-20"
     >
       <span
         aria-hidden="true"

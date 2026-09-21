@@ -38,7 +38,7 @@ const CookieBanner: FC = () => {
     <div
       role="region"
       aria-label={t.cookie.aria}
-      className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-[440px] z-50"
+      className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-[440px] z-40"
     >
       <div className="bg-ink-900 text-white rounded-xl shadow-float border border-white/10 p-4 md:p-5 backdrop-blur-md">
         <div className="flex items-start gap-3">
@@ -49,7 +49,7 @@ const CookieBanner: FC = () => {
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={accept}
-                className="bg-orange-700 hover:bg-orange-800 text-white text-[12.5px] font-bold px-4 py-2 rounded-md transition-colors"
+                className="bg-orange-700 hover:bg-orange-800 text-white text-[12.5px] font-bold px-5 py-3 min-h-[44px] rounded-md transition-colors"
               >
                 {t.cookie.accept}
               </button>
