@@ -23,6 +23,7 @@ export default function LoginPage() {
   // 管理员 tab 内 AdminLoginForm 自带已登录检测(自动 redirect 到 /admin/dashboard)
 
   const announceText = t.auth.announce;
+  const loginErrId = 'login-page-error';
 
   return (
     <>
@@ -110,7 +111,7 @@ export default function LoginPage() {
                 }}
               />
               {error && (
-                <div className="text-center text-rose-600 text-[13px] -mt-8 mb-8">{error}</div>
+                <div id={loginErrId} role="alert" className="text-center text-rose-600 text-[13px] -mt-8 mb-8">{error}</div>
               )}
             </>
           }

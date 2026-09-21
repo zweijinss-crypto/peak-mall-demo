@@ -1,4 +1,4 @@
-import { useState, type FC, type ReactNode, type FormEvent } from 'react';
+import { useState, useId, type FC, type ReactNode, type FormEvent, type ReactElement, isValidElement, cloneElement } from 'react';
 import { useT } from '@/lib/use-t';
 
 export interface AuthI18n {
@@ -128,6 +128,7 @@ const LoginPanel: FC<LoginPanelProps> = ({ onLogin, i18n }) => {
   const [rem, setRem] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const loginMsgId = 'auth-login-msg';
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -146,18 +147,24 @@ const LoginPanel: FC<LoginPanelProps> = ({ onLogin, i18n }) => {
       <div className="bg-neutral-50 border-b border-neutral-100 px-5 py-3.5 text-[14px] font-bold text-neutral-700">
         {i18n.loginTitle}
       </div>
-      <form onSubmit={submit} className="p-6">
+      <form onSubmit={submit} className="p-6" noValidate>
         <Field label={i18n.email} required>
           <input
+            id="auth-login-email"
             type="email" value={u} onChange={(e) => setU(e.target.value)}
             placeholder={i18n.emailPh} autoComplete="username"
+            aria-invalid={msg ? true : undefined}
+            aria-describedby={msg ? loginMsgId : undefined}
             className={inputCls}
           />
         </Field>
         <Field label={i18n.password} required>
           <input
+            id="auth-login-password"
             type="password" value={p} onChange={(e) => setP(e.target.value)}
             placeholder={i18n.passwordPh} autoComplete="current-password"
+            aria-invalid={msg ? true : undefined}
+            aria-describedby={msg ? loginMsgId : undefined}
             className={inputCls}
           />
         </Field>
@@ -171,7 +178,7 @@ const LoginPanel: FC<LoginPanelProps> = ({ onLogin, i18n }) => {
         >
           {busy ? '...' : i18n.login}
         </button>
-        {msg && <div className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}
+        {msg && <div id={loginMsgId} role="alert" className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}
       </form>
     </div>
   );
@@ -191,6 +198,7 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
   const [invite, setInvite] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const regMsgId = 'auth-register-msg';
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -219,28 +227,28 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
       <div className="bg-neutral-50 border-b border-neutral-100 px-5 py-3.5 text-[14px] font-bold text-neutral-700">
         {i18n.registerTitle}
       </div>
-      <form onSubmit={submit} className="p-6">
+      <form onSubmit={submit} className="p-6" noValidate>
         <Field label={i18n.email} required>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={i18n.emailPh} autoComplete="email" className={inputCls} />
+          <input id="auth-register-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={i18n.emailPh} autoComplete="email" aria-invalid={msg ? true : undefined} aria-describedby={msg ? regMsgId : undefined} className={inputCls} />
         </Field>
         <Field label={i18n.nickname}>
-          <input value={nick} onChange={(e) => setNick(e.target.value)} placeholder={i18n.nicknamePh} className={inputCls} />
+          <input id="auth-register-nickname" value={nick} onChange={(e) => setNick(e.target.value)} placeholder={i18n.nicknamePh} className={inputCls} />
         </Field>
         <Field label={i18n.password} required>
-          <input type="password" value={p1} onChange={(e) => setP1(e.target.value)} placeholder={i18n.passwordPh} autoComplete="new-password" className={inputCls} />
+          <input id="auth-register-password" type="password" value={p1} onChange={(e) => setP1(e.target.value)} placeholder={i18n.passwordPh} autoComplete="new-password" aria-invalid={msg ? true : undefined} aria-describedby={msg ? regMsgId : undefined} className={inputCls} />
         </Field>
         <Field label={i18n.password2} required>
-          <input type="password" value={p2} onChange={(e) => setP2(e.target.value)} placeholder={i18n.password2Ph} autoComplete="new-password" className={inputCls} />
+          <input id="auth-register-password2" type="password" value={p2} onChange={(e) => setP2(e.target.value)} placeholder={i18n.password2Ph} autoComplete="new-password" aria-invalid={msg ? true : undefined} aria-describedby={msg ? regMsgId : undefined} className={inputCls} />
         </Field>
         {requireInvite && (
           <Field label={i18n.invite} required>
-            <input value={invite} onChange={(e) => setInvite(e.target.value)} placeholder={i18n.invitePh} className={inputCls} />
+            <input id="auth-register-invite" value={invite} onChange={(e) => setInvite(e.target.value)} placeholder={i18n.invitePh} className={inputCls} />
           </Field>
         )}
         <button type="submit" disabled={busy} className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white border border-orange-700 hover:border-orange-800 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60">
           {busy ? '...' : i18n.register}
         </button>
-        {msg && <div className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}
+        {msg && <div id={regMsgId} role="alert" className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}
       </form>
     </div>
   );
@@ -253,13 +261,21 @@ interface FieldProps {
 }
 
 const Field: FC<FieldProps> = ({ label, required, children }) => {
+  // If the child input has an explicit id (preferred), wire htmlFor to it.
+  // Otherwise auto-generate one so label and control are programmatically
+  // associated — Lighthouse label-content-name-mismatch audit fails otherwise.
+  const child = isValidElement(children) ? (children as ReactElement<{ id?: string }>) : null;
+  const explicitId = child?.props.id;
+  const reactId = useId();
+  const inputId = explicitId ?? `auth-field-${reactId}`;
   return (
     <div className="mb-4.5">
-      <label className="block text-[13px] text-neutral-600 mb-2 font-normal">
-        {required && <span className="text-orange-700 mr-1 font-bold">*</span>}
+      <label htmlFor={inputId} className="block text-[13px] text-neutral-600 mb-2 font-normal">
+        {required && <span className="text-orange-700 mr-1 font-bold" aria-hidden="true">*</span>}
+        {required && <span className="sr-only">(required)</span>}
         {label}
       </label>
-      {children}
+      {child ? cloneElement(child, { id: inputId }) : children}
     </div>
   );
 };
