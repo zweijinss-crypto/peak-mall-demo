@@ -751,7 +751,7 @@ export const COPY = {
     export: '导出 CSV',
     exported: (n: number) => `已导出 ${n} 条记录`,
     amountCol: '金额',
-    address: '提现地址',
+    addressCol: '提现地址',
     date: '时间',
     statusPending: '处理中',
     statusApproved: '已批准',

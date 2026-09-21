@@ -641,7 +641,7 @@ export const COPY_EN = {
     export: 'Export CSV',
     exported: (n: number) => `Exported ${n} records`,
     amountCol: 'Amount',
-    address: 'Withdraw address',
+    addressCol: 'Payout address',
     date: 'Date',
     statusPending: 'Processing',
     statusApproved: 'Approved',

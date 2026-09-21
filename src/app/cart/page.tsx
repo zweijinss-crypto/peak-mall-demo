@@ -268,7 +268,7 @@ export default function CartPage() {
                         aria-label={t.cart.couponPlaceholder}
                       />
                       <button
-                        onClick={handleApplyCoupon}
+                        onClick={() => handleApplyCoupon()}
                         className="px-4 py-2 bg-ink-900 hover:bg-ink-700 text-white text-[13px] font-bold rounded-md transition-colors"
                       >
                         {t.cart.couponApply}
