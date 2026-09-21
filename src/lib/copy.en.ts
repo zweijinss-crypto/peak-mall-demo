@@ -521,6 +521,14 @@ export const COPY_EN = {
     memberJoinDate: 'Joined',
     memberOrderCount: 'Orders',
     memberCommission: 'Commission',
+    /** F1: member detail modal */
+    memberDetailTitle: 'Member detail',
+    memberClose: 'Close',
+    memberAvgOrder: 'Avg order value',
+    memberRecent: 'Recent commissions',
+    memberRecentEmpty: 'No commissions yet',
+    memberCopyInviteLink: 'Copy invite link',
+    memberLinkCopied: 'Invite link copied',
   },
   commissions: {
     title: 'Commissions',

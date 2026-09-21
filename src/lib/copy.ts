@@ -631,6 +631,14 @@ export const COPY = {
     memberJoinDate: '加入时间',
     memberOrderCount: '贡献订单',
     memberCommission: '贡献佣金',
+    /** F1: 成员详情 modal */
+    memberDetailTitle: '成员详情',
+    memberClose: '关闭',
+    memberAvgOrder: '平均订单金额',
+    memberRecent: '最近佣金记录',
+    memberRecentEmpty: '暂无佣金记录',
+    memberCopyInviteLink: '复制专属邀请链接',
+    memberLinkCopied: '邀请链接已复制',
   },
   commissions: {
     title: '佣金明细',

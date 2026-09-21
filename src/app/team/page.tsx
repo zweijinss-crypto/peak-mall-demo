@@ -17,16 +17,55 @@ interface Member {
   joinedAt: string; // ISO — static to avoid hydration mismatch
   orderCount: number;
   commission: number;
+  /** F1: 详情 modal 额外字段 */
+  avgOrder: number;
+  recent: Array<{ orderId: string; date: string; amount: number }>;
 }
 
 const INVITE_CODE = 'PEAK-' + 'DEMO-7F3K';
 
 const MEMBERS: Member[] = [
-  { id: 'M1', nickname: '推广者 莉莉',   level: 1, joinedAt: '2026-08-12T04:00:00.000Z', orderCount: 24, commission:  68.40 },
-  { id: 'M2', nickname: '推广者 阿明',   level: 1, joinedAt: '2026-08-19T04:00:00.000Z', orderCount: 17, commission:  45.10 },
-  { id: 'M3', nickname: '推广者 小张',   level: 2, joinedAt: '2026-09-02T04:00:00.000Z', orderCount:  9, commission:  18.20 },
-  { id: 'M4', nickname: '推广者 Jenny',  level: 2, joinedAt: '2026-09-08T04:00:00.000Z', orderCount:  6, commission:  12.50 },
-  { id: 'M5', nickname: '推广者 老王',   level: 3, joinedAt: '2026-09-14T04:00:00.000Z', orderCount:  2, commission:   4.10 },
+  {
+    id: 'M1', nickname: '推广者 莉莉', level: 1, joinedAt: '2026-08-12T04:00:00.000Z',
+    orderCount: 24, commission: 68.40, avgOrder: 57.00,
+    recent: [
+      { orderId: 'O-L-2491', date: '2026-09-18T03:12:00.000Z', amount: 5.20 },
+      { orderId: 'O-L-2480', date: '2026-09-15T07:42:00.000Z', amount: 3.10 },
+      { orderId: 'O-L-2465', date: '2026-09-11T11:24:00.000Z', amount: 4.80 },
+    ],
+  },
+  {
+    id: 'M2', nickname: '推广者 阿明', level: 1, joinedAt: '2026-08-19T04:00:00.000Z',
+    orderCount: 17, commission: 45.10, avgOrder: 53.00,
+    recent: [
+      { orderId: 'O-A-2391', date: '2026-09-17T03:12:00.000Z', amount: 4.50 },
+      { orderId: 'O-A-2380', date: '2026-09-12T07:42:00.000Z', amount: 2.80 },
+      { orderId: 'O-A-2365', date: '2026-09-08T11:24:00.000Z', amount: 3.40 },
+    ],
+  },
+  {
+    id: 'M3', nickname: '推广者 小张', level: 2, joinedAt: '2026-09-02T04:00:00.000Z',
+    orderCount: 9, commission: 18.20, avgOrder: 81.00,
+    recent: [
+      { orderId: 'O-X-2201', date: '2026-09-16T03:12:00.000Z', amount: 2.10 },
+      { orderId: 'O-X-2189', date: '2026-09-10T07:42:00.000Z', amount: 1.80 },
+    ],
+  },
+  {
+    id: 'M4', nickname: '推广者 Jenny', level: 2, joinedAt: '2026-09-08T04:00:00.000Z',
+    orderCount: 6, commission: 12.50, avgOrder: 42.00,
+    recent: [
+      { orderId: 'O-J-2087', date: '2026-09-14T03:12:00.000Z', amount: 1.95 },
+      { orderId: 'O-J-2075', date: '2026-09-09T07:42:00.000Z', amount: 2.20 },
+    ],
+  },
+  {
+    id: 'M5', nickname: '推广者 老王', level: 3, joinedAt: '2026-09-14T04:00:00.000Z',
+    orderCount: 2, commission: 4.10, avgOrder: 41.00,
+    recent: [
+      { orderId: 'O-W-2001', date: '2026-09-15T03:12:00.000Z', amount: 2.10 },
+    ],
+  },
 ];
 
 const LEVEL_BADGE: Record<1 | 2 | 3, string> = {
@@ -41,6 +80,23 @@ export default function TeamPage() {
   const [copied, setCopied] = useState(false);
   /** B6: fixed-position copy success toast */
   const [copyToast, setCopyToast] = useState<string | null>(null);
+
+  /** F1: 成员详情 modal — selectedId = 当前打开的成员 id, null = 关闭 */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [linkToast, setLinkToast] = useState<string | null>(null);
+  const selected = selectedId ? MEMBERS.find((m) => m.id === selectedId) ?? null : null;
+
+  /** F1: 复制专属邀请链接 */
+  const handleCopyInviteLink = async (memberId: string) => {
+    const link = `https://peak-mall-demo.netlify.app/?invite=${INVITE_CODE}&ref=${memberId}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkToast(t.team.memberLinkCopied);
+      window.setTimeout(() => setLinkToast(null), 1800);
+    } catch {
+      /* clipboard 不可用时静默 */
+    }
+  };
 
   const onCopy = async () => {
     try {
@@ -148,7 +204,19 @@ export default function TeamPage() {
                 </thead>
                 <tbody>
                   {MEMBERS.map((m) => (
-                    <tr key={m.id} className="border-t border-ink-100">
+                    <tr
+                      key={m.id}
+                      onClick={() => setSelectedId(m.id)}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedId(m.id);
+                        }
+                      }}
+                      aria-label={`${m.nickname} — L${m.level} — ${m.orderCount} orders — $${m.commission.toFixed(2)}`}
+                      className="border-t border-ink-100 hover:bg-ink-50 cursor-pointer focus:outline-none focus-visible:bg-orange-50"
+                    >
                       <td className="px-5 py-3 text-ink-500 font-mono text-[12.5px]">{m.id}</td>
                       <td className="px-5 py-3 font-semibold text-ink-900">{m.nickname}</td>
                       <td className="px-5 py-3">
@@ -173,6 +241,112 @@ export default function TeamPage() {
           )}
         </section>
       </main>
+
+      {/* F1: 成员详情 modal */}
+      {selected && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="memberDetailTitle"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedId(null); }}
+        >
+          <div className="bg-white rounded-2xl w-full max-w-[480px] p-6 shadow-float max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">
+                  {t.team.memberDetailTitle}
+                </div>
+                <h3 id="memberDetailTitle" className="text-[18px] font-extrabold text-ink-900 truncate">
+                  {selected.nickname}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedId(null)}
+                aria-label={t.team.memberClose}
+                className="w-8 h-8 flex-shrink-0 text-ink-400 hover:text-ink-700 hover:bg-ink-50 rounded-md transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <span className={`inline-block px-2 py-0.5 rounded text-[11.5px] font-bold ${LEVEL_BADGE[selected.level]}`}>
+                L{selected.level}
+              </span>
+              <span className="text-[12px] text-ink-500 font-mono">{selected.id}</span>
+            </div>
+
+            {/* 统计 grid: 4 个 KPI */}
+            <div className="grid grid-cols-2 gap-2.5 mb-4 text-[12.5px]">
+              <div className="bg-ink-50 border border-ink-100 rounded-md p-3">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">{t.team.memberJoinDate}</div>
+                <div className="text-ink-900 font-bold tabular-nums" suppressHydrationWarning>
+                  {selected.joinedAt.slice(0, 10)}
+                </div>
+              </div>
+              <div className="bg-ink-50 border border-ink-100 rounded-md p-3">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">{t.team.memberOrderCount}</div>
+                <div className="text-ink-900 font-bold tabular-nums">{selected.orderCount}</div>
+              </div>
+              <div className="bg-ink-50 border border-ink-100 rounded-md p-3">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">{t.team.memberCommission}</div>
+                <div className="text-emerald-700 font-bold tabular-nums">${selected.commission.toFixed(2)}</div>
+              </div>
+              <div className="bg-ink-50 border border-ink-100 rounded-md p-3">
+                <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-1">{t.team.memberAvgOrder}</div>
+                <div className="text-ink-900 font-bold tabular-nums">${selected.avgOrder.toFixed(2)}</div>
+              </div>
+            </div>
+
+            {/* 最近佣金记录 */}
+            <div className="mb-4">
+              <div className="text-[10px] tracking-[1.5px] uppercase text-ink-500 font-bold mb-2">
+                {t.team.memberRecent}
+              </div>
+              {selected.recent.length === 0 ? (
+                <div className="text-[12.5px] text-ink-500 italic py-3 text-center">
+                  {t.team.memberRecentEmpty}
+                </div>
+              ) : (
+                <ul className="space-y-1.5 text-[12.5px]">
+                  {selected.recent.map((r) => (
+                    <li key={r.orderId} className="flex items-center justify-between bg-white border border-ink-100 rounded-md px-3 py-2">
+                      <span className="font-mono text-ink-700 truncate mr-2">{r.orderId}</span>
+                      <span className="text-ink-500 text-[11px] tabular-nums" suppressHydrationWarning>
+                        {r.date.slice(0, 10)}
+                      </span>
+                      <span className="text-emerald-700 font-bold tabular-nums ml-3">${r.amount.toFixed(2)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleCopyInviteLink(selected.id)}
+                className="flex-1 py-2.5 border border-orange-700 text-orange-700 hover:bg-orange-700 hover:text-white text-[13px] font-bold rounded-md transition-colors"
+              >
+                🔗 {t.team.memberCopyInviteLink}
+              </button>
+              <button
+                onClick={() => setSelectedId(null)}
+                className="px-5 py-2.5 bg-orange-700 hover:bg-orange-800 text-white text-[13.5px] font-bold rounded-md transition-colors"
+              >
+                {t.team.memberClose}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* F1: 邀请链接复制成功 toast */}
+      {linkToast && (
+        <div role="status" className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold z-50">
+          ✓ {linkToast}
+        </div>
+      )}
 
       <Footer />
     </>
