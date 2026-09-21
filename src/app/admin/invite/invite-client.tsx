@@ -1,4 +1,6 @@
 'use client';
+import { DataTable, Th, Td } from '@/components/admin/DataTable';
+import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
@@ -25,40 +27,38 @@ export function InviteClient() {
           + {t.admin.invite.add}
         </button>
       </div>
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
-        <table className="w-full text-[12.5px] min-w-[600px]">
-          <thead className="bg-neutral-50 text-neutral-600">
+      <DataTable minWidth="720px">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">{t.admin.invite.colCode}</th>
-              <th className="px-3 py-2 text-left">{t.admin.invite.colUsed}</th>
-              <th className="px-3 py-2 text-left">{t.admin.invite.colStatus}</th>
-              <th className="px-3 py-2 text-left">{t.admin.invite.colTime}</th>
-              <th className="px-3 py-2 text-left">{t.admin.invite.colAction}</th>
+              <Th>{t.admin.invite.colCode}</Th>
+              <Th>{t.admin.invite.colUsed}</Th>
+              <Th>{t.admin.invite.colStatus}</Th>
+              <Th>{t.admin.invite.colTime}</Th>
+              <Th>{t.admin.invite.colAction}</Th>
             </tr>
           </thead>
           <tbody>
             {invites.length === 0 ? (
-              <tr><td colSpan={5} className="text-center text-neutral-500 py-6">{t.admin.invite.empty}</td></tr>
+              <tr><Td colSpan={5} className="text-center text-neutral-500 py-6">{t.admin.invite.empty}</Td></tr>
             ) : (
               invites.map((i: any) => (
-                <tr key={i.code} className="border-t border-neutral-100">
-                  <td className="px-3 py-2 font-mono">{i.code}</td>
-                  <td className="px-3 py-2">{i.used} / {i.limit}</td>
-                  <td className="px-3 py-2">
+                <tr key={i.code} className="hover:bg-neutral-50 transition-colors">
+                  <Td className="font-mono text-[12px]">{i.code}</Td>
+                  <Td>{i.used} / {i.limit}</Td>
+                  <Td>
                     <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${i.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-neutral-200 text-neutral-600'}`}>{i.status}</span>
-                  </td>
-                  <td className="px-3 py-2 text-[11px] text-neutral-500">{i.created_at}</td>
-                  <td className="px-3 py-2">
+                  </Td>
+                  <Td muted>{i.created_at}</Td>
+                  <Td>
                     <button onClick={() => toggle(i.code)} className="px-2 py-0.5 text-[11px] rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50">
                       {i.status === 'active' ? t.admin.invite.disable : t.admin.invite.enable}
                     </button>
-                  </td>
+                  </Td>
                 </tr>
               ))
             )}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
     </div>
   );
 }

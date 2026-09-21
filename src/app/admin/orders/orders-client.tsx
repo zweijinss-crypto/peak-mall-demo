@@ -1,4 +1,6 @@
 'use client';
+import { DataTable, Th, Td } from '@/components/admin/DataTable';
+import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
 import { useState } from 'react';
 import { PageBanner } from '@/components/peak-mall';
@@ -8,12 +10,12 @@ import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
 
 type Tab = 'all' | OrderStatus;
 
-const STATUS_CLASS: Record<OrderStatus, string> = {
-  pending: 'bg-neutral-100 text-neutral-700',
-  paid: 'bg-blue-100 text-blue-700',
-  shipped: 'bg-amber-100 text-amber-700',
-  completed: 'bg-emerald-100 text-emerald-700',
-  cancelled: 'bg-rose-100 text-rose-700',
+const STATUS_KIND: Record<OrderStatus, StatusKind> = {
+  pending: 'pending',
+  paid: 'paid',
+  shipped: 'info',
+  completed: 'active',
+  cancelled: 'danger',
 };
 
 export function OrdersClient() {
@@ -51,55 +53,53 @@ export function OrdersClient() {
           </button>
         ))}
       </div>
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
-        <table className="w-full text-[12.5px] min-w-[900px]">
-          <thead className="bg-neutral-50 text-neutral-600">
+      <DataTable minWidth="720px">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colOrder}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colUser}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colAmt}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colStatus}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colPay}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colCard}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colContact}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colAddr}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colTime}</th>
-              <th className="px-3 py-2 text-left">{t.admin.orders.colAction}</th>
+              <Th>{t.admin.orders.colOrder}</Th>
+              <Th>{t.admin.orders.colUser}</Th>
+              <Th>{t.admin.orders.colAmt}</Th>
+              <Th>{t.admin.orders.colStatus}</Th>
+              <Th>{t.admin.orders.colPay}</Th>
+              <Th>{t.admin.orders.colCard}</Th>
+              <Th>{t.admin.orders.colContact}</Th>
+              <Th>{t.admin.orders.colAddr}</Th>
+              <Th>{t.admin.orders.colTime}</Th>
+              <Th>{t.admin.orders.colAction}</Th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={10} className="text-center text-neutral-500 py-6">{t.admin.orders.empty}</td></tr>
+              <tr><Td colSpan={10} className="text-center text-neutral-500 py-6">{t.admin.orders.empty}</Td></tr>
             ) : (
               filtered.map((o: any) => (
-                <tr key={o.id} className="border-t border-neutral-100">
-                  <td className="px-3 py-2 font-mono text-[11.5px]">{o.order_no}</td>
-                  <td className="px-3 py-2">{o.nickname} <span className="text-neutral-700">@{o.username}</span></td>
-                  <td className="px-3 py-2 font-bold">{usd(o.amount)}</td>
-                  <td className="px-3 py-2">
-                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${STATUS_CLASS[o.status as OrderStatus]}`}>
+                <tr key={o.id} className="hover:bg-neutral-50 transition-colors">
+                  <Td className="font-mono text-[12px]">{o.order_no}</Td>
+                  <Td>{o.nickname} <span className="text-neutral-700">@{o.username}</span></Td>
+                  <Td className="font-bold tabular-nums">{usd(o.amount)}</Td>
+                  <Td>
+                    <StatusBadge kind={STATUS_KIND[o.status as OrderStatus]}>
                       {orderStatusLabel(o.status, locale as any)}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">{o.pay_method || t.admin.orders.dash}</td>
-                  <td className="px-3 py-2">{o.card_last4 ? `${o.card_brand || ''} ****${o.card_last4}${o.card_expiry ? ` (${o.card_expiry})` : ''}` : t.admin.orders.dash}</td>
-                  <td className="px-3 py-2">{o.contact_name || t.admin.orders.dash}</td>
-                  <td className="px-3 py-2 max-w-[200px] truncate">{o.address || t.admin.orders.dash}</td>
-                  <td className="px-3 py-2 text-[11px] text-neutral-500">{o.created_at}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                    </StatusBadge>
+                  </Td>
+                  <Td>{o.pay_method || t.admin.orders.dash}</Td>
+                  <Td>{o.card_last4 ? `${o.card_brand || ''} ****${o.card_last4}${o.card_expiry ? ` (${o.card_expiry})` : ''}` : t.admin.orders.dash}</Td>
+                  <Td>{o.contact_name || t.admin.orders.dash}</Td>
+                  <Td muted className="max-w-[180px] truncate">{o.address || t.admin.orders.dash}</Td>
+                  <Td muted>{o.created_at}</Td>
+                  <Td className="whitespace-nowrap">
                     {o.status === 'paid' && (
                       <button onClick={() => ship(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.orders.ship}</button>
                     )}
                     {o.status === 'shipped' && (
                       <button onClick={() => complete(o.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.orders.complete}</button>
                     )}
-                  </td>
+                  </Td>
                 </tr>
               ))
             )}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
     </div>
   );
 }

@@ -1,4 +1,6 @@
 'use client';
+import { DataTable, Th, Td } from '@/components/admin/DataTable';
+import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
@@ -22,42 +24,40 @@ export function AgentsClient() {
     <div>
       <PageBanner title={t.admin.agents.title} accent="emerald" />
       <p className="text-[12.5px] text-neutral-500 mb-4 leading-relaxed">{t.admin.agents.hint}</p>
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
-        <table className="w-full text-[12.5px] min-w-[720px]">
-          <thead className="bg-neutral-50 text-neutral-600">
+      <DataTable minWidth="720px">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">ID</th>
-              <th className="px-3 py-2 text-left">{t.admin.users.colRole}</th>
-              <th className="px-3 py-2 text-left">{t.admin.users.colBal}</th>
-              <th className="px-3 py-2 text-left">{t.admin.agents.colOwn}</th>
-              <th className="px-3 py-2 text-left">{t.admin.agents.colSub}</th>
-              <th className="px-3 py-2 text-left">{t.admin.agents.colLimit}</th>
-              <th className="px-3 py-2 text-left">{t.admin.agents.colTrc20}</th>
-              <th className="px-3 py-2 text-left">{t.admin.agents.colAction}</th>
+              <Th>ID</Th>
+              <Th>{t.admin.users.colRole}</Th>
+              <Th>{t.admin.users.colBal}</Th>
+              <Th>{t.admin.agents.colOwn}</Th>
+              <Th>{t.admin.agents.colSub}</Th>
+              <Th>{t.admin.agents.colLimit}</Th>
+              <Th>{t.admin.agents.colTrc20}</Th>
+              <Th>{t.admin.agents.colAction}</Th>
             </tr>
           </thead>
           <tbody>
             {agents.length === 0 ? (
-              <tr><td colSpan={8} className="text-center text-neutral-500 py-6">{t.admin.agents.empty}</td></tr>
+              <tr><Td colSpan={8} className="text-center text-neutral-500 py-6">{t.admin.agents.empty}</Td></tr>
             ) : (
               agents.map((a: any) => (
-                <tr key={a.id} className="border-t border-neutral-100">
-                  <td className="px-3 py-2">{a.id}</td>
-                  <td className="px-3 py-2">{a.nickname} <span className="text-neutral-700">@{a.username}</span></td>
-                  <td className="px-3 py-2 font-bold">{usd(a.balance)}</td>
-                  <td className="px-3 py-2"><input id={`own_${a.id}`} aria-label={`${t.admin.agents.colOwn} ${a.username}`} defaultValue={a.own_rate} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</td>
-                  <td className="px-3 py-2"><input id={`sub_${a.id}`} aria-label={`${t.admin.agents.colSub} ${a.username}`} defaultValue={a.sub_rate} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</td>
-                  <td className="px-3 py-2"><input id={`lim_${a.id}`} aria-label={`${t.admin.agents.colLimit} ${a.username}`} defaultValue={a.sub_rate_limit} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</td>
-                  <td className="px-3 py-2 max-w-[160px] truncate text-[11px]">{a.withdraw_address || '—'}</td>
-                  <td className="px-3 py-2">
+                <tr key={a.id} className="hover:bg-neutral-50 transition-colors">
+                  <Td>{a.id}</Td>
+                  <Td>{a.nickname} <span className="text-neutral-700">@{a.username}</span></Td>
+                  <Td className="font-bold tabular-nums">{usd(a.balance)}</Td>
+                  <Td><input id={`own_${a.id}`} aria-label={`${t.admin.agents.colOwn} ${a.username}`} defaultValue={a.own_rate} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</Td>
+                  <Td><input id={`sub_${a.id}`} aria-label={`${t.admin.agents.colSub} ${a.username}`} defaultValue={a.sub_rate} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</Td>
+                  <Td><input id={`lim_${a.id}`} aria-label={`${t.admin.agents.colLimit} ${a.username}`} defaultValue={a.sub_rate_limit} className="border border-neutral-200 rounded px-1.5 py-1 w-[64px]" /> %</Td>
+                  <Td muted className="max-w-[180px] truncate">{a.withdraw_address || '—'}</Td>
+                  <Td>
                     <button onClick={() => save(a.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700">{t.admin.agents.save}</button>
-                  </td>
+                  </Td>
                 </tr>
               ))
             )}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
     </div>
   );
 }

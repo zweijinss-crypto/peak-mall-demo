@@ -1,15 +1,17 @@
 'use client';
+import { DataTable, Th, Td } from '@/components/admin/DataTable';
+import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 
-const STATUS_CLASS: Record<WdStatus, string> = {
-  pending: 'bg-amber-100 text-amber-700',
-  approved: 'bg-blue-100 text-blue-700',
-  paid: 'bg-emerald-100 text-emerald-700',
-  rejected: 'bg-rose-100 text-rose-700',
+const STATUS_KIND: Record<WdStatus, StatusKind> = {
+  pending: 'pending',
+  approved: 'info',
+  paid: 'active',
+  rejected: 'danger',
 };
 
 export function WdClient() {
@@ -29,47 +31,46 @@ export function WdClient() {
   return (
     <div>
       <PageBanner title={t.admin.wd.title} accent="emerald" />
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
-        <table className="w-full text-[12.5px] min-w-[920px]">
-          <thead className="bg-neutral-50 text-neutral-600">
+      <DataTable minWidth="720px">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colId}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colUser}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colAmt}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colFee}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colMethod}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colReject}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colStatus}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colTime}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colAddr}</th>
-              <th className="px-3 py-2 text-left">{t.admin.wd.colAction}</th>
+              <Th>{t.admin.wd.colId}</Th>
+              <Th>{t.admin.wd.colUser}</Th>
+              <Th>{t.admin.wd.colAmt}</Th>
+              <Th>{t.admin.wd.colFee}</Th>
+              <Th>{t.admin.wd.colMethod}</Th>
+              <Th>{t.admin.wd.colReject}</Th>
+              <Th>{t.admin.wd.colStatus}</Th>
+              <Th>{t.admin.wd.colTime}</Th>
+              <Th>{t.admin.wd.colAddr}</Th>
+              <Th>{t.admin.wd.colAction}</Th>
             </tr>
           </thead>
           <tbody>
             {wd.length === 0 ? (
-              <tr><td colSpan={10} className="text-center text-neutral-500 py-6">{t.admin.wd.empty}</td></tr>
+              <tr><Td colSpan={10} className="text-center text-neutral-500 py-6">{t.admin.wd.empty}</Td></tr>
             ) : (
               wd.map((w: any) => {
                 const mismatch = w.method === 'usdt_trc20' && w.bound_address && w.account && w.account !== w.bound_address;
                 return (
-                  <tr key={w.id} className="border-t border-neutral-100">
-                    <td className="px-3 py-2 font-mono">#{w.id}</td>
-                    <td className="px-3 py-2">@{w.username}</td>
-                    <td className="px-3 py-2 font-bold">{usd(w.amount)}</td>
-                    <td className="px-3 py-2">{usd(w.fee)}</td>
-                    <td className="px-3 py-2">{w.method === 'usdt_trc20' ? 'USDT-TRC20' : w.method}</td>
-                    <td className="px-3 py-2 max-w-[180px] truncate">{w.reject_reason || '—'}</td>
-                    <td className="px-3 py-2">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${STATUS_CLASS[w.status as WdStatus]}`}>
+                  <tr key={w.id} className="hover:bg-neutral-50 transition-colors">
+                    <Td className="font-mono text-[12px]">#{w.id}</Td>
+                    <Td>@{w.username}</Td>
+                    <Td className="font-bold tabular-nums">{usd(w.amount)}</Td>
+                    <Td>{usd(w.fee)}</Td>
+                    <Td>{w.method === 'usdt_trc20' ? 'USDT-TRC20' : w.method}</Td>
+                    <Td muted className="max-w-[180px] truncate">{w.reject_reason || '—'}</Td>
+                    <Td>
+                      <StatusBadge kind={STATUS_KIND[w.status as WdStatus]}>
                         {wdStatusLabel(w.status, locale as any)}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-[11px] text-neutral-500">{w.created_at}</td>
-                    <td className="px-3 py-2 max-w-[180px] truncate text-[11px]">
+                      </StatusBadge>
+                    </Td>
+                    <Td muted>{w.created_at}</Td>
+                    <Td muted className="max-w-[180px] truncate">
                       {w.bound_address ? w.bound_address : <span className="text-neutral-700">{t.admin.wd.unbound}</span>}
                       {mismatch && <div className="text-rose-600 font-semibold mt-1">{t.admin.wd.addrMismatch}</div>}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    </Td>
+                    <Td className="whitespace-nowrap">
                       {w.status === 'pending' && (
                         <>
                           <button onClick={() => approve(w.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700 mr-1">{t.admin.wd.approve}</button>
@@ -82,14 +83,13 @@ export function WdClient() {
                       {(w.status === 'paid' || w.status === 'rejected') && (
                         <span className="text-neutral-700 text-[11px]">{t.admin.wd.view}</span>
                       )}
-                    </td>
+                    </Td>
                   </tr>
                 );
               })
             )}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
     </div>
   );
 }

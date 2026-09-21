@@ -1,4 +1,6 @@
 'use client';
+import { DataTable, Th, Td } from '@/components/admin/DataTable';
+import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
@@ -46,53 +48,51 @@ export function ProductsClient() {
       <div className="mb-2 text-[12px] text-neutral-500">
         {t.admin.products.count(products.length)}
       </div>
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
-        <table className="w-full text-[12.5px] min-w-[760px]">
-          <thead className="bg-neutral-50 text-neutral-600">
+      <DataTable minWidth="720px">
+          <thead>
             <tr>
-              <th className="px-3 py-2 text-left">ID</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colImg}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colName}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colCat}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colPrice}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colStock}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colDesc}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colStatus}</th>
-              <th className="px-3 py-2 text-left">{t.admin.products.colAction}</th>
+              <Th>ID</Th>
+              <Th>{t.admin.products.colImg}</Th>
+              <Th>{t.admin.products.colName}</Th>
+              <Th>{t.admin.products.colCat}</Th>
+              <Th>{t.admin.products.colPrice}</Th>
+              <Th>{t.admin.products.colStock}</Th>
+              <Th>{t.admin.products.colDesc}</Th>
+              <Th>{t.admin.products.colStatus}</Th>
+              <Th>{t.admin.products.colAction}</Th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan={9} className="text-center text-neutral-500 py-6">{t.admin.products.empty}</td></tr>
+              <tr><Td colSpan={9} className="text-center text-neutral-500 py-6">{t.admin.products.empty}</Td></tr>
             ) : (
               products.map((p: any) => (
-                <tr key={p.id} className="border-t border-neutral-100">
-                  <td className="px-3 py-2">{p.id}</td>
-                  <td className="px-3 py-2 text-[18px]">{p.cover}</td>
-                  <td className="px-3 py-2"><input id={`pn_${p.id}`} aria-label={`${t.admin.products.colName} ${p.name}`} defaultValue={p.name} className="border border-neutral-200 rounded px-1.5 py-1 w-[140px]" /></td>
-                  <td className="px-3 py-2"><input id={`pc_${p.id}`} aria-label={`${t.admin.products.colCat} ${p.name}`} defaultValue={p.category} className="border border-neutral-200 rounded px-1.5 py-1 w-[80px]" /></td>
-                  <td className="px-3 py-2"><input id={`pp_${p.id}`} aria-label={`${t.admin.products.colPrice} ${p.name}`} defaultValue={p.price} className="border border-neutral-200 rounded px-1.5 py-1 w-[70px]" /></td>
-                  <td className="px-3 py-2"><input id={`ps_${p.id}`} aria-label={`${t.admin.products.colStock} ${p.name}`} defaultValue={p.stock} className="border border-neutral-200 rounded px-1.5 py-1 w-[60px]" /></td>
-                  <td className="px-3 py-2"><input id={`pd_${p.id}`} aria-label={`${t.admin.products.colDesc} ${p.name}`} defaultValue={p.description} className="border border-neutral-200 rounded px-1.5 py-1 w-[150px]" /></td>
-                  <td className="px-3 py-2">
+                <tr key={p.id} className="hover:bg-neutral-50 transition-colors">
+                  <Td>{p.id}</Td>
+                  <Td className="text-[18px]">{p.cover}</Td>
+                  <Td><input id={`pn_${p.id}`} aria-label={`${t.admin.products.colName} ${p.name}`} defaultValue={p.name} className="border border-neutral-200 rounded px-1.5 py-1 w-[140px]" /></Td>
+                  <Td><input id={`pc_${p.id}`} aria-label={`${t.admin.products.colCat} ${p.name}`} defaultValue={p.category} className="border border-neutral-200 rounded px-1.5 py-1 w-[80px]" /></Td>
+                  <Td><input id={`pp_${p.id}`} aria-label={`${t.admin.products.colPrice} ${p.name}`} defaultValue={p.price} className="border border-neutral-200 rounded px-1.5 py-1 w-[70px]" /></Td>
+                  <Td><input id={`ps_${p.id}`} aria-label={`${t.admin.products.colStock} ${p.name}`} defaultValue={p.stock} className="border border-neutral-200 rounded px-1.5 py-1 w-[60px]" /></Td>
+                  <Td><input id={`pd_${p.id}`} aria-label={`${t.admin.products.colDesc} ${p.name}`} defaultValue={p.description} className="border border-neutral-200 rounded px-1.5 py-1 w-[150px]" /></Td>
+                  <Td>
                     {p.status ? (
-                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-700">{t.admin.products.on}</span>
+                      <StatusBadge kind="paid">{t.admin.products.on}</StatusBadge>
                     ) : (
-                      <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-neutral-200 text-neutral-600">{t.admin.products.off}</span>
+                      <StatusBadge kind="mute">{t.admin.products.off}</StatusBadge>
                     )}
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  </Td>
+                  <Td className="whitespace-nowrap">
                     <button onClick={() => save(p.id)} className="px-2 py-0.5 text-[11px] rounded bg-emerald-700 text-white hover:bg-emerald-700 mr-1">{t.admin.products.save}</button>
                     <button onClick={() => toggle(p.id, p.status)} className="px-2 py-0.5 text-[11px] rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50">
                       {p.status ? t.admin.products.off : t.admin.products.on}
                     </button>
-                  </td>
+                  </Td>
                 </tr>
               ))
             )}
           </tbody>
-        </table>
-      </div>
+        </DataTable>
     </div>
   );
 }
