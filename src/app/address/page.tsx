@@ -14,13 +14,17 @@ interface Address {
   region: string;
   detail: string;
   isDefault: boolean;
+  /** D4: tag selector — home / office / other */
+  tag: 'home' | 'office' | 'other';
 }
 
 function loadAddrs(): Address[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Address[]) : [];
+    const arr = raw ? (JSON.parse(raw) as Address[]) : [];
+    // D4 migration: 旧数据无 tag,补默认 'home'
+    return arr.map((a) => ({ ...a, tag: (a.tag ?? 'home') as Address['tag'] }));
   } catch {
     return [];
   }
@@ -31,7 +35,7 @@ function saveAddrs(arr: Address[]) {
   localStorage.setItem(KEY, JSON.stringify(arr));
 }
 
-const EMPTY: Omit<Address, 'id'> = { name: '', phone: '', region: '', detail: '', isDefault: false };
+const EMPTY: Omit<Address, 'id'> = { name: '', phone: '', region: '', detail: '', isDefault: false, tag: 'home' };
 
 /** D3: 中国大陆手机号验证 — 11 位数字,1[3-9] 开头 */
 function validatePhone(p: string): boolean {
@@ -49,9 +53,15 @@ export default function AddressPage() {
   /** D3: phone 验证错误(仅当用户输入后显示) */
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
+  /** D4: name required error */
+  const [nameError, setNameError] = useState<string | null>(null);
+
   /** D2: 删除确认 modal — pendingId = 待删除地址 id, null = 关闭 */
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [deleteFlash, setDeleteFlash] = useState<string | null>(null);
+
+  /** D4: saved flash */
+  const [savedFlash, setSavedFlash] = useState<string | null>(null);
 
   useEffect(() => {
     setList(loadAddrs());
@@ -79,8 +89,13 @@ export default function AddressPage() {
   };
   const save = () => {
     if (!editing) return;
-    if (!editing.name.trim() || !editing.phone.trim()) return;
-    if (!validatePhone(editing.phone)) {
+    // D4: name required inline error
+    if (!editing.name.trim()) {
+      setNameError(t.address.nameRequired);
+      return;
+    }
+    setNameError(null);
+    if (!editing.phone.trim() || !validatePhone(editing.phone)) {
       setPhoneError(t.address.phoneInvalid);
       return;
     }
@@ -106,6 +121,8 @@ export default function AddressPage() {
         },
       ]);
     }
+    setSavedFlash(t.address.savedFlash);
+    window.setTimeout(() => setSavedFlash(null), 1800);
     cancel();
   };
   const remove = (id: string) => {
@@ -154,9 +171,23 @@ export default function AddressPage() {
                 <span className="block text-[13px] text-ink-600 mb-1.5">{t.address.name} *</span>
                 <input
                   value={editing.name}
-                  onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-ink-200 rounded-md text-[14px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  onChange={(e) => {
+                    setEditing({ ...editing, name: e.target.value });
+                    if (nameError && e.target.value.trim()) setNameError(null);
+                  }}
+                  aria-invalid={nameError ? 'true' : 'false'}
+                  aria-describedby={nameError ? 'nameErr' : undefined}
+                  className={`w-full px-3 py-2.5 border rounded-md text-[14px] outline-none focus:ring-2 ${
+                    nameError
+                      ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-100'
+                      : 'border-ink-200 focus:border-orange-500 focus:ring-orange-100'
+                  }`}
                 />
+                {nameError && (
+                  <span id="nameErr" role="alert" className="block mt-1 text-[11.5px] text-rose-600">
+                    ⚠ {nameError}
+                  </span>
+                )}
               </label>
               <label className="block">
                 <span className="block text-[13px] text-ink-600 mb-1.5">{t.address.phone} *</span>
@@ -217,6 +248,36 @@ export default function AddressPage() {
                 />
                 {t.address.setDefault}
               </label>
+
+              {/* D4: tag selector (家 / 公司 / 其他) */}
+              <fieldset className="md:col-span-2">
+                <legend className="block text-[13px] text-ink-600 mb-1.5">{t.address.tag}</legend>
+                <div role="radiogroup" aria-label={t.address.tag} className="flex gap-2">
+                  {([
+                    { key: 'home',   label: t.address.tagHome },
+                    { key: 'office', label: t.address.tagOffice },
+                    { key: 'other',  label: t.address.tagOther },
+                  ] as Array<{ key: Address['tag']; label: string }>).map((tg) => {
+                    const active = editing.tag === tg.key;
+                    return (
+                      <button
+                        key={tg.key}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => setEditing({ ...editing, tag: tg.key })}
+                        className={`px-4 py-1.5 rounded-md text-[13px] font-semibold border transition-colors ${
+                          active
+                            ? 'bg-orange-700 text-white border-orange-700'
+                            : 'bg-white text-ink-700 border-ink-200 hover:border-orange-500'
+                        }`}
+                      >
+                        {tg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
             </div>
             <div className="flex gap-3">
               <button
@@ -280,6 +341,16 @@ export default function AddressPage() {
           </div>
         )}
 
+        {/* D4: 保存成功 toast */}
+        {savedFlash && (
+          <div
+            role="status"
+            className="fixed bottom-6 right-6 bg-emerald-500 text-white px-5 py-3 rounded-lg shadow-float text-[14px] font-semibold animate-fade-up z-50"
+          >
+            ✓ {savedFlash}
+          </div>
+        )}
+
         {list.length === 0 ? (
           <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
             <div className="text-[40px] mb-3">📍</div>
@@ -293,7 +364,14 @@ export default function AddressPage() {
                 key={a.id}
                 className="bg-white rounded-xl border border-ink-100 p-5 hover:shadow-soft transition-shadow"
               >
-                <header className="flex items-center gap-2 mb-3">
+                <header className="flex items-center gap-2 mb-3 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    a.tag === 'home' ? 'bg-emerald-100 text-emerald-700' :
+                    a.tag === 'office' ? 'bg-blue-100 text-blue-700' :
+                    'bg-ink-100 text-ink-700'
+                  }`}>
+                    {a.tag === 'home' ? t.address.tagHome : a.tag === 'office' ? t.address.tagOffice : t.address.tagOther}
+                  </span>
                   <span className="text-[15px] font-bold text-ink-900">{a.name}</span>
                   <span className="text-[13px] text-ink-500">{a.phone}</span>
                   {a.isDefault && (

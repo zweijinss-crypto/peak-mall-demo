@@ -352,6 +352,13 @@ export const COPY_EN = {
     removed: 'Address removed',
     /** D3: phone validation */
     phonePh: '11 digits, e.g. 13800001234',
+    /** D4: tag selector + form errors */
+    tag: 'Tag',
+    tagHome: 'Home',
+    tagOffice: 'Office',
+    tagOther: 'Other',
+    nameRequired: 'Recipient name is required',
+    savedFlash: 'Address saved',
     phoneInvalid: 'Enter a valid 11-digit phone number (starts with 1[3-9])',
   },
   checkout: {
