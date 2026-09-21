@@ -38,6 +38,7 @@ export function WdCenterClient() {
   const t = useT();
   const [wd, setWd, mounted, isEnPath] = useAdminStore('wd');
   const [users, , usersMounted] = useAdminStore('users');
+  const [rules] = useAdminStore('rules');
   const [tab, setTab] = useState<Tab>('all');
   const [amt, setAmt] = useState('');
   const [method, setMethod] = useState<'usdt_trc20' | 'card'>('usdt_trc20');
@@ -75,8 +76,13 @@ export function WdCenterClient() {
     ['paid', t.admin.wdCenter.tabs.paid],
   ];
 
-  // Fee is the same 2% used elsewhere in admin fixtures.
-  const FEE_RATE = 0.02;
+  // Fee and minimum withdrawal are sourced from the admin/rules store so
+  // they stay in sync with whatever ops configured under /admin/rules.
+  // rules.withdraw_fee is a percentage (e.g. 2 means 2%); rules.min_withdraw
+  // is the absolute floor in USD.
+  const feePct = Number(rules?.withdraw_fee ?? 2);
+  const minWd = Number(rules?.min_withdraw ?? 10);
+  const feeRate = feePct / 100;
 
   const submit = () => {
     setMsg(null);
@@ -85,7 +91,7 @@ export function WdCenterClient() {
       return;
     }
     const v = Number(amt);
-    if (!v || v < 10) {
+    if (!v || v < minWd) {
       setMsg({ kind: 'err', text: t.admin.wdCenter.applyFailMin });
       return;
     }
@@ -102,7 +108,7 @@ export function WdCenterClient() {
     // Match the bound_address convention so admin/agents can verify it.
     const bound = currentUser.withdraw_address ?? '';
     const mismatch = needsAddr && bound && finalAccount !== bound;
-    const fee = +(v * FEE_RATE).toFixed(2);
+    const fee = +(v * feeRate).toFixed(2);
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     const nextId = wd.length === 0 ? 1 : Math.max(...wd.map((w: any) => w.id)) + 1;
     const newRow = {

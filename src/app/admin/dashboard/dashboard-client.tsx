@@ -69,7 +69,14 @@ export function DashboardClient() {
     const totalCommission = comm.reduce((acc, c) => (c.status === 'settled' ? acc + c.amount : acc), 0);
     const pendingCommission = comm.reduce((acc, c) => (c.status === 'pending' ? acc + c.amount : acc), 0);
 
-    const todayKey = '2026-09-20';
+    // Demo data is seeded around 2026-09-20; use the latest order date as
+    // the "today" anchor so KPIs never look stale as wall-clock time moves
+    // past the seed. Falls back to real today if no orders exist.
+    const latestOrderDate = orders
+      .map((o) => o.created_at.slice(0, 10))
+      .sort()
+      .pop();
+    const todayKey = latestOrderDate ?? new Date().toISOString().slice(0, 10);
     const todayComm = comm
       .filter((c) => c.status === 'settled' && c.created_at.startsWith(todayKey))
       .reduce((a, b) => a + b.amount, 0);
@@ -87,9 +94,9 @@ export function DashboardClient() {
     // 7-day sparkline data — orders grouped by date.
     const sparkline = (() => {
       const days: Array<{ date: string; amt: number; count: number }> = [];
-      // Build last 7 day buckets from the demo "today" anchor so the chart
-      // always shows a realistic curve regardless of when the demo is opened.
-      const anchor = new Date('2026-09-20T00:00:00Z');
+      // Anchor on the same date we use for the KPI card so the sparkline
+      // and the "today" total line up visually.
+      const anchor = new Date(todayKey + 'T00:00:00Z');
       for (let i = 6; i >= 0; i--) {
         const d = new Date(anchor.getTime() - i * 86400000);
         const key = d.toISOString().slice(0, 10);
