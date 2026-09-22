@@ -25,7 +25,13 @@ export default function ShopHotPage() {
       />
 
       <main>
-        <Suspense fallback={<div className="max-w-shell mx-auto px-5 py-8 text-ink-500">加载中…</div>}>
+        <Suspense
+          fallback={
+            <div className="max-w-shell mx-auto px-5 py-8 min-h-[1200px] text-ink-500">
+              加载中…
+            </div>
+          }
+        >
           <ProductGrid products={PRODUCTS} mode="hot" />
         </Suspense>
       </main>

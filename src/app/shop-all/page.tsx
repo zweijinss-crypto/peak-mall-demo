@@ -25,8 +25,18 @@ export default function ShopAllPage() {
       />
 
       <main>
-        {/* ProductGrid reads ?cat=... via useSearchParams; wrap in Suspense for static export */}
-        <Suspense fallback={<div className="max-w-shell mx-auto px-5 py-8 text-ink-500">加载中…</div>}>
+        {/* ProductGrid reads ?cat=... via useSearchParams; wrap in Suspense for static export.
+            Fallback must reserve enough vertical space to avoid CLS once the
+            client component hydrates — a one-line "加载中…" leaves the page
+            with ~32px of content and pushes the footer up several hundred px
+            after hydration. 1200px matches the typical desktop ProductGrid. */}
+        <Suspense
+          fallback={
+            <div className="max-w-shell mx-auto px-5 py-8 min-h-[1200px] text-ink-500">
+              加载中…
+            </div>
+          }
+        >
           <ProductGrid products={PRODUCTS} mode="all" />
         </Suspense>
       </main>
