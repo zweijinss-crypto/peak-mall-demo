@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ADMIN_GROUPS, type AdminKey } from '@/lib/admin/sidebar';
 import { useT } from '@/lib/use-t';
-import { adminStore } from '@/lib/admin/fixtures';
 import { logout } from '@/lib/admin/auth';
 
 /**
@@ -30,14 +29,6 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
   const pathname = usePathname() ?? '';
   const t = useT();
   const isEn = pathname.startsWith('/en/') || pathname === '/en';
-
-  const handleReset = () => {
-    if (typeof window === 'undefined') return;
-    if (window.confirm(isEn ? 'Reset all admin demo data?' : '重置所有 admin 演示数据?')) {
-      adminStore.reset();
-      window.location.reload();
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -71,12 +62,7 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
               PEAK MALL · {t.admin.roleAdmin}
             </small>
           </Link>
-          {/* Demo notice — small chip pinned under the brand so users know it's mock data */}
-          <div className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5">
-            <span aria-hidden="true">●</span>
-            <span>{t.admin.demoBadge}</span>
           </div>
-        </div>
 
         {/* Nav groups — flex-1 fills the middle so .side-foot stays at the bottom */}
         <nav className="flex-1 py-2 overflow-y-auto">
@@ -145,13 +131,6 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
               className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white transition-colors"
             >
               ← {t.admin.backToShop}
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="px-3 py-1.5 text-[12px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-white transition-colors"
-            >
-              ↻ {t.admin.resetData}
             </button>
           </div>
         </div>

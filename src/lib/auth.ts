@@ -8,9 +8,9 @@
  *   cached session in supabase-js (persistSession: true)
  * - logout clears Supabase session
  *
- * Offline fallback: if NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY aren't set
- * (e.g. demo on a static host), falls back to a localStorage-backed
- * fake user so the demo banner still works. The fallback is gated by
+ * Offline fallback: if NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY aren't set,
+ * falls back to a localStorage-backed session so the static export
+ * keeps working in preview environments. The fallback is gated by
  * `isSupabaseConfigured()`.
  */
 import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
@@ -65,7 +65,7 @@ function writeFallbackUser(user: AuthUser | null): void {
   }
 }
 
-function fakeLoginLocal(
+function localFallbackLogin(
   email: string,
   password: string,
 ): AuthResult {
@@ -101,7 +101,7 @@ async function loginImpl(
   const supabase = getSupabase();
   if (!supabase) {
     if (!isSupabaseConfigured()) return { ok: false, error: 'NOT_CONFIGURED' };
-    return fakeLoginLocal(email, password);
+    return localFallbackLogin(email, password);
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -156,7 +156,7 @@ async function registerImpl(input: {
   if (!supabase) {
     if (!isSupabaseConfigured()) return { ok: false, error: 'NOT_CONFIGURED' };
     // Local fallback: register == login (no password persistence)
-    return fakeLoginLocal(email, password);
+    return localFallbackLogin(email, password);
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -237,24 +237,19 @@ function getCurrentUserImpl(): AuthUser | null {
 }
 
 // ---------------------------------------------------------------
-// Public API — drop-in replacements for fakeLogin / fakeRegister.
-// Caller code in login/page.tsx already wraps these in async onLogin/
-// onRegister handlers, so making these async is transparent.
+// Public API
 // ---------------------------------------------------------------
 
-export const fakeLogin = async (
+export const login = async (
   email: string,
   password: string,
 ): Promise<AuthResult> => loginImpl(email, password);
 
-export const fakeRegister = async (input: {
+export const register = async (input: {
   email: string;
   password: string;
   nickname?: string;
 }): Promise<AuthResult> => registerImpl(input);
-
-export const login = fakeLogin;
-export const register = fakeRegister;
 
 export const getCurrentUser = (): AuthUser | null => getCurrentUserImpl();
 

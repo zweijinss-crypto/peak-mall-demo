@@ -7,7 +7,6 @@
  * - 复用 admin/lib/auth.login() 函数
  * - 登录成功 → /admin/dashboard
  * - a11y:label htmlFor + input id + role=alert + focus ring
- * - demo 凭据提示(admin/admin123)放在表单底部,符合 zh 站点 admin 风格
  */
 
 import { useEffect, useState, type FC, type FormEvent } from 'react';
@@ -137,8 +136,6 @@ const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboar
         >
           {t.admin.loginSubmit}
         </button>
-
-        <p className="text-[11.5px] text-neutral-500 text-center">{t.admin.loginHint}</p>
       </form>
     </div>
   );
