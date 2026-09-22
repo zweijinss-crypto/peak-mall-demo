@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useT } from '@/lib/use-t';
 import { canSync, getMyAdminRoles, ROUTE_RESOURCE, type AdminRole } from '@/lib/admin/rbac';
+import { isSupabaseConfigured } from '@/lib/api';
 
 /**
  * AdminRouteGuard — per-route permission gate.
@@ -37,6 +38,15 @@ export function AdminRouteGuard({
 
   useEffect(() => {
     let cancelled = false;
+    // Demo mode (no Supabase env): everyone is super_admin, skip the
+    // server check. Matches AdminGate + AdminLayout behavior.
+    if (!isSupabaseConfigured()) {
+      setRoles(['super_admin']);
+      setOk(true);
+      return () => {
+        cancelled = true;
+      };
+    }
     void (async () => {
       const r = await getMyAdminRoles();
       if (cancelled) return;
