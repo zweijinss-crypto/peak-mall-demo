@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -74,6 +75,8 @@ export default function CheckoutPage() {
   const [cardExp, setCardExp] = useState('');
   const [cardCvv, setCardCvv] = useState('');
   const [cardHolder, setCardHolder] = useState('');
+  // Phase 2.5 — terms consent required at checkout.
+  const [termsAgreed, setTermsAgreed] = useState(false);
 
   /** Suppress the cart-empty redirect for ~2s after pay completes —
    *  without this, paying clears the cart and the empty-cart guard
@@ -144,6 +147,12 @@ export default function CheckoutPage() {
     setErrMsg(null);
     if (!pickedAddrId) {
       setErrMsg(t.checkout.placeOrderNeedAddress);
+      return;
+    }
+    // Phase 2.5 — terms consent gate. Reject before creating a
+    // pending order so we don't accumulate abandoned carts.
+    if (!termsAgreed) {
+      setErrMsg(t.checkout.termsAgreeRequired);
       return;
     }
     const order = placeOrder();
@@ -635,9 +644,27 @@ export default function CheckoutPage() {
 
             {!pendingOrder ? (
               <>
+                {/* Phase 2.5 — Terms consent checkbox required to place order. */}
+                <label htmlFor="checkout-terms" className="flex items-start gap-2.5 text-[12.5px] text-neutral-700 mb-3 cursor-pointer leading-relaxed min-h-[28px] py-1">
+                  <input
+                    id="checkout-terms"
+                    type="checkbox"
+                    checked={termsAgreed}
+                    onChange={(e) => setTermsAgreed(e.target.checked)}
+                    aria-required="true"
+                    aria-invalid={errMsg === t.checkout.termsAgreeRequired ? true : undefined}
+                    className="w-5 h-5 mt-0.5 accent-orange-700 cursor-pointer shrink-0"
+                  />
+                  <span>
+                    {t.checkout.termsAgree.replace('{terms}', '').trim()}
+                    {' '}
+                    <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-orange-700 hover:underline">{t.checkout.termsLinkText}</Link>
+                  </span>
+                </label>
                 <button
                   onClick={enterCashier}
-                  disabled={addresses.length === 0 || !pickedAddrId}
+                  disabled={addresses.length === 0 || !pickedAddrId || !termsAgreed}
+                  aria-disabled={addresses.length === 0 || !pickedAddrId || !termsAgreed}
                   className="w-full py-3.5 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 disabled:cursor-not-allowed text-white text-[14px] font-extrabold tracking-wide rounded-md transition-colors"
                 >
                   {t.checkout.placeOrder}

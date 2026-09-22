@@ -1,5 +1,14 @@
 import { useState, useId, type FC, type ReactNode, type FormEvent, type ReactElement, isValidElement, cloneElement } from 'react';
+import Link from 'next/link';
 import { useT } from '@/lib/use-t';
+
+/**
+ * Phase 2.5 — current Terms of Service / Privacy Policy version
+ * string. Bump when the documents change materially so the audit
+ * trail on users.terms_accepted_version / privacy_accepted_version
+ * tells us which document each user agreed to.
+ */
+const LEGAL_DOC_VERSION = '2026-09-22';
 
 export interface AuthI18n {
   hero: string;
@@ -20,6 +29,11 @@ export interface AuthI18n {
   register: string;
   pwMismatch: string;
   errGeneric: string;
+  /** Phase 2.5 — terms + privacy consent (label text + inline links). */
+  consentLabel: string;
+  termsLinkText: string;
+  privacyLinkText: string;
+  consentRequired: string;
 }
 
 export interface LoginPayload {
@@ -43,10 +57,20 @@ export interface AuthResult {
 
 export interface AuthSplitProps {
   onLogin?: (p: LoginPayload) => Promise<AuthResult | void>;
-  onRegister?: (p: RegisterPayload) => Promise<AuthResult | void>;
+  onRegister?: (
+    p: RegisterPayload & { consent: ConsentPayload },
+  ) => Promise<AuthResult | void>;
   /** 是否显示邀请码字段(默认 false,业务建议邀请码可选) */
   requireInvite?: boolean;
   i18n?: AuthI18n;
+}
+
+/** Phase 2.5 — what the caller records on the user record at signup. */
+export interface ConsentPayload {
+  termsAcceptedAt: string; // ISO-8601
+  privacyAcceptedAt: string; // ISO-8601
+  termsVersion: string;
+  privacyVersion: string;
 }
 
 function buildI18n(t: ReturnType<typeof useT>): AuthI18n {
@@ -74,6 +98,16 @@ function buildI18n(t: ReturnType<typeof useT>): AuthI18n {
     register: pick('submitRegister', 'register'),
     pwMismatch: pick('pwMismatch', 'pwMismatch'),
     errGeneric: pick('errGeneric', 'errGeneric'),
+    consentLabel:
+      (a.consentLabel as string) ??
+      'I agree to the Terms of Service and Privacy Policy.',
+    termsLinkText:
+      (a.termsLinkText as string) ?? 'Terms of Service',
+    privacyLinkText:
+      (a.privacyLinkText as string) ?? 'Privacy Policy',
+    consentRequired:
+      (a.consentRequired as string) ??
+      'Please agree to the Terms and Privacy Policy to continue.',
   };
 }
 
@@ -198,7 +232,10 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
   const [invite, setInvite] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Phase 2.5 — terms + privacy consent. Required to submit.
+  const [consent, setConsent] = useState(false);
   const regMsgId = 'auth-register-msg';
+  const consentId = 'auth-register-consent';
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -206,15 +243,26 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
       setMsg(i18n.pwMismatch);
       return;
     }
+    if (!consent) {
+      setMsg(i18n.consentRequired);
+      return;
+    }
     setBusy(true);
     setMsg(null);
     try {
+      const now = new Date().toISOString();
       const r = await onRegister?.({
         email,
         nickname: nick,
         password: p1,
         password2: p2,
         inviteCode: invite,
+        consent: {
+          termsAcceptedAt: now,
+          privacyAcceptedAt: now,
+          termsVersion: LEGAL_DOC_VERSION,
+          privacyVersion: LEGAL_DOC_VERSION,
+        },
       });
       if (r && !r.ok) setMsg(r.error || i18n.errGeneric);
     } finally {
@@ -245,7 +293,34 @@ const RegisterPanel: FC<RegisterPanelProps> = ({ onRegister, requireInvite, i18n
             <input id="auth-register-invite" value={invite} onChange={(e) => setInvite(e.target.value)} placeholder={i18n.invitePh} className={inputCls} />
           </Field>
         )}
-        <button type="submit" disabled={busy} className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white border border-orange-700 hover:border-orange-800 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60">
+        {/* Phase 2.5 — Terms + Privacy consent. Required to enable submit. */}
+        <label htmlFor={consentId} className="flex items-start gap-2.5 text-[12.5px] text-neutral-700 mb-4 cursor-pointer leading-relaxed min-h-[28px] py-1">
+          <input
+            id={consentId}
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            aria-required="true"
+            aria-invalid={msg === i18n.consentRequired ? true : undefined}
+            aria-describedby={msg === i18n.consentRequired ? regMsgId : undefined}
+            className="w-5 h-5 mt-0.5 accent-orange-700 cursor-pointer shrink-0"
+          />
+          <span>
+            {i18n.consentLabel.replace('{terms}', '').replace('{privacy}', '').trim()}
+            {' '}
+            <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-orange-700 hover:underline">{i18n.termsLinkText}</Link>
+            {' '}
+            {i18n.consentLabel.includes('和') ? '和' : '&'}
+            {' '}
+            <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-orange-700 hover:underline">{i18n.privacyLinkText}</Link>
+          </span>
+        </label>
+        <button
+          type="submit"
+          disabled={busy || !consent}
+          aria-disabled={busy || !consent}
+          className="w-full py-3 bg-orange-700 hover:bg-orange-800 text-white border border-orange-700 hover:border-orange-800 text-[14.5px] font-bold tracking-wide rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
           {busy ? '...' : i18n.register}
         </button>
         {msg && <div id={regMsgId} role="alert" className="mt-3.5 px-3 py-2.5 rounded text-[13px] bg-rose-50 text-rose-600">{msg}</div>}

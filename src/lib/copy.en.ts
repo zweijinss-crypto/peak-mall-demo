@@ -454,6 +454,12 @@ export const COPY_EN = {
     cardEncrypted: 'Encrypted in transit. We only store the last 4 digits and brand for reference.',
     brandDetected: (b: string) => `Detected ${b}`,
     brandUnknown: 'Enter a valid card number',
+    // Phase 2.5 — checkout-time Terms consent. Privacy is linked from
+    // the Terms page footer; we only re-prompt for Terms at checkout.
+    termsAgree: 'I agree to the {terms}',
+    termsAgreeRequired: 'Please agree to the Terms to place your order',
+    termsLinkText: 'Terms of Service',
+    privacyLinkText: 'Privacy Policy',
     confirmPay: 'Confirm payment',
     payFailed: 'Payment failed — try again or pick another method',
     payProcessing: 'Processing payment…',
@@ -787,6 +793,12 @@ export const COPY_EN = {
     loginErrorGeneric: 'Sign in failed',
     registerErrorGeneric: 'Registration failed',
     loggedInAs: (email: string, at: string) => `Signed in as ${email} · since ${at}`,
+    // Phase 2.5 — legal consent. {terms} / {privacy} are replaced with
+    // anchors by AuthSplit at render time.
+    consentLabel: 'I agree to the {terms} and {privacy}',
+    termsLinkText: 'Terms of Service',
+    privacyLinkText: 'Privacy Policy',
+    consentRequired: 'Please agree to the Terms and Privacy Policy to continue.',
     tabUser: 'Customer sign-in',
     tabAdmin: 'Admin sign-in',
     adminPanelTitle: 'Admin console',

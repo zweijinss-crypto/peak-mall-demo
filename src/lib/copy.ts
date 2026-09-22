@@ -146,6 +146,12 @@ export const COPY = {
     loginErrorGeneric: '登录失败',
     registerErrorGeneric: '注册失败',
     loggedInAs: (email: string, at: string) => `已登录为 ${email} · 登录于 ${at}`,
+    // Phase 2.5 — legal consent. The {terms} / {privacy} placeholders
+    // are replaced by the AuthSplit component with linked anchors.
+    consentLabel: '我已阅读并同意 {terms} 和 {privacy}',
+    termsLinkText: '《使用条款》',
+    privacyLinkText: '《隐私政策》',
+    consentRequired: '请勾选同意《使用条款》和《隐私政策》后继续',
     // v40: 登录/管理后台合页 — tab 切换
     tabUser: '用户登录',
     tabAdmin: '管理员登录',
@@ -663,6 +669,12 @@ export const COPY = {
     cardEncrypted: '信息经加密传输,仅记录卡号后 4 位与品牌用于对账',
     brandDetected: (b: string) => `已识别 ${b}`,
     brandUnknown: '请输入有效卡号',
+    // Phase 2.5 — checkout-time Terms consent (single checkbox; Privacy is
+    // referenced via the same anchored link as the registration panel).
+    termsAgree: '我已阅读并同意 {terms}',
+    termsAgreeRequired: '请先勾选同意《使用条款》后提交订单',
+    termsLinkText: '《使用条款》',
+    privacyLinkText: '《隐私政策》',
     confirmPay: '确认支付',
     payFailed: '支付失败,请重试或换其他方式',
     payProcessing: '支付处理中…',

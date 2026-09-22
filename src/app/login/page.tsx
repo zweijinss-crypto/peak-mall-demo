@@ -96,6 +96,10 @@ function LoginPageInner() {
                   register: t.auth.register,
                   pwMismatch: t.auth.pwMismatch,
                   errGeneric: t.auth.errGeneric,
+                  consentLabel: t.auth.consentLabel,
+                  termsLinkText: t.auth.termsLinkText,
+                  privacyLinkText: t.auth.privacyLinkText,
+                  consentRequired: t.auth.consentRequired,
                 }}
                 onLogin={async (p) => {
                   setError(null);
@@ -110,7 +114,18 @@ function LoginPageInner() {
                 }}
                 onRegister={async (p) => {
                   setError(null);
-                  const r = await register({ email: p.email, password: p.password, nickname: p.nickname });
+                  // Phase 2.5 — forward consent metadata so the
+                  // auth trigger can stamp users.terms_accepted_at /
+                  // privacy_accepted_at.
+                  const r = await register({
+                    email: p.email,
+                    password: p.password,
+                    nickname: p.nickname,
+                    termsAcceptedAt: p.consent.termsAcceptedAt,
+                    privacyAcceptedAt: p.consent.privacyAcceptedAt,
+                    termsVersion: p.consent.termsVersion,
+                    privacyVersion: p.consent.privacyVersion,
+                  });
                   if (!r.ok) {
                     const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.registerErrorShort : t.auth.registerErrorGeneric;
                     setError(msg);

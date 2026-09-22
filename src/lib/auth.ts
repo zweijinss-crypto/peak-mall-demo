@@ -146,8 +146,22 @@ async function registerImpl(input: {
   email: string;
   password: string;
   nickname?: string;
+  // Phase 2.5 — legal consent forwarded as raw_user_meta_data so the
+  // auth trigger can stamp users.terms_accepted_at / privacy_accepted_at.
+  termsAcceptedAt?: string;
+  privacyAcceptedAt?: string;
+  termsVersion?: string;
+  privacyVersion?: string;
 }): Promise<AuthResult> {
-  const { email, password, nickname } = input;
+  const {
+    email,
+    password,
+    nickname,
+    termsAcceptedAt,
+    privacyAcceptedAt,
+    termsVersion,
+    privacyVersion,
+  } = input;
   if (!email || !password) return { ok: false, error: 'MISSING_FIELDS' };
   if (password.length < 6) return { ok: false, error: 'PASSWORD_TOO_SHORT' };
   if (!email.includes('@')) return { ok: false, error: 'INVALID_EMAIL' };
@@ -159,10 +173,17 @@ async function registerImpl(input: {
     return localFallbackLogin(email, password);
   }
 
+  const meta: Record<string, string> = {};
+  if (nickname) meta.nickname = nickname;
+  if (termsAcceptedAt)   meta.terms_accepted_at   = termsAcceptedAt;
+  if (privacyAcceptedAt) meta.privacy_accepted_at = privacyAcceptedAt;
+  if (termsVersion)      meta.terms_version        = termsVersion;
+  if (privacyVersion)    meta.privacy_version      = privacyVersion;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: nickname ? { nickname } : undefined },
+    options: { data: Object.keys(meta).length ? meta : undefined },
   });
   if (error) return { ok: false, error: mapAuthError(error.message) };
 
@@ -249,6 +270,10 @@ export const register = async (input: {
   email: string;
   password: string;
   nickname?: string;
+  termsAcceptedAt?: string;
+  privacyAcceptedAt?: string;
+  termsVersion?: string;
+  privacyVersion?: string;
 }): Promise<AuthResult> => registerImpl(input);
 
 export const getCurrentUser = (): AuthUser | null => getCurrentUserImpl();
