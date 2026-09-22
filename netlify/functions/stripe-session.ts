@@ -210,5 +210,27 @@ async function createOrderOnServer(
     }
   }
 
+  // Phase 2.1 — reserve inventory for every line item. We do this after
+  // the order + items are persisted so that a stock failure can be
+  // surfaced as a 4xx with the order id for the client to retry / cancel.
+  for (const it of input.items) {
+    const { error: rpcErr } = await supabase.rpc('reserve_stock', {
+      p_product_id: it.productId,
+      p_qty: it.qty,
+      p_order_id: order.id,
+      p_reason: 'stripe_session_created',
+    });
+    if (rpcErr) {
+      logger.error('stripe-session: reserve_stock failed', rpcErr, {
+        productId: it.productId,
+        qty: it.qty,
+        orderId: order.id,
+      });
+      // Roll back the order so the customer can retry
+      await supabase.from('orders').delete().eq('id', order.id);
+      return null;
+    }
+  }
+
   return { orderId: order.id, orderNo: order.order_no };
 }

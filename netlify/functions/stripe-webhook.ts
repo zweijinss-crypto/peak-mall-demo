@@ -135,6 +135,9 @@ const handler: Handler = async (event) => {
           amountTotal: session.amount_total ?? 0,
           currency: session.currency?.toUpperCase() ?? 'USD',
         });
+
+        // Phase 2.1 — convert reserved stock to actual deduction.
+        await deductReservedForOrder(supabase, orderId, stripeEvent.id);
         break;
       }
 
@@ -156,6 +159,9 @@ const handler: Handler = async (event) => {
           status: 'failed',
           raw_payload: pi as any,
         });
+
+        // Phase 2.1 — release reserved stock back to inventory.
+        await releaseReservedForOrder(supabase, orderId, stripeEvent.id, 'payment_failed');
         break;
       }
 
@@ -177,6 +183,11 @@ const handler: Handler = async (event) => {
           status: 'refunded',
           raw_payload: charge as any,
         });
+
+        // Phase 2.1 — refund returns stock. Use 'refund' kind so we
+        // don't touch reserved_stock (the order was already deducted
+        // at checkout.session.completed time).
+        await refundStockForOrder(supabase, orderId, stripeEvent.id);
         break;
       }
 
@@ -319,5 +330,114 @@ async function fireOrderConfirmation(
     logger.error('stripe-webhook: order confirmation email failed', err, {
       orderId,
     });
+  }
+}
+
+// ---------------------------------------------------------------
+// Phase 2.1 — stock helpers
+// ---------------------------------------------------------------
+
+async function deductReservedForOrder(
+  supabase: SupabaseClient,
+  orderId: string,
+  eventId: string,
+): Promise<void> {
+  try {
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('id, product_id, qty')
+      .eq('order_id', orderId);
+    for (const it of (items ?? []) as Array<{
+      id: string;
+      product_id: number;
+      qty: number;
+    }>) {
+      const { error } = await supabase.rpc('deduct_stock', {
+        p_product_id: it.product_id,
+        p_qty: it.qty,
+        p_order_id: orderId,
+        p_reason: `stripe:${eventId}`,
+      });
+      if (error) {
+        logger.error('stripe-webhook: deduct_stock failed', error, {
+          productId: it.product_id,
+          qty: it.qty,
+          orderId,
+        });
+      }
+    }
+  } catch (err) {
+    logger.error('stripe-webhook: deductReservedForOrder crashed', err, { orderId });
+  }
+}
+
+async function releaseReservedForOrder(
+  supabase: SupabaseClient,
+  orderId: string,
+  eventId: string,
+  reason: string,
+): Promise<void> {
+  try {
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('id, product_id, qty')
+      .eq('order_id', orderId);
+    for (const it of (items ?? []) as Array<{
+      id: string;
+      product_id: number;
+      qty: number;
+    }>) {
+      const { error } = await supabase.rpc('release_stock', {
+        p_product_id: it.product_id,
+        p_qty: it.qty,
+        p_order_id: orderId,
+        p_reason: `${reason}:${eventId}`,
+        p_kind: 'release',
+      });
+      if (error) {
+        logger.error('stripe-webhook: release_stock failed', error, {
+          productId: it.product_id,
+          qty: it.qty,
+          orderId,
+        });
+      }
+    }
+  } catch (err) {
+    logger.error('stripe-webhook: releaseReservedForOrder crashed', err, { orderId });
+  }
+}
+
+async function refundStockForOrder(
+  supabase: SupabaseClient,
+  orderId: string,
+  eventId: string,
+): Promise<void> {
+  try {
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('id, product_id, qty')
+      .eq('order_id', orderId);
+    for (const it of (items ?? []) as Array<{
+      id: string;
+      product_id: number;
+      qty: number;
+    }>) {
+      const { error } = await supabase.rpc('release_stock', {
+        p_product_id: it.product_id,
+        p_qty: it.qty,
+        p_order_id: orderId,
+        p_reason: `refund:${eventId}`,
+        p_kind: 'refund',
+      });
+      if (error) {
+        logger.error('stripe-webhook: refund release_stock failed', error, {
+          productId: it.product_id,
+          qty: it.qty,
+          orderId,
+        });
+      }
+    }
+  } catch (err) {
+    logger.error('stripe-webhook: refundStockForOrder crashed', err, { orderId });
   }
 }

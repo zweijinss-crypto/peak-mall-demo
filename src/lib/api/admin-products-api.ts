@@ -109,3 +109,37 @@ export async function updateProduct(
 export async function archiveProduct(id: number): Promise<boolean> {
   return updateProduct(id, { status: false } as Partial<AdminProduct>);
 }
+
+/**
+ * Phase 2.1 — adjust a product's stock by a signed delta with a free-form
+ * reason. Records an inventory_movement audit row.
+ *
+ * Positive delta increases stock (e.g. receiving new shipment).
+ * Negative delta decreases stock (e.g. shrinkage, write-off).
+ *
+ * Returns ok=false with an error code on constraint failures:
+ *   - ADJUST_BELOW_RESERVED  (won't drop stock below current reservations)
+ *   - NEGATIVE_STOCK
+ *   - INVALID_DELTA
+ *   - PRODUCT_NOT_FOUND
+ */
+export async function adjustStock(
+  productId: number,
+  delta: number,
+  reason: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const sb = getSupabase();
+  if (!sb) return { ok: false, error: 'NOT_CONFIGURED' };
+
+  const { error } = await sb.rpc('adjust_stock', {
+    p_product_id: productId,
+    p_delta: delta,
+    p_actor: null, // server-side can fill in auth.uid() if needed
+    p_reason: reason || 'admin_adjust',
+  });
+  if (!error) return { ok: true };
+
+  // Postgres exception codes come through as `error.message`
+  // e.g. "ADJUST_BELOW_RESERVED"
+  return { ok: false, error: error.message || 'UNKNOWN' };
+}
