@@ -7,6 +7,7 @@ import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 import { isSupabaseConfigured } from '@/lib/api';
 import { fetchAllWd } from '@/lib/api/admin-wd-api';
+import { newUuid } from '@/lib/admin/uuid';
 
 type Tab = 'all' | WdStatus;
 
@@ -24,16 +25,15 @@ const STATUS_CLASS: Record<WdStatus, string> = {
  * survives reloads.
  */
 const DEMO_USER_KEY = 'peakMall.demoWdUserId';
-function pickDefaultUserId(users: Array<{ id: number; balance: number }>): number {
-  if (typeof window === 'undefined') return users[0]?.id ?? 1;
+function pickDefaultUserId(users: Array<{ id: string; balance: number }>): string {
+  if (typeof window === 'undefined') return users[0]?.id ?? '';
   const saved = window.localStorage.getItem(DEMO_USER_KEY);
   if (saved) {
-    const id = Number(saved);
-    if (users.some((u) => u.id === id)) return id;
+    if (users.some((u) => u.id === saved)) return saved;
   }
   // Pick the user with the highest available balance.
   const richest = [...users].sort((a, b) => b.balance - a.balance)[0];
-  return richest?.id ?? users[0]?.id ?? 1;
+  return richest?.id ?? users[0]?.id ?? '';
 }
 
 export function WdCenterClient() {
@@ -59,7 +59,7 @@ export function WdCenterClient() {
   const [method, setMethod] = useState<'usdt_trc20' | 'card'>('usdt_trc20');
   const [account, setAccount] = useState('');
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Resolve the current "logged-in" demo user once both stores are mounted.
   // useState's lazy initializer only fires once, but we need users data —
@@ -125,7 +125,7 @@ export function WdCenterClient() {
     const mismatch = needsAddr && bound && finalAccount !== bound;
     const fee = +(v * feeRate).toFixed(2);
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const nextId = wd.length === 0 ? 1 : Math.max(...wd.map((w: any) => w.id)) + 1;
+    const nextId = newUuid();
     const newRow = {
       id: nextId,
       user_id: currentUser.id,
@@ -141,12 +141,12 @@ export function WdCenterClient() {
       mismatch,
     };
     setWd([newRow, ...wd]);
-    setMsg({ kind: 'ok', text: `${t.admin.wdCenter.submitted} #${nextId} · ${t.admin.wdCenter.applySuccess}` });
+    setMsg({ kind: 'ok', text: `${t.admin.wdCenter.submitted} #${nextId.slice(0, 8)} · ${t.admin.wdCenter.applySuccess}` });
     setAmt('');
     setAccount('');
   };
 
-  const switchUser = (id: number) => {
+  const switchUser = (id: string) => {
     setCurrentUserId(id);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(DEMO_USER_KEY, String(id));

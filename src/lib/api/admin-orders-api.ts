@@ -5,14 +5,13 @@
  * AdminOrder shape the admin UI expects. Falls back to localStorage
  * adminStore.orders when Supabase isn't configured.
  *
- * Mutators (setOrderStatus / shipOrder / refundOrder) all read the
- * stored numeric id → uuid map written by fetchAllOrders, so the
- * admin UI can keep using its synthetic hash-based ids without
- * needing a schema migration of the local ids.
+ * Phase 1.1.9 — id is now the Supabase uuid (was: numeric hash).
+ * Mutators take `id` (string uuid) directly. LocalStore rows carry the
+ * same uuid, so no translation layer is needed.
  */
 
 import { getSupabase } from './supabase-client';
-import { adminStore, type AdminOrder, type OrderStatus } from '../admin/fixtures';
+import { adminStore, type AdminOrder, type OrderStatus, type AdminId } from '../admin/fixtures';
 
 interface RemoteOrder {
   id: string;                  // uuid
@@ -39,9 +38,9 @@ interface JoinedOrder extends RemoteOrder {
   users: { nickname: string | null; email: string } | null;
 }
 
-function mapJoined(r: JoinedOrder, i: number): AdminOrder {
+function mapJoined(r: JoinedOrder): AdminOrder {
   return {
-    id: hashId(r.id, i),
+    id: r.id,
     order_no: r.order_no,
     nickname: r.users?.nickname ?? r.ship_name,
     username: r.users?.email ?? r.user_id.slice(0, 8),
@@ -56,19 +55,6 @@ function mapJoined(r: JoinedOrder, i: number): AdminOrder {
     updated_at: r.updated_at.slice(0, 19),
     uuid: r.id,
   };
-}
-
-function hashId(uuid: string, fallback: number): number {
-  let x = 5381 ^ uuid.charCodeAt(0);
-  for (let i = 0; i < uuid.length; i++) x = ((x << 5) + x) ^ uuid.charCodeAt(i);
-  x = ((x << 5) + x) ^ (fallback & 0xffff);
-  return x >>> 0;
-}
-
-/** Resolve the synthetic numeric id back to the Supabase uuid. */
-function findUuid(numericId: number): string | null {
-  const order = adminStore.orders.read().find((o) => o.id === numericId);
-  return order?.uuid ?? null;
 }
 
 /** Fetch all orders for the admin (phase 1.1.8). */
@@ -90,24 +76,22 @@ export async function fetchAllOrders(): Promise<AdminOrder[] | null> {
     console.error('[admin-orders-api] fetchAllOrders:', error);
     return null;
   }
-  return ((data ?? []) as unknown as JoinedOrder[]).map(mapJoined);
+  return ((data ?? []) as unknown as JoinedOrder[]).map((r) => mapJoined(r));
 }
 
 /** Update order status (admin action). */
 export async function setOrderStatus(
-  numericId: number,
+  id: AdminId,
   status: OrderStatus,
   extra?: { carrier?: string; tracking_no?: string; cancel_reason?: string },
 ): Promise<boolean> {
   const all = adminStore.orders.read();
   const now = new Date().toISOString();
-  const next = all.map((o) => (o.id === numericId ? { ...o, status, updated_at: now.slice(0, 19) } : o));
+  const next = all.map((o) => (o.id === id ? { ...o, status, updated_at: now.slice(0, 19) } : o));
   adminStore.orders.write(next);
 
   const sb = getSupabase();
   if (!sb) return true;
-  const uuid = findUuid(numericId);
-  if (!uuid) return true;
 
   const patch: Record<string, unknown> = { status, updated_at: now };
   if (extra?.carrier) patch.carrier = extra.carrier;
@@ -117,7 +101,7 @@ export async function setOrderStatus(
     patch.cancelled_at = now;
     if (extra?.cancel_reason) patch.cancel_reason = extra.cancel_reason;
   }
-  const { error } = await sb.from('orders').update(patch).eq('id', uuid);
+  const { error } = await sb.from('orders').update(patch).eq('id', id);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-orders-api] setOrderStatus:', error);
@@ -128,14 +112,14 @@ export async function setOrderStatus(
 
 /** Phase 2.2 — persist carrier + tracking_no + mark shipped. */
 export async function shipOrder(
-  numericId: number,
+  id: AdminId,
   carrier: string,
   trackingNo: string,
 ): Promise<boolean> {
   const all = adminStore.orders.read();
   const now = new Date().toISOString();
   const next = all.map((o) =>
-    o.id === numericId
+    o.id === id
       ? {
           ...o,
           status: 'shipped' as const,
@@ -150,8 +134,6 @@ export async function shipOrder(
 
   const sb = getSupabase();
   if (!sb) return true;
-  const uuid = findUuid(numericId);
-  if (!uuid) return true;
   const { error } = await sb
     .from('orders')
     .update({
@@ -161,7 +143,7 @@ export async function shipOrder(
       shipped_at: now,
       updated_at: now,
     })
-    .eq('id', uuid);
+    .eq('id', id);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-orders-api] shipOrder:', error);
@@ -171,16 +153,16 @@ export async function shipOrder(
 }
 
 /** Phase 2.2 — admin marks order as completed (after delivery). */
-export async function completeOrder(numericId: number): Promise<boolean> {
-  return setOrderStatus(numericId, 'completed');
+export async function completeOrder(id: AdminId): Promise<boolean> {
+  return setOrderStatus(id, 'completed');
 }
 
 /** Phase 2.2 — admin cancels an order with a reason. */
 export async function adminCancelOrder(
-  numericId: number,
+  id: AdminId,
   reason: string,
 ): Promise<boolean> {
-  return setOrderStatus(numericId, 'cancelled', { cancel_reason: reason });
+  return setOrderStatus(id, 'cancelled', { cancel_reason: reason });
 }
 
 export interface RefundResult {
@@ -190,13 +172,9 @@ export interface RefundResult {
 
 /**
  * Phase 2.4 — partial or full refund.
- *
- * - Updates orders.refund_state / refund_amount / payment_status / status.
- * - Logs into order_refunds (when the table exists).
- * - Returns {ok, error} so the admin modal can show server-side errors.
  */
 export async function refundOrder(
-  numericId: number,
+  id: AdminId,
   amount: number,
   reason: string,
 ): Promise<RefundResult> {
@@ -204,7 +182,7 @@ export async function refundOrder(
     return { ok: false, error: 'Amount must be positive.' };
   }
   const all = adminStore.orders.read();
-  const target = all.find((o) => o.id === numericId);
+  const target = all.find((o) => o.id === id);
   if (!target) return { ok: false, error: 'Order not found.' };
 
   const orderTotal = Number(target.amount);
@@ -219,7 +197,7 @@ export async function refundOrder(
 
   // Optimistic local update.
   const next = all.map((o) =>
-    o.id === numericId
+    o.id === id
       ? {
           ...o,
           refunded: true,
@@ -236,8 +214,6 @@ export async function refundOrder(
 
   const sb = getSupabase();
   if (!sb) return { ok: true };
-  const uuid = target.uuid;
-  if (!uuid) return { ok: true };
 
   // 1. Update orders header.
   const patch: Record<string, unknown> = {
@@ -251,7 +227,7 @@ export async function refundOrder(
     patch.cancelled_at = now;
     patch.cancel_reason = reason;
   }
-  const { error: updateErr } = await sb.from('orders').update(patch).eq('id', uuid);
+  const { error: updateErr } = await sb.from('orders').update(patch).eq('id', id);
   if (updateErr) {
     // eslint-disable-next-line no-console
     console.error('[admin-orders-api] refundOrder update:', updateErr);
@@ -261,7 +237,7 @@ export async function refundOrder(
   // 2. Append to order_refunds (best-effort, ignore if table missing).
   try {
     const { error: refundErr } = await sb.from('order_refunds').insert({
-      order_id: uuid,
+      order_id: id,
       amount,
       reason,
       status: isFull ? 'refunded' : 'pending',

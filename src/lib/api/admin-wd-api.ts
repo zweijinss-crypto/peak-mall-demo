@@ -1,13 +1,13 @@
 /**
  * admin-wd-api — admin withdrawal queue (Phase 1.1.8).
  *
- * Reads public.withdrawals + users. Falls back to adminStore.wd.
+ * Phase 1.1.9 — id is now the Supabase uuid (was: numeric hash).
  */
 
 import { getSupabase } from './supabase-client';
-import { adminStore, type AdminWd, type WdStatus } from '../admin/fixtures';
+import { adminStore, type AdminWd, type AdminId, type WdStatus } from '../admin/fixtures';
 
-interface RemoteWd {
+interface JoinedWd {
   id: string;
   user_id: string;
   amount: number;
@@ -19,15 +19,12 @@ interface RemoteWd {
   account: string | null;
   created_at: string;
   updated_at: string;
-}
-
-interface JoinedWd extends RemoteWd {
   users: { nickname: string | null; email: string } | null;
 }
 
-function mapJoined(r: JoinedWd, i: number): AdminWd {
+function mapJoined(r: JoinedWd): AdminWd {
   return {
-    id: hashId(r.id, i),
+    id: r.id,
     username: r.users?.email?.split('@')[0] ?? r.user_id.slice(0, 8),
     amount: Number(r.amount),
     fee: Number(r.fee),
@@ -39,10 +36,6 @@ function mapJoined(r: JoinedWd, i: number): AdminWd {
     created_at: r.created_at.slice(0, 19),
     uuid: r.id,
   };
-}
-
-function findUuid(numericId: number): string | null {
-  return adminStore.wd.read().find((w) => w.id === numericId)?.uuid ?? null;
 }
 
 /** Fetch all withdrawals for the admin. */
@@ -63,18 +56,18 @@ export async function fetchAllWd(): Promise<AdminWd[] | null> {
     console.error('[admin-wd-api] fetchAllWd:', error);
     return null;
   }
-  return ((data ?? []) as unknown as JoinedWd[]).map(mapJoined);
+  return ((data ?? []) as unknown as JoinedWd[]).map((r) => mapJoined(r));
 }
 
 /** Update withdrawal status (approve / reject / mark paid). */
 export async function setWdStatus(
-  numericId: number,
+  id: AdminId,
   status: WdStatus,
   rejectReason?: string,
 ): Promise<boolean> {
   const all = adminStore.wd.read();
   const next = all.map((w) =>
-    w.id === numericId
+    w.id === id
       ? { ...w, status, ...(rejectReason ? { reject_reason: rejectReason } : {}) }
       : w,
   );
@@ -82,8 +75,6 @@ export async function setWdStatus(
 
   const sb = getSupabase();
   if (!sb) return true;
-  const uuid = findUuid(numericId);
-  if (!uuid) return true;
   const patch: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString(),
@@ -91,18 +82,11 @@ export async function setWdStatus(
   if (status === 'rejected' && rejectReason) {
     patch.reject_reason = rejectReason;
   }
-  const { error } = await sb.from('withdrawals').update(patch).eq('id', uuid);
+  const { error } = await sb.from('withdrawals').update(patch).eq('id', id);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-wd-api] setWdStatus:', error);
     return false;
   }
   return true;
-}
-
-function hashId(uuid: string, fallback: number): number {
-  let x = 5381 ^ uuid.charCodeAt(0);
-  for (let i = 0; i < uuid.length; i++) x = ((x << 5) + x) ^ uuid.charCodeAt(i);
-  x = ((x << 5) + x) ^ (fallback & 0xffff);
-  return x >>> 0;
 }

@@ -10,6 +10,7 @@ import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import type { AdminProduct } from '@/lib/admin/fixtures';
 import { fetchAllProducts, isSupabaseConfigured } from '@/lib/api';
+import { newUuid } from '@/lib/admin/uuid';
 
 /**
  * ProductsClient — admin product CRUD + bulk ops + edit history (5s undo).
@@ -134,17 +135,17 @@ export function ProductsClient() {
   }, [mounted, setProducts]);
 
   // Bulk selection — set of product ids.
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Detail modal state.
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [draftError, setDraftError] = useState<string | null>(null);
   const [descTab, setDescTab] = useState<'edit' | 'preview'>('edit');
   const [imgInput, setImgInput] = useState('');
 
   // Delete confirm state.
-  const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
+  const [deletingIds, setDeletingIds] = useState<string[] | null>(null);
 
   // Undo toast state.
   const [undo, setUndo] = useState<{ row: AdminProduct; timer: number } | null>(null);
@@ -164,7 +165,7 @@ export function ProductsClient() {
   const someSelected = selected.size > 0 && selected.size < products.length;
 
   // ───── open / close detail ─────
-  const openDetail = (id: number) => {
+  const openDetail = (id: string) => {
     const p = products.find((x) => x.id === id);
     if (!p) return;
     setEditingId(id);
@@ -286,19 +287,19 @@ export function ProductsClient() {
     setUndo(null);
   };
 
-  const toggleStatus = (id: number) => {
+  const toggleStatus = (id: string) => {
     setProducts(products.map((p) => (p.id === id ? { ...p, status: !p.status } : p)));
   };
 
   const addProduct = () => {
-    const id = products.length === 0 ? 1 : Math.max(...products.map((p) => p.id)) + 1;
+    const id = newUuid();
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const sku = `NEW-${id}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+    const sku = `NEW-${id.slice(0, 8)}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
     setProducts([
       ...products,
       {
         id,
-        name: t.admin.products.colName + ' #' + id,
+        name: t.admin.products.colName + ' #' + id.slice(0, 4),
         sku,
         category: '数码电子',
         price: 0,
@@ -318,7 +319,7 @@ export function ProductsClient() {
   };
 
   // Bulk selection helpers.
-  const toggleOne = (id: number) => {
+  const toggleOne = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -337,7 +338,7 @@ export function ProductsClient() {
     setProducts(products.map((p) => (ids.has(p.id) ? { ...p, status } : p)));
   };
 
-  const requestDelete = (ids: number[]) => setDeletingIds(ids);
+  const requestDelete = (ids: string[]) => setDeletingIds(ids);
   const confirmDelete = () => {
     if (!deletingIds) return;
     const idSet = new Set(deletingIds);

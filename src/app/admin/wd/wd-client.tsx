@@ -59,10 +59,10 @@ export function WdClient() {
   }, [mounted, setWd]);
 
   // Modal state — one at a time so the focus trap is straightforward.
-  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [approvingId, setApprovingId] = useState<number | null>(null);
-  const [payingId, setPayingId] = useState<number | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [payingId, setPayingId] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState(false);
 
   // Toast state — auto-dismiss 3s. Mirrors agents/products undo pattern.
@@ -82,13 +82,13 @@ export function WdClient() {
   const locale = isEn ? 'en' : 'zh';
   const now = () => new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  const approve = (id: number) => setApprovingId(id);
-  const reject = (id: number) => {
+  const approve = (id: string) => setApprovingId(id);
+  const reject = (id: string) => {
     setRejectingId(id);
     setRejectReason('');
     setReasonError(false);
   };
-  const markPaid = (id: number) => setPayingId(id);
+  const markPaid = (id: string) => setPayingId(id);
 
   const handleConfirmApprove = () => {
     if (approvingId === null) return;

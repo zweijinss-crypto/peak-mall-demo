@@ -6,19 +6,28 @@
  * sensible defaults on first read. Every mutation routes through here so
  * reloads persist (matches the user-side wishlist/cart experience).
  *
- * All identifiers are stable ISO timestamps so SSR + client hydrate to
- * the same value before any client mutation kicks in.
+ * Phase 1.1.9: all admin ids are now uuid strings (was: number). Seed
+ * rows derive their uuid deterministically from a stable key (order_no,
+ * sku, code, ...) so SSR + client hydration produce the same value.
+ * New admin-created rows use newUuid().
  */
 
 import type { Locale } from '../store';
+import { seedUuid } from './uuid';
 
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
 export type WdStatus = 'pending' | 'approved' | 'paid' | 'rejected';
 export type UserStatus = 'active' | 'frozen';
 export type UserRole = 'fx' | 'agent';
 
+/**
+ * AdminId — every admin row uses a uuid string. Seed rows are derived
+ * via seedUuid(stableKey); new admin-created rows are uuid v4.
+ */
+export type AdminId = string;
+
 export interface AdminProduct {
-  id: number;
+  id: AdminId;
   name: string;
   sku: string;
   category: string;
@@ -34,10 +43,14 @@ export interface AdminProduct {
   seoSlug?: string;
   created_at: string;
   updated_at?: string;
+  /** Phase 1.1.9 — Supabase products bigserial id (number) for hydrating
+   *  seeded fixture data without a real DB row. undefined for rows that
+   *  came from Supabase (whose id IS a number anyway). */
+  legacy_id?: number;
 }
 
 export interface AdminOrder {
-  id: number;
+  id: AdminId;
   order_no: string;
   nickname: string;
   username: string;
@@ -67,12 +80,15 @@ export interface AdminOrder {
   shipped_at?: string;
   /** Phase 2.4 — payment_status mirror (pending/success/failed/refunded). */
   payment_status?: 'pending' | 'success' | 'failed' | 'refunded';
-  /** Phase 1.1.8 — Supabase orders uuid, set when row comes from DB. */
+  /** Phase 1.1.8 — Supabase orders uuid (matches id when from DB). */
   uuid?: string;
+  /** Phase 1.1.9 — kept for callers that still expect the numeric legacy
+   *  id when the row came from fixtures (computed via seedUuid mapping). */
+  legacy_id?: number;
 }
 
 export interface AdminUser {
-  id: number;
+  id: AdminId;
   nickname: string;
   username: string;
   role: UserRole;
@@ -82,12 +98,15 @@ export interface AdminUser {
   created_at: string;
   balance: number;
   withdraw_address?: string;
-  /** Phase 1.1.8 — Supabase users uuid, set when row comes from DB. */
+  /** Phase 1.1.8 — Supabase users uuid (matches id when from DB). */
   uuid?: string;
+  /** Phase 1.1.9 — optional numeric id kept for backward compat during
+   *  migration from the legacy localStorage-only admin console. */
+  legacy_id?: number;
 }
 
 export interface AdminAgent {
-  id: number;
+  id: AdminId;
   nickname: string;
   username: string;
   balance: number;
@@ -95,11 +114,15 @@ export interface AdminAgent {
   sub_rate: number;
   sub_rate_limit: number;
   withdraw_address?: string;
-  /** Phase 1.1.8 — Supabase users uuid, set when row comes from DB. */
+  /** Phase 1.1.8 — Supabase users uuid (matches id when from DB). */
   uuid?: string;
+  /** Phase 1.1.9 — optional numeric id kept for backward compat during
+   *  migration from the legacy localStorage-only admin console. */
+  legacy_id?: number;
 }
 
 export interface AdminInvite {
+  /** invite codes are the natural id (string). */
   code: string;
   used: number;
   limit: number;
@@ -108,7 +131,7 @@ export interface AdminInvite {
 }
 
 export interface AdminTicket {
-  id: number;
+  id: AdminId;
   order_no: string;
   username: string;
   reason: string;
@@ -120,7 +143,7 @@ export interface AdminTicket {
 }
 
 export interface AdminCommLog {
-  id: number;
+  id: AdminId;
   username: string;
   amount: number;
   source: string; // 订单号
@@ -132,7 +155,7 @@ export interface AdminCommLog {
 }
 
 export interface AdminWd {
-  id: number;
+  id: AdminId;
   username: string;
   amount: number;
   fee: number;
@@ -170,9 +193,19 @@ export interface AdminSupportCfg {
 
 /* ──────────────── Seed ──────────────── */
 
+/** Build a seed uuid for the given stable key. */
+const sid = seedUuid;
+
+/**
+ * Phase 1.1.9 — seed rows now carry a uuid id derived from their
+ * stable identity. legacy_id keeps the numeric form for backward-compat
+ * with any caller still using numeric ids (none in 1.1.9, but useful
+ * during the migration window).
+ */
 export const SEED_PRODUCTS: AdminProduct[] = [
   {
-    id: 1,
+    id: sid('product:NB-PRO-14-2026'),
+    legacy_id: 1,
     name: '笔记本 Pro 14',
     sku: 'NB-PRO-14-2026',
     category: '数码电子',
@@ -190,7 +223,8 @@ export const SEED_PRODUCTS: AdminProduct[] = [
     updated_at: '2026-08-12 10:23:00',
   },
   {
-    id: 2,
+    id: sid('product:HP-WH5-BLK'),
+    legacy_id: 2,
     name: '降噪耳机 WH-5',
     sku: 'HP-WH5-BLK',
     category: '数码电子',
@@ -208,7 +242,8 @@ export const SEED_PRODUCTS: AdminProduct[] = [
     updated_at: '2026-08-15 14:05:11',
   },
   {
-    id: 3,
+    id: sid('product:RB-S2-LDS'),
+    legacy_id: 3,
     name: '扫地机器人 S2',
     sku: 'RB-S2-LDS',
     category: '智能家居',
@@ -226,7 +261,8 @@ export const SEED_PRODUCTS: AdminProduct[] = [
     updated_at: '2026-08-20 09:42:33',
   },
   {
-    id: 4,
+    id: sid('product:KB-K1-BLU'),
+    legacy_id: 4,
     name: '机械键盘 K1',
     sku: 'KB-K1-BLU',
     category: '数码电子',
@@ -244,7 +280,8 @@ export const SEED_PRODUCTS: AdminProduct[] = [
     updated_at: '2026-08-25 16:18:00',
   },
   {
-    id: 5,
+    id: sid('product:WT-W3-BLK'),
+    legacy_id: 5,
     name: '智能手表 W3',
     sku: 'WT-W3-BLK',
     category: '智能家居',
@@ -262,7 +299,8 @@ export const SEED_PRODUCTS: AdminProduct[] = [
     updated_at: '2026-09-01 11:30:45',
   },
   {
-    id: 6,
+    id: sid('product:CAM-C6-4K'),
+    legacy_id: 6,
     name: '便携相机 C6',
     sku: 'CAM-C6-4K',
     category: '数码电子',
@@ -282,26 +320,26 @@ export const SEED_PRODUCTS: AdminProduct[] = [
 ];
 
 export const SEED_ORDERS: AdminOrder[] = [
-  { id: 1001, order_no: 'PM-20260920-001', nickname: '小张', username: 'zhang_88', amount: 1588, status: 'paid', pay_method: 'card', card_brand: 'VISA', card_last4: '1111', card_expiry: '12/28', contact_name: '张先生', address: '上海市浦东新区世纪大道 100 号', created_at: '2026-09-20 11:23:08' },
-  { id: 1002, order_no: 'PM-20260920-002', nickname: 'Lily', username: 'lily_us', amount: 459, status: 'shipped', pay_method: 'wallet', contact_name: 'Lily Chen', address: '北京市朝阳区建国路 88 号', created_at: '2026-09-20 13:47:21' },
-  { id: 1003, order_no: 'PM-20260920-003', nickname: '老王', username: 'wang_old', amount: 299, status: 'completed', pay_method: 'card', card_brand: 'MasterCard', card_last4: '4242', card_expiry: '06/29', contact_name: '王先生', address: '广州市天河区珠江新城 12 号', created_at: '2026-09-19 09:11:54' },
-  { id: 1004, order_no: 'PM-20260920-004', nickname: 'Anna', username: 'anna_eu', amount: 899, status: 'pending', contact_name: 'Anna Müller', address: 'Berlin Mitte 5', created_at: '2026-09-20 14:55:02' },
-  { id: 1005, order_no: 'PM-20260920-005', nickname: 'Tom', username: 'tom_jp', amount: 199, status: 'cancelled', contact_name: 'Tom Tanaka', address: 'Tokyo Shibuya 1-1', created_at: '2026-09-18 22:08:33' },
-  { id: 1006, order_no: 'PM-20260920-006', nickname: '小李', username: 'li_cn', amount: 1299, status: 'paid', pay_method: 'card', card_brand: 'VISA', card_last4: '0005', card_expiry: '03/30', contact_name: '李女士', address: '深圳市南山区科技园 1 路', created_at: '2026-09-20 15:32:19' },
+  { id: sid('order:PM-20260920-001'), legacy_id: 1001, order_no: 'PM-20260920-001', nickname: '小张', username: 'zhang_88', amount: 1588, status: 'paid', pay_method: 'card', card_brand: 'VISA', card_last4: '1111', card_expiry: '12/28', contact_name: '张先生', address: '上海市浦东新区世纪大道 100 号', created_at: '2026-09-20 11:23:08' },
+  { id: sid('order:PM-20260920-002'), legacy_id: 1002, order_no: 'PM-20260920-002', nickname: 'Lily', username: 'lily_us', amount: 459, status: 'shipped', pay_method: 'wallet', contact_name: 'Lily Chen', address: '北京市朝阳区建国路 88 号', created_at: '2026-09-20 13:47:21' },
+  { id: sid('order:PM-20260920-003'), legacy_id: 1003, order_no: 'PM-20260920-003', nickname: '老王', username: 'wang_old', amount: 299, status: 'completed', pay_method: 'card', card_brand: 'MasterCard', card_last4: '4242', card_expiry: '06/29', contact_name: '王先生', address: '广州市天河区珠江新城 12 号', created_at: '2026-09-19 09:11:54' },
+  { id: sid('order:PM-20260920-004'), legacy_id: 1004, order_no: 'PM-20260920-004', nickname: 'Anna', username: 'anna_eu', amount: 899, status: 'pending', contact_name: 'Anna Müller', address: 'Berlin Mitte 5', created_at: '2026-09-20 14:55:02' },
+  { id: sid('order:PM-20260920-005'), legacy_id: 1005, order_no: 'PM-20260920-005', nickname: 'Tom', username: 'tom_jp', amount: 199, status: 'cancelled', contact_name: 'Tom Tanaka', address: 'Tokyo Shibuya 1-1', created_at: '2026-09-18 22:08:33' },
+  { id: sid('order:PM-20260920-006'), legacy_id: 1006, order_no: 'PM-20260920-006', nickname: '小李', username: 'li_cn', amount: 1299, status: 'paid', pay_method: 'card', card_brand: 'VISA', card_last4: '0005', card_expiry: '03/30', contact_name: '李女士', address: '深圳市南山区科技园 1 路', created_at: '2026-09-20 15:32:19' },
 ];
 
 export const SEED_USERS: AdminUser[] = [
-  { id: 1, nickname: '小张', username: 'zhang_88', role: 'fx', referrer: '—', teamCount: 3, status: 'active', created_at: '2026-08-12', balance: 156.32, withdraw_address: 'TXyZ...a91d' },
-  { id: 2, nickname: 'Lily', username: 'lily_us', role: 'fx', referrer: 'anna_eu', teamCount: 0, status: 'active', created_at: '2026-08-30', balance: 42.00 },
-  { id: 3, nickname: '老王', username: 'wang_old', role: 'agent', referrer: '—', teamCount: 12, status: 'active', created_at: '2026-07-04', balance: 1284.50, withdraw_address: 'TLa...aA2f' },
-  { id: 4, nickname: 'Anna', username: 'anna_eu', role: 'agent', referrer: '—', teamCount: 5, status: 'active', created_at: '2026-06-21', balance: 762.10, withdraw_address: 'TAn...8Bc1' },
-  { id: 5, nickname: 'Tom', username: 'tom_jp', role: 'fx', referrer: 'anna_eu', teamCount: 1, status: 'frozen', created_at: '2026-09-01', balance: 0 },
-  { id: 6, nickname: '小李', username: 'li_cn', role: 'fx', referrer: 'wang_old', teamCount: 0, status: 'active', created_at: '2026-09-10', balance: 12.00 },
+  { id: sid('user:zhang_88'), legacy_id: 1, nickname: '小张', username: 'zhang_88', role: 'fx', referrer: '—', teamCount: 3, status: 'active', created_at: '2026-08-12', balance: 156.32, withdraw_address: 'TXyZ...a91d' },
+  { id: sid('user:lily_us'), legacy_id: 2, nickname: 'Lily', username: 'lily_us', role: 'fx', referrer: 'anna_eu', teamCount: 0, status: 'active', created_at: '2026-08-30', balance: 42.00 },
+  { id: sid('user:wang_old'), legacy_id: 3, nickname: '老王', username: 'wang_old', role: 'agent', referrer: '—', teamCount: 12, status: 'active', created_at: '2026-07-04', balance: 1284.50, withdraw_address: 'TLa...aA2f' },
+  { id: sid('user:anna_eu'), legacy_id: 4, nickname: 'Anna', username: 'anna_eu', role: 'agent', referrer: '—', teamCount: 5, status: 'active', created_at: '2026-06-21', balance: 762.10, withdraw_address: 'TAn...8Bc1' },
+  { id: sid('user:tom_jp'), legacy_id: 5, nickname: 'Tom', username: 'tom_jp', role: 'fx', referrer: 'anna_eu', teamCount: 1, status: 'frozen', created_at: '2026-09-01', balance: 0 },
+  { id: sid('user:li_cn'), legacy_id: 6, nickname: '小李', username: 'li_cn', role: 'fx', referrer: 'wang_old', teamCount: 0, status: 'active', created_at: '2026-09-10', balance: 12.00 },
 ];
 
 export const SEED_AGENTS: AdminAgent[] = [
-  { id: 3, nickname: '老王', username: 'wang_old', balance: 1284.50, own_rate: 12, sub_rate: 8, sub_rate_limit: 15, withdraw_address: 'TLa...aA2f' },
-  { id: 4, nickname: 'Anna', username: 'anna_eu', balance: 762.10, own_rate: 10, sub_rate: 5, sub_rate_limit: 12, withdraw_address: 'TAn...8Bc1' },
+  { id: sid('agent:wang_old'), nickname: '老王', username: 'wang_old', balance: 1284.50, own_rate: 12, sub_rate: 8, sub_rate_limit: 15, withdraw_address: 'TLa...aA2f' },
+  { id: sid('agent:anna_eu'), nickname: 'Anna', username: 'anna_eu', balance: 762.10, own_rate: 10, sub_rate: 5, sub_rate_limit: 12, withdraw_address: 'TAn...8Bc1' },
 ];
 
 export const SEED_INVITES: AdminInvite[] = [
@@ -311,23 +349,23 @@ export const SEED_INVITES: AdminInvite[] = [
 ];
 
 export const SEED_TICKETS: AdminTicket[] = [
-  { id: 1, order_no: 'PM-20260920-001', username: 'zhang_88', reason: '颜色与描述不符,申请换货', status: 'open', created_at: '2026-09-20 12:01:44' },
-  { id: 2, order_no: 'PM-20260918-007', username: 'lily_us', reason: '物流 3 天未更新', status: 'replied', created_at: '2026-09-19 08:30:12' },
-  { id: 3, order_no: 'PM-20260915-022', username: 'wang_old', reason: '退款 7 天未到账', status: 'closed', created_at: '2026-09-16 10:14:08' },
+  { id: sid('ticket:AS_1001'), order_no: 'PM-20260920-001', username: 'zhang_88', reason: '颜色与描述不符,申请换货', status: 'open', created_at: '2026-09-20 12:01:44' },
+  { id: sid('ticket:AS_1002'), order_no: 'PM-20260918-007', username: 'lily_us', reason: '物流 3 天未更新', status: 'replied', created_at: '2026-09-19 08:30:12' },
+  { id: sid('ticket:AS_1003'), order_no: 'PM-20260915-022', username: 'wang_old', reason: '退款 7 天未到账', status: 'closed', created_at: '2026-09-16 10:14:08' },
 ];
 
 export const SEED_COMM: AdminCommLog[] = [
-  { id: 1, username: 'zhang_88', amount: 158.80, source: 'PM-20260920-001', rate: 10, status: 'settled', created_at: '2026-09-20 11:24:00' },
-  { id: 2, username: 'lily_us', amount: 45.90, source: 'PM-20260920-002', rate: 10, status: 'settled', created_at: '2026-09-20 13:48:00' },
-  { id: 3, username: 'wang_old', amount: 153.84, source: 'PM-20260920-003', rate: 12, status: 'pending', created_at: '2026-09-19 09:12:30' },
-  { id: 4, username: 'anna_eu', amount: 89.90, source: 'PM-20260919-014', rate: 10, status: 'settled', created_at: '2026-09-19 14:00:00' },
+  { id: sid('comm:PM-20260920-001:zhang_88'), username: 'zhang_88', amount: 158.80, source: 'PM-20260920-001', rate: 10, status: 'settled', created_at: '2026-09-20 11:24:00' },
+  { id: sid('comm:PM-20260920-002:lily_us'), username: 'lily_us', amount: 45.90, source: 'PM-20260920-002', rate: 10, status: 'settled', created_at: '2026-09-20 13:48:00' },
+  { id: sid('comm:PM-20260920-003:wang_old'), username: 'wang_old', amount: 153.84, source: 'PM-20260920-003', rate: 12, status: 'pending', created_at: '2026-09-19 09:12:30' },
+  { id: sid('comm:PM-20260919-014:anna_eu'), username: 'anna_eu', amount: 89.90, source: 'PM-20260919-014', rate: 10, status: 'settled', created_at: '2026-09-19 14:00:00' },
 ];
 
 export const SEED_WD: AdminWd[] = [
-  { id: 901, username: 'zhang_88', amount: 100, fee: 2, method: 'usdt_trc20', status: 'pending', bound_address: 'TXyZ...a91d', account: 'TXyZ...a91d', created_at: '2026-09-20 12:11:30' },
-  { id: 902, username: 'wang_old', amount: 500, fee: 10, method: 'usdt_trc20', status: 'approved', bound_address: 'TLa...aA2f', account: 'TLa...aA2f', created_at: '2026-09-20 10:42:18' },
-  { id: 903, username: 'anna_eu', amount: 200, fee: 4, method: 'card', status: 'paid', created_at: '2026-09-18 15:08:22' },
-  { id: 904, username: 'lily_us', amount: 40, fee: 1, method: 'usdt_trc20', status: 'rejected', reject_reason: '余额不足', created_at: '2026-09-17 09:30:00' },
+  { id: sid('wd:901'), username: 'zhang_88', amount: 100, fee: 2, method: 'usdt_trc20', status: 'pending', bound_address: 'TXyZ...a91d', account: 'TXyZ...a91d', created_at: '2026-09-20 12:11:30' },
+  { id: sid('wd:902'), username: 'wang_old', amount: 500, fee: 10, method: 'usdt_trc20', status: 'approved', bound_address: 'TLa...aA2f', account: 'TLa...aA2f', created_at: '2026-09-20 10:42:18' },
+  { id: sid('wd:903'), username: 'anna_eu', amount: 200, fee: 4, method: 'card', status: 'paid', created_at: '2026-09-18 15:08:22' },
+  { id: sid('wd:904'), username: 'lily_us', amount: 40, fee: 1, method: 'usdt_trc20', status: 'rejected', reject_reason: '余额不足', created_at: '2026-09-17 09:30:00' },
 ];
 
 export const DEFAULT_RULES: AdminRules = {

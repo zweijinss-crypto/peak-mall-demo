@@ -5,12 +5,15 @@
  * jsonb) and maps to AdminProduct. Falls back to adminStore.products
  * when Supabase isn't configured.
  *
- * Note: name/category/description are jsonb in DB ({ zh, en }) — we
- * pull the zh variant for display in the admin console.
+ * Phase 1.1.9 — public.products.id stays bigserial (number) for cheap
+ * indexing; AdminProduct.id is a deterministic uuid derived via
+ * seedUuid('product:' + legacyId). The `legacy_id` field carries the
+ * numeric form so we can do real .eq('id', legacy_id) updates.
  */
 
 import { getSupabase } from './supabase-client';
-import { adminStore, type AdminProduct } from '../admin/fixtures';
+import { adminStore, type AdminProduct, type AdminId } from '../admin/fixtures';
+import { seedUuid } from '../admin/uuid';
 
 interface RemoteProduct {
   id: number;
@@ -33,7 +36,8 @@ interface RemoteProduct {
 function mapJoined(r: RemoteProduct): AdminProduct {
   const name = r.name?.zh ?? r.name?.en ?? `Product ${r.id}`;
   return {
-    id: r.id,
+    id: seedUuid(`product:${r.id}`),
+    legacy_id: r.id,
     name,
     sku: r.seo_slug ?? `SKU-${r.id}`,
     category: r.category?.zh ?? r.category?.en ?? '—',
@@ -73,7 +77,7 @@ export async function fetchAllProducts(): Promise<AdminProduct[] | null> {
 
 /** Update product stock (admin restock). */
 export async function setProductStock(
-  id: number,
+  id: AdminId,
   stock: number,
 ): Promise<boolean> {
   const all = adminStore.products.read();
@@ -84,10 +88,13 @@ export async function setProductStock(
 
   const sb = getSupabase();
   if (!sb) return true;
+  const product = all.find((p) => p.id === id);
+  const numericId = product?.legacy_id;
+  if (numericId == null) return true;
   const { error } = await sb
     .from('products')
     .update({ stock, updated_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', numericId);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-products-api] setProductStock:', error);
@@ -98,7 +105,7 @@ export async function setProductStock(
 
 /** Toggle product active/archived. */
 export async function setProductStatus(
-  id: number,
+  id: AdminId,
   active: boolean,
 ): Promise<boolean> {
   const all = adminStore.products.read();
@@ -109,10 +116,13 @@ export async function setProductStatus(
 
   const sb = getSupabase();
   if (!sb) return true;
+  const product = all.find((p) => p.id === id);
+  const numericId = product?.legacy_id;
+  if (numericId == null) return true;
   const { error } = await sb
     .from('products')
     .update({ status: active ? 1 : 0, updated_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq('id', numericId);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-products-api] setProductStatus:', error);

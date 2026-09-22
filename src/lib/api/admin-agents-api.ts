@@ -1,17 +1,11 @@
 /**
  * admin-agents-api — admin agent rate config (Phase 1.1.8).
  *
- * Persists agent commission rates to public.users metadata (jsonb
- * `agent_config` column added in migration 0011). Falls back to
- * adminStore.agents (localStorage) when Supabase isn't configured.
- *
- * Schema assumption — migration 0011 adds:
- *   alter table public.users add column if not exists agent_config jsonb;
- *   with shape: { own_rate, sub_rate, sub_rate_limit }
+ * Phase 1.1.9 — id is now the Supabase uuid (was: numeric hash).
  */
 
 import { getSupabase } from './supabase-client';
-import { adminStore, type AdminAgent } from '../admin/fixtures';
+import { adminStore, type AdminAgent, type AdminId } from '../admin/fixtures';
 
 interface AgentConfig {
   own_rate: number;
@@ -40,10 +34,10 @@ export async function fetchAllAgents(): Promise<AdminAgent[] | null> {
     nickname: string | null;
     role: string;
     agent_config: AgentConfig | null;
-  }>).map((r, i) => {
+  }>).map((r) => {
     const cfg = r.agent_config ?? { own_rate: 10, sub_rate: 5, sub_rate_limit: 10 };
     return {
-      id: hashId(r.id, i),
+      id: r.id,
       nickname: r.nickname ?? r.email.split('@')[0],
       username: r.email.split('@')[0],
       balance: 0,
@@ -58,12 +52,12 @@ export async function fetchAllAgents(): Promise<AdminAgent[] | null> {
 
 /** Persist agent commission rates. */
 export async function setAgentRates(
-  numericId: number,
+  id: AdminId,
   rates: AgentConfig,
 ): Promise<boolean> {
   const all = adminStore.agents.read();
   const next = all.map((a) =>
-    a.id === numericId
+    a.id === id
       ? { ...a, own_rate: rates.own_rate, sub_rate: rates.sub_rate, sub_rate_limit: rates.sub_rate_limit }
       : a,
   );
@@ -71,24 +65,14 @@ export async function setAgentRates(
 
   const sb = getSupabase();
   if (!sb) return true;
-  const agent = all.find((a) => a.id === numericId);
-  const uuid = agent?.uuid;
-  if (!uuid) return true;
   const { error } = await sb
     .from('users')
     .update({ agent_config: rates, updated_at: new Date().toISOString() })
-    .eq('id', uuid);
+    .eq('id', id);
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-agents-api] setAgentRates:', error);
     return false;
   }
   return true;
-}
-
-function hashId(uuid: string, fallback: number): number {
-  let x = 5381 ^ uuid.charCodeAt(0);
-  for (let i = 0; i < uuid.length; i++) x = ((x << 5) + x) ^ uuid.charCodeAt(i);
-  x = ((x << 5) + x) ^ (fallback & 0xffff);
-  return x >>> 0;
 }

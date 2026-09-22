@@ -51,13 +51,13 @@ function validate(d: DraftRow, t: any): string | null {
 export function AgentsClient() {
   const t = useT();
   const [agents, setAgents, mounted] = useAdminStore('agents');
-  const [drafts, setDrafts] = useState<Record<number, DraftRow>>({});
-  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
-  const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [errorFor, setErrorFor] = useState<{ id: number; msg: string } | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, DraftRow>>({});
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [errorFor, setErrorFor] = useState<{ id: string; msg: string } | null>(null);
 
   // Undo toast state.
-  const [undo, setUndo] = useState<{ id: number; prev: any; timer: number } | null>(null);
+  const [undo, setUndo] = useState<{ id: string; prev: any; timer: number } | null>(null);
   const undoTimerRef = useRef<number | null>(null);
   const [undone, setUndone] = useState(false);
   const undoneTimerRef = useRef<number | null>(null);
@@ -71,7 +71,7 @@ export function AgentsClient() {
   useEffect(() => {
     if (!mounted) return;
     setDrafts((prev) => {
-      const next: Record<number, DraftRow> = {};
+      const next: Record<string, DraftRow> = {};
       for (const a of agents as any[]) {
         next[a.id] = prev[a.id] ?? draftFromAgent(a);
       }
@@ -79,12 +79,12 @@ export function AgentsClient() {
     });
   }, [mounted, agents]);
 
-  const setDraft = useCallback((id: number, field: keyof DraftRow, value: string) => {
+  const setDraft = useCallback((id: string, field: keyof DraftRow, value: string) => {
     setDrafts((prev) => ({ ...prev, [id]: { ...(prev[id] ?? EMPTY_DRAFT), [field]: value } }));
     if (errorFor?.id === id) setErrorFor(null);
   }, [errorFor]);
 
-  const save = useCallback((id: number) => {
+  const save = useCallback((id: string) => {
     const a = (agents as any[]).find((x) => x.id === id);
     if (!a) return;
     const draft = drafts[id];
@@ -152,7 +152,7 @@ export function AgentsClient() {
     undoneTimerRef.current = window.setTimeout(() => setUndone(false), 2500);
   }, [undo, agents, setAgents]);
 
-  const copyAddress = useCallback(async (id: number, addr: string) => {
+  const copyAddress = useCallback(async (id: string, addr: string) => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(addr);

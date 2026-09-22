@@ -84,14 +84,14 @@ export function OrdersClient() {
   }, [mounted]);
 
   const [tab, setTab] = useState<Tab>('all');
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // Modal state — one at a time.
-  const [detailId, setDetailId] = useState<number | null>(null);
-  const [cancellingIds, setCancellingIds] = useState<number[] | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [cancellingIds, setCancellingIds] = useState<string[] | null>(null);
   const [cancelReason, setCancelReason] = useState('');
-  const [refundingId, setRefundingId] = useState<number | null>(null);
-  const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [deletingIds, setDeletingIds] = useState<string[] | null>(null);
 
   // Phase 2.4 — refund dialog state (amount + reason)
   const [refundAmount, setRefundAmount] = useState<string>('');
@@ -100,7 +100,7 @@ export function OrdersClient() {
   const [refundErr, setRefundErr] = useState<string | null>(null);
 
   // Phase 2.2 — shipping dialog state
-  const [shippingOrderId, setShippingOrderId] = useState<number | null>(null);
+  const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
   const [shipCarrier, setShipCarrier] = useState<string>('USPS');
   const [shipTrackingNo, setShipTrackingNo] = useState<string>('');
   const [shippingBusy, setShippingBusy] = useState(false);
@@ -129,7 +129,7 @@ export function OrdersClient() {
   const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
   const someSelected = visibleIds.some((id) => selected.has(id)) && !allSelected;
 
-  const toggleOne = (id: number) => {
+  const toggleOne = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -164,14 +164,14 @@ export function OrdersClient() {
   const detailOrder = detailId !== null ? orders.find((o: any) => o.id === detailId) ?? null : null;
   const refundingOrder = refundingId !== null ? orders.find((o: any) => o.id === refundingId) ?? null : null;
 
-  const setStatus = (id: number, status: OrderStatus, extra: Record<string, any> = {}) => {
+  const setStatus = (id: string, status: OrderStatus, extra: Record<string, any> = {}) => {
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     setOrders(
       orders.map((o: any) => (o.id === id ? { ...o, status, ...extra, updated_at: now } : o)),
     );
   };
 
-  const requestCancel = (ids: number[]) => {
+  const requestCancel = (ids: string[]) => {
     setCancellingIds(ids);
     setCancelReason('');
   };
@@ -336,7 +336,7 @@ export function OrdersClient() {
     setDetailId(null);
   };
 
-  const requestDelete = (ids: number[]) => setDeletingIds(ids);
+  const requestDelete = (ids: string[]) => setDeletingIds(ids);
   const confirmDelete = () => {
     if (!deletingIds) return;
     const idSet = new Set(deletingIds);

@@ -51,12 +51,12 @@ export function TicketsClient() {
 
   if (!mounted) return <div className="text-neutral-500 text-[13px]">Loading…</div>;
 
-  const reply = async (id: number) => {
+  const reply = async (id: string) => {
     const next = tickets.map((x) => (x.id === id ? { ...x, status: 'replied' as const } : x));
     setTickets(next);
     await setTicketStatus(id, 'replied');
   };
-  const close = async (id: number) => {
+  const close = async (id: string) => {
     const next = tickets.map((x) => (x.id === id ? { ...x, status: 'closed' as const } : x));
     setTickets(next);
     await setTicketStatus(id, 'closed');

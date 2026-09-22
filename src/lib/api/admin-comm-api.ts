@@ -1,14 +1,13 @@
 /**
  * admin-comm-api — admin commission ledger (Phase 1.1.8).
  *
- * Reads public.commissions + users joined. Falls back to
- * adminStore.comm when Supabase isn't configured.
+ * Phase 1.1.9 — id is now the Supabase uuid (was: numeric hash).
  */
 
 import { getSupabase } from './supabase-client';
 import { adminStore, type AdminCommLog } from '../admin/fixtures';
 
-interface RemoteComm {
+interface JoinedComm {
   id: string;
   user_id: string;
   order_no: string;
@@ -16,15 +15,12 @@ interface RemoteComm {
   rate: number;
   status: 'settled' | 'pending';
   created_at: string;
-}
-
-interface JoinedComm extends RemoteComm {
   users: { nickname: string | null; email: string } | null;
 }
 
-function mapJoined(r: JoinedComm, i: number): AdminCommLog {
+function mapJoined(r: JoinedComm): AdminCommLog {
   return {
-    id: hashId(r.id, i),
+    id: r.id,
     username: r.users?.email?.split('@')[0] ?? r.user_id.slice(0, 8),
     amount: Number(r.amount),
     source: r.order_no,
@@ -52,12 +48,5 @@ export async function fetchAllComm(): Promise<AdminCommLog[] | null> {
     console.error('[admin-comm-api] fetchAllComm:', error);
     return null;
   }
-  return ((data ?? []) as unknown as JoinedComm[]).map(mapJoined);
-}
-
-function hashId(uuid: string, fallback: number): number {
-  let x = 5381 ^ uuid.charCodeAt(0);
-  for (let i = 0; i < uuid.length; i++) x = ((x << 5) + x) ^ uuid.charCodeAt(i);
-  x = ((x << 5) + x) ^ (fallback & 0xffff);
-  return x >>> 0;
+  return ((data ?? []) as unknown as JoinedComm[]).map((r) => mapJoined(r));
 }

@@ -10,6 +10,7 @@ import { Modal } from '@/components/admin/Modal';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, orderStatusLabel } from '@/lib/admin/fixtures';
 import { fetchAllUsers, isSupabaseConfigured } from '@/lib/api';
+import { newUuid } from '@/lib/admin/uuid';
 
 const STATUS_KIND: Record<'active' | 'frozen', StatusKind> = {
   active: 'active',
@@ -52,9 +53,9 @@ export function UsersClient() {
   }, [mounted, setUsers]);
   const [orders] = useAdminStore('orders');
 
-  const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [detailId, setDetailId] = useState<number | null>(null);
-  const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [deletingIds, setDeletingIds] = useState<string[] | null>(null);
 
   // Toast — single-flight 3s auto-dismiss; aligns with wd / agents pattern.
   const [toast, setToast] = useState<{ kind: 'success' | 'info' | 'danger'; text: string } | null>(null);
@@ -76,7 +77,7 @@ export function UsersClient() {
   const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
   const someSelected = visibleIds.some((id) => selected.has(id)) && !allSelected;
 
-  const toggleOne = (id: number) => {
+  const toggleOne = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -101,7 +102,7 @@ export function UsersClient() {
   };
   const clearSelection = () => setSelected(new Set());
 
-  const setStatus = (ids: number[], status: 'active' | 'frozen') => {
+  const setStatus = (ids: string[], status: 'active' | 'frozen') => {
     const idSet = new Set(ids);
     const n = ids.length;
     setUsers(users.map((u: any) => (idSet.has(u.id) ? { ...u, status } : u)));
@@ -113,12 +114,12 @@ export function UsersClient() {
     );
   };
 
-  const setRole = (id: number, role: 'fx' | 'agent') => {
+  const setRole = (id: string, role: 'fx' | 'agent') => {
     setUsers(users.map((u: any) => (u.id === id ? { ...u, role } : u)));
     showToast('info', t.admin.users.roleChangedToast);
   };
 
-  const requestDelete = (ids: number[]) => setDeletingIds(ids);
+  const requestDelete = (ids: string[]) => setDeletingIds(ids);
   const confirmDelete = () => {
     if (!deletingIds) return;
     const n = deletingIds.length;
@@ -134,14 +135,14 @@ export function UsersClient() {
   };
 
   const add = () => {
-    const id = users.length === 0 ? 1 : Math.max(...users.map((u: any) => u.id)) + 1;
+    const id = newUuid();
     const today = new Date().toISOString().slice(0, 10);
     setUsers([
       ...users,
       {
         id,
         nickname: '新用户',
-        username: `user_${id}`,
+        username: `user_${id.slice(0, 8)}`,
         role: 'fx',
         referrer: '—',
         teamCount: 0,
