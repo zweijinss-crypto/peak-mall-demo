@@ -185,3 +185,50 @@ export async function verifyAdmin(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Phase 3.2 — admin TOTP status. Returns whether the caller has
+ * enabled 2FA and when they last did a fresh verification. AdminGate
+ * uses this to require re-verify every MFA_REFRESH_MINUTES.
+ */
+export interface AdminMfaStatus {
+  totpEnabled: boolean;
+  /** ISO timestamp of the last successful verify, or null. */
+  verifiedAt: string | null;
+  /** True when the last verify is older than MFA_REFRESH_MINUTES. */
+  needsReverify: boolean;
+}
+
+export const MFA_REFRESH_MINUTES = 30;
+
+export async function getAdminMfaStatus(): Promise<AdminMfaStatus> {
+  const fallback = { totpEnabled: false, verifiedAt: null, needsReverify: false };
+  const supabase = getSupabase();
+  if (!supabase) return fallback;
+  try {
+    const sessionResult = supabase.auth.getSession() as unknown as {
+      data: { session: { user?: { id?: string } } | null };
+    };
+    const uid = sessionResult.data.session?.user?.id;
+    if (!uid) return fallback;
+    const { data } = await supabase
+      .from('users')
+      .select('totp_enabled, totp_verified_at')
+      .eq('id', uid)
+      .maybeSingle();
+    const row = data as { totp_enabled?: boolean; totp_verified_at?: string | null } | null;
+    const enabled = Boolean(row?.totp_enabled);
+    const verifiedAt = row?.totp_verified_at ?? null;
+    let needsReverify = false;
+    if (enabled && verifiedAt) {
+      const ageMs = Date.now() - new Date(verifiedAt).getTime();
+      needsReverify = ageMs > MFA_REFRESH_MINUTES * 60 * 1000;
+    } else if (enabled) {
+      // enabled but never verified — treat as needs verify
+      needsReverify = true;
+    }
+    return { totpEnabled: enabled, verifiedAt, needsReverify };
+  } catch {
+    return fallback;
+  }
+}

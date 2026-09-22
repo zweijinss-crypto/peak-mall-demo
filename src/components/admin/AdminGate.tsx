@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { isAuthed, logout, verifyAdmin } from '@/lib/admin/auth';
+import { isAuthed, logout, verifyAdmin, getAdminMfaStatus } from '@/lib/admin/auth';
 
 /**
  * AdminGate — client-side guard for every /admin/* page.
@@ -30,12 +30,21 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     void (async () => {
       const verified = await verifyAdmin();
       if (cancelled) return;
-      if (verified) {
-        setOk(true);
-      } else {
+      if (!verified) {
         await logout();
         router.replace('/admin/login?reason=not_admin');
+        return;
       }
+      // Phase 3.2 — 2FA gate. If the admin has TOTP enabled and
+      // either hasn't verified yet or the last verify is older than
+      // MFA_REFRESH_MINUTES, bounce them to /admin/mfa.
+      const mfa = await getAdminMfaStatus();
+      if (cancelled) return;
+      if (mfa.totpEnabled && mfa.needsReverify) {
+        router.replace('/admin/mfa');
+        return;
+      }
+      setOk(true);
     })();
     return () => {
       cancelled = true;

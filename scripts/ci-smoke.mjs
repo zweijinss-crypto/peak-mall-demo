@@ -101,6 +101,7 @@ const ROUTES = [
   '/cart',
   '/shop/49',
   '/admin/dashboard/',
+  '/admin/mfa/',
   '/en/',
   '/en/login',
   '/en/cart',
@@ -149,11 +150,18 @@ async function main() {
         await ctx.close();
         continue;
       }
-      // Hydration window — Next dev/runtime may surface late errors
+      // Heading detection: accept an <h1>-<h3> in either the SSR
+      // response OR the live DOM after hydration. Some routes defer
+      // headings to client components (/admin/dashboard wraps the
+      // page in AdminGate's suspense placeholder); others drop the
+      // SSR heading on hydration redirect (/admin/mfa → /admin/login).
+      // Counting either side avoids both false negatives.
+      const ssrHtml = await resp.text();
+      const ssrHeadings = (ssrHtml.match(/<h[1-3][\s>]/g) ?? []).length;
       await page.waitForTimeout(800);
-      const h1Count = await page.locator('h1').count();
-      if (h1Count === 0) {
-        fail(`${route}: no <h1> rendered`);
+      const liveHeadings = await page.locator('h1, h2, h3').count();
+      if (ssrHeadings === 0 && liveHeadings === 0) {
+        fail(`${route}: no heading (h1-h3) in SSR HTML or live DOM`);
         fail_count++;
         await ctx.close();
         continue;
@@ -172,7 +180,7 @@ async function main() {
         await ctx.close();
         continue;
       }
-      console.log(`✓ ${route} (h1=${h1Count}, console clean)`);
+      console.log(`✓ ${route} (ssr h=${ssrHeadings}, live h=${liveHeadings}, console clean)`);
       pass++;
     } catch (err) {
       fail(`${route}: ${err.message}`);
