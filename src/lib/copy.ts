@@ -1147,6 +1147,10 @@ export const COPY = {
     auditColAction: '动作',
     auditColResource: '资源',
     auditColDiff: '变更',
+    // Phase 1.1.8 — admin data source indicator
+    fromRemote: '已同步 Supabase',
+    fromLocal: '本地缓存',
+    syncing: '同步中…',
     groupOverview: '总览',
     groupMall: '商城管理',
     groupDistribute: '分销管理',

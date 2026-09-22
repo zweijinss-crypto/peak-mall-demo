@@ -101,6 +101,9 @@ export interface AdminTicket {
   reason: string;
   status: 'open' | 'replied' | 'closed';
   created_at: string;
+  /** Phase 1.1.8 — Supabase after_sales uuid, set when the row comes
+   * from the DB; undefined for localStorage-only seed rows. */
+  uuid?: string;
 }
 
 export interface AdminCommLog {
