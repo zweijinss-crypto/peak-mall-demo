@@ -31,14 +31,24 @@ export const metadata: Metadata = {
     description:
       'Static e-commerce demo — 16 SKUs across categories, bilingual zh + en.',
     locale: 'zh_CN',
-    alternateLocale: 'en_US',
+    alternateLocale: ['en_US', 'ja_JP', 'ko_KR'],
     url: 'https://peak-mall-demo.netlify.app',
+    // Phase 3.8.2 — 1200x630 social preview card (PNG for broad support)
+    images: [
+      {
+        url: '/og/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Peak Mall — 16 SKUs bilingual demo',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Peak Mall Demo',
     description:
       'Static e-commerce demo — 16 SKUs across categories, bilingual zh + en.',
+    images: ['/og/twitter-card.png'],
   },
   robots: {
     index: true,
