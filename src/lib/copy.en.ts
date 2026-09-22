@@ -1606,4 +1606,20 @@ export const COPY_EN = {
     commDetail: 'Commissions',
     teamMgmt: 'Team',
   },
+  // Phase 3.3.2 — status page
+  status: {
+    title: 'System status',
+    subtitle: 'Live health probe · refreshes every 30s',
+    probeError: 'Cannot reach status service',
+    loading: 'Checking…',
+    allOk: 'All systems operational',
+    someIssues: 'Some services are degraded — features may be limited',
+    ok: 'OK',
+    down: 'DOWN',
+    colService: 'Service',
+    colStatus: 'Status',
+    colLatency: 'Latency',
+    colDetail: 'Detail',
+    lastCheck: 'Last checked',
+  },
 } as const;

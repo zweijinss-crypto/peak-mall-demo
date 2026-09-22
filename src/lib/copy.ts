@@ -1582,4 +1582,20 @@ export const COPY = {
     commDetail: '佣金明细',
     teamMgmt: '团队管理',
   },
+  // Phase 3.3.2 — status page
+  status: {
+    title: '服务状态',
+    subtitle: '实时健康检查 · 每 30 秒刷新',
+    probeError: '无法连接到状态服务',
+    loading: '检查中…',
+    allOk: '所有服务正常',
+    someIssues: '部分服务异常,功能可能受限',
+    ok: 'OK',
+    down: '异常',
+    colService: '服务',
+    colStatus: '状态',
+    colLatency: '延迟',
+    colDetail: '详情',
+    lastCheck: '最后检查',
+  },
 } as const;
