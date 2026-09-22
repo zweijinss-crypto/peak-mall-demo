@@ -18,7 +18,8 @@ export type AdminKey =
   | 'wd'
   | 'wdCenter'
   | 'home'
-  | 'support';
+  | 'support'
+  | 'audit';
 
 export interface AdminItem {
   key: AdminKey;
@@ -71,6 +72,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
     items: [
       { key: 'home', href: '/admin/home', icon: '🏠' },
       { key: 'support', href: '/admin/support', icon: '🎧' },
+      { key: 'audit', href: '/admin/audit', icon: '📜' },
     ],
   },
 ];

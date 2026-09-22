@@ -54,6 +54,7 @@ export const PERMISSIONS: Record<AdminRole, Partial<Record<AdminResource, AdminA
     support_cfg: ['read', 'update'],
     audit_log:   ['read'],
   },
+  // ops/cs/finance: audit_log.read NOT granted — only super_admin.
   ops: {
     products: ['read', 'create', 'update'],
     orders:   ['read', 'update'],
@@ -162,6 +163,7 @@ export async function getMyAdminRoles(): Promise<AdminRole[]> {
  *   - /admin/wd-center → wd (operator view of pending withdrawals)
  *   - /admin/home      → home_cfg
  *   - /admin/support   → support_cfg
+ *   - /admin/audit     → audit_log (super_admin only)
  */
 export const ROUTE_RESOURCE: Record<string, AdminResource> = {
   '/admin/dashboard':  'orders',   // any admin can see the dashboard
@@ -177,6 +179,7 @@ export const ROUTE_RESOURCE: Record<string, AdminResource> = {
   '/admin/wd-center':  'wd',
   '/admin/home':       'home_cfg',
   '/admin/support':    'support_cfg',
+  '/admin/audit':      'audit_log',
 };
 
 /**

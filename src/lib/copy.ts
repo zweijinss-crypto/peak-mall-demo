@@ -1136,6 +1136,17 @@ export const COPY = {
     roleCs: '客服',
     roleFinance: '财务',
     roleBadgeTitle: '当前角色',
+    // Phase 3.7.2 — audit log page
+    auditTitle: '操作日志',
+    auditSubtitle: '最近 100 条 admin 操作记录。仅 super_admin 可见。',
+    auditFilterResource: '按资源过滤 (orders/products/...)',
+    auditFilterActor: '按操作者邮箱过滤',
+    auditEmpty: '还没有操作记录。',
+    auditColTime: '时间',
+    auditColActor: '操作者',
+    auditColAction: '动作',
+    auditColResource: '资源',
+    auditColDiff: '变更',
     groupOverview: '总览',
     groupMall: '商城管理',
     groupDistribute: '分销管理',
@@ -1539,6 +1550,9 @@ export const COPY = {
       phHours: '13:00 - 23:30',
       hintUrl: '填写完整链接，例如 https://t.me/MementoCare',
       hintHours: '留空则客服卡片不显示在线时间',
+    },
+    audit: {
+      title: '操作日志',
     },
     demo: {
       title: '模拟下单',

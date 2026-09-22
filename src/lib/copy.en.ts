@@ -1161,6 +1161,17 @@ export const COPY_EN = {
     roleCs: 'Customer support',
     roleFinance: 'Finance',
     roleBadgeTitle: 'Current role',
+    // Phase 3.7.2 — audit log page
+    auditTitle: 'Audit log',
+    auditSubtitle: 'Last 100 admin actions. Super admin only.',
+    auditFilterResource: 'Filter by resource (orders/products/...)',
+    auditFilterActor: 'Filter by actor email',
+    auditEmpty: 'No audit entries yet.',
+    auditColTime: 'Time',
+    auditColActor: 'Actor',
+    auditColAction: 'Action',
+    auditColResource: 'Resource',
+    auditColDiff: 'Change',
     groupOverview: 'Overview',
     groupMall: 'Mall',
     groupDistribute: 'Distribution',
@@ -1563,6 +1574,9 @@ export const COPY_EN = {
       phHours: '13:00 - 23:30',
       hintUrl: 'Full URL, e.g. https://t.me/MementoCare',
       hintHours: 'Leave empty to hide the hours line',
+    },
+    audit: {
+      title: 'Audit log',
     },
     demo: {
       title: 'Demo order',

@@ -236,6 +236,47 @@ export const handler: Handler = async (event) => {
     });
   }
 
+  // ---------- Audit log (Phase 3.7.2) ----------
+  // Best-effort: log_admin_action is SECURITY DEFINER so it runs
+  // with the service_role context. If actor_id can't be resolved
+  // (e.g. dev tool call), we still log — the actor_id will be null.
+  const actorId =
+    (event.headers['x-admin-user-id'] as string | undefined) ?? null;
+  const actorEmail =
+    (event.headers['x-admin-email'] as string | undefined) ?? null;
+  try {
+    const { error: auditErr } = await supabase.rpc('log_admin_action', {
+      p_action: 'order.refund',
+      p_resource: 'orders',
+      p_resource_id: order.order_no ?? order.id,
+      p_before: { refund_amount: alreadyRefunded, status: order.status },
+      p_after: {
+        refund_amount: alreadyRefunded + body.amount,
+        stripe_refund_id: refund.id,
+        audit_id: auditRow.id,
+      },
+      p_metadata: {
+        amount: body.amount,
+        currency: order.currency,
+        reason: body.reason ?? null,
+        note: body.note ?? null,
+        actor_id: actorId,
+        actor_email: actorEmail,
+      },
+    });
+    if (auditErr) {
+      logger.warn('stripe-refund: audit_log insert failed', {
+        error: String(auditErr),
+        orderId: order.id,
+      });
+    }
+  } catch (err) {
+    logger.warn('stripe-refund: audit_log call crashed', {
+      error: String(err),
+      orderId: order.id,
+    });
+  }
+
   // ---------- Email (best-effort) ----------
   try {
     const { data: buyer } = await supabase
