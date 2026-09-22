@@ -40,3 +40,6 @@ test-results/
 .tsplaywright/
 # Local Netlify folder
 .netlify
+
+# Daily memory / heartbeat state — personal to the workspace
+memory/
