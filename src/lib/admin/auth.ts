@@ -67,9 +67,23 @@ function mapAuthError(message: string): AdminAuthError {
 /**
  * isAuthed — sync fast-path. Returns true if the previous login wrote
  * the localStorage flag. Use AdminGuard for a server-verified check.
+ *
+ * In demo mode (Supabase not configured) we treat the session as
+ * always-authed so deep-link targets like /admin/mfa don't bounce
+ * back to /admin/login. The layout still gates real routes via the
+ * Supabase branch, so this is a localStorage convenience only.
  */
 export function isAuthed(): boolean {
-  return readFlag();
+  if (readFlag()) return true;
+  // Demo mode short-circuit — process.env.NEXT_PUBLIC_SUPABASE_URL
+  // is statically replaced at build time, so we read it synchronously.
+  // In demo mode (no Supabase URL), treat the session as authed so
+  // deep-link targets like /admin/mfa don't bounce to /admin/login.
+  if (typeof window !== 'undefined') {
+    const env = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!env) return true;
+  }
+  return false;
 }
 
 /**

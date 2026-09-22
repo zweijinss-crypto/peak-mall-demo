@@ -38,6 +38,12 @@ export default function MfaPage() {
       router.replace('/admin/login');
       return;
     }
+    // Demo mode (no Supabase env) — 2FA enrollment isn't available
+    // without a real backend. Send the user to the dashboard.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      router.replace('/admin/dashboard');
+      return;
+    }
     const u = getCurrentUser();
     if (u?.email) setEmail(u.email);
   }, [router]);

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ADMIN_GROUPS, type AdminKey } from '@/lib/admin/sidebar';
 import { useT } from '@/lib/use-t';
 import { logout } from '@/lib/admin/auth';
+import { isSupabaseConfigured } from '@/lib/api';
 
 /**
  * AdminShell — shared layout chrome for every /admin/* page.
@@ -114,6 +115,22 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
 
       {/* Main content area */}
       <main className="flex-1 p-4 md:p-6 min-w-0">
+        {/* Demo-mode banner — shown only when Supabase isn't configured.
+            Makes the dev state unmistakable so it never ships to a real
+            user by accident. */}
+        {!isSupabaseConfigured() && (
+          <div
+            role="note"
+            className="mb-4 px-4 py-2.5 rounded-md bg-rose-50 border border-rose-300 text-rose-800 text-[12.5px] flex items-center gap-2 flex-wrap"
+          >
+            <span aria-hidden="true">⚠️</span>
+            <span className="font-semibold">Demo mode</span>
+            <span className="text-rose-700">
+              {' '}— Supabase not configured. Data lives in your browser&apos;s localStorage only.
+              Switch back to required sign-in by adding <code className="px-1 py-0.5 bg-rose-100 rounded font-mono text-[11.5px]">NEXT_PUBLIC_SUPABASE_URL</code> + <code className="px-1 py-0.5 bg-rose-100 rounded font-mono text-[11.5px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to <code className="px-1 py-0.5 bg-rose-100 rounded font-mono text-[11.5px]">.env.local</code>.
+            </span>
+          </div>
+        )}
         {/* Topbar — slim: only meta + reset/back. Logout moved to sidebar footer. */}
         <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
           <div className="flex items-center gap-3 text-[12px] text-neutral-500">

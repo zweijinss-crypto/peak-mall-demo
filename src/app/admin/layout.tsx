@@ -71,30 +71,22 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     void (async () => {
       const supabase = getSupabase();
 
-      // No Supabase configured → static demo mode. Opt in via the
-      // ?demo=1 query string so the gate card doesn't block the demo
-      // UX (anyone can hit /admin/products?demo=1 and see the page).
-      // Without that opt-in, treat as denied and require sign-in via
-      // a real Supabase project.
-      const hasDemoHint =
-        typeof window !== 'undefined' &&
-        new URLSearchParams(window.location.search).get('demo') === '1';
+      // No Supabase configured → static demo mode. Default-on while
+      // we're still wiring up auth: any /admin/* page opens without a
+      // sign-in step so reviewers can poke around. A red "Demo mode"
+      // banner sits at the top of AdminShell to make the dev state
+      // unmistakable. Switch to require sign-in once Supabase env is
+      // set (see .env.example).
       if (!supabase) {
-        if (!isSupabaseConfigured() && hasDemoHint) {
-          if (!cancelled) {
-            setState({
-              kind: 'ok',
-              role: {
-                email: 'demo@local',
-                nickname: 'Demo',
-                roles: ['super_admin'],
-              },
-            });
-          }
-          return;
-        }
         if (!cancelled) {
-          setState({ kind: 'denied', reason: 'no_session' });
+          setState({
+            kind: 'ok',
+            role: {
+              email: 'demo@local',
+              nickname: 'Demo',
+              roles: ['super_admin'],
+            },
+          });
         }
         return;
       }

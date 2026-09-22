@@ -3,23 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthed, logout, verifyAdmin, getAdminMfaStatus } from '@/lib/admin/auth';
-import { getSupabase } from '@/lib/api/supabase-client';
+import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
 import { useT } from '@/lib/use-t';
 
 /**
  * AdminGate — client-side guard for every /admin/* page.
  *
- * 1. Sync fast-path: if localStorage flag is missing AND there's no
- *    Supabase session, hand off to /admin/layout (which renders the
- *    richer gate card with a sign-in link). This avoids the case
- *    where AdminGate redirects before the layout can show its UI.
- * 2. On mount, verifyAdmin() re-checks public.users.role === 'admin'
- *    against Supabase to catch stale flags after a server-side role
- *    downgrade. If role isn't admin → logout + redirect to /admin/login
- *    with `?reason=not_admin`.
+ * Demo mode (no Supabase env): opens immediately, no auth check.
+ * isAuthed() also returns true in demo mode (see auth.ts), so the
+ * flag check below would otherwise run verifyAdmin() which calls
+ * Supabase and fails — we skip that whole branch.
  *
- * Renders a lightweight placeholder during the check to avoid flashing
- * the admin chrome before the redirect.
+ * Production mode:
+ * 1. No localStorage flag + no Supabase session → let /admin/layout
+ *    render the gate card (its single source of truth for "sign in").
+ * 2. LocalStorage flag set → verifyAdmin() against Supabase to
+ *    catch stale flags after a server-side role downgrade. Failure
+ *    → logout + redirect to /admin/login?reason=not_admin.
+ * 3. Phase 3.2 — if TOTP enabled and stale, bounce to /admin/mfa.
  */
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,9 +29,16 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // Demo mode short-circuit: open immediately, no async work.
+    if (!isSupabaseConfigured()) {
+      setOk(true);
+      return () => {
+        cancelled = true;
+      };
+    }
     if (!isAuthed()) {
       // No local flag AND no Supabase session? Let /admin/layout
-      // render its gate card with the sign-in link. The layout is the
+      // render its gate card with a sign-in link. The layout is the
       // single source of truth for "you need to sign in" UI now.
       void (async () => {
         const supabase = getSupabase();

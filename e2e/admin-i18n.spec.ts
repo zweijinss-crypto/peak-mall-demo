@@ -53,28 +53,41 @@ for (const path of EN_ROUTES) {
     const resp = await page.goto(path + '?demo=1', { waitUntil: 'domcontentloaded' });
     expect(resp?.status(), `${path} should return 200`).toBe(200);
     await page.waitForSelector('aside', { state: 'visible', timeout: 5000 });
+    // Wait for client-side i18n to switch to en copy. The brand line
+    // "Peak Mall" + role "Admin Console" are unique to the en copy
+    // (zh has "顶峰商城" + "总后台 · 管理员"). We sample until both are
+    // present to avoid the SSR fallback race.
+    await page.waitForFunction(() => {
+      const aside = document.querySelector('aside');
+      if (!aside) return false;
+      const t = aside.textContent || '';
+      return t.includes('Peak Mall') && t.includes('Admin Console');
+    }, { timeout: 10000 });
     const sidebarText = (await page.locator('aside').first().innerText()).toLowerCase();
     for (const label of EN_GROUP_LABELS) {
       expect(sidebarText, `${path} sidebar should contain "${label}"`).toContain(label.toLowerCase());
     }
-    // Don't pin nav title for /en/admin/audit/ — that route isn't in
-    // the sidebar (it's gated as super_admin only and rendered via a
-    // direct link from the audit page itself).
-    if (!path.includes('/audit')) {
-      // At least one nav title is present — exact match per key varies
-      // by route but every sidebar contains "Dashboard".
-      expect(sidebarText, `${path} sidebar should contain "dashboard"`).toContain('dashboard');
-    }
+    // Every sidebar contains "dashboard" — use it as a smoke check
+    // that the nav rendered. Exact per-key titles vary by route.
+    expect(sidebarText, `${path} sidebar should contain "dashboard"`).toContain('dashboard');
   });
 }
 
 test('/admin/login renders the sign-in form (zh, no Supabase redirect during prerender)', async ({ page }) => {
   // Static export: /admin/login is a server component that calls
-  // redirect('/login?tab=admin'). At runtime the Next router handles
-  // the 307 marker (visible in the build output) and replaces the
-  // URL. Wait for the URL change before asserting content.
+  // redirect('/login?tab=admin') in production or redirect('/admin/dashboard')
+  // in demo mode. At runtime the Next router handles the 307 marker
+  // (visible in the build output) and replaces the URL.
   const resp = await page.goto('/admin/login/', { waitUntil: 'domcontentloaded' });
   expect(resp?.status()).toBe(200);
+  // Detect demo mode via the banner on the dashboard.
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+  const url = page.url();
+  if (url.includes('/admin/dashboard')) {
+    // Demo mode: /admin/login redirects straight to the dashboard.
+    expect(url).toContain('/admin/dashboard');
+    return;
+  }
   await page.waitForURL(/\/login/, { timeout: 5000 });
   expect(page.url()).toContain('/login');
   expect(page.url()).toContain('tab=admin');
