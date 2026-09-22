@@ -9,8 +9,28 @@ import { useT } from '@/lib/use-t';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
 import { fetchAllOrdersForAdmin, isSupabaseConfigured } from '@/lib/api';
+import { shipOrder } from '@/lib/api/admin-orders-api';
 
 type Tab = 'all' | OrderStatus;
+
+// Phase 2.2 — carrier list + tracking URL builder.
+// Each carrier maps to a tracking URL template; `{tracking}` is the
+// placeholder replaced at runtime.
+const CARRIERS: Array<{ key: string; label: string; urlTemplate: string }> = [
+  { key: 'USPS',         label: 'USPS',            urlTemplate: 'https://tools.usps.com/go/TrackConfirmAction?tLabels={tracking}' },
+  { key: 'FedEx',        label: 'FedEx',           urlTemplate: 'https://www.fedex.com/fedextrack/?trknbr={tracking}' },
+  { key: 'UPS',          label: 'UPS',             urlTemplate: 'https://www.ups.com/track?tracknum={tracking}' },
+  { key: 'DHL',          label: 'DHL',             urlTemplate: 'https://www.dhl.com/global-en/home/tracking.html?tracking-id={tracking}' },
+  { key: 'SF Express',   label: 'SF Express',      urlTemplate: 'https://www.sf-international.com/cgi-bin/WebObjects/weBOutOrder?{tracking}' },
+  { key: 'YTO',          label: 'YTO',             urlTemplate: 'https://www.yto.net.cn/?{tracking}' },
+  { key: 'Other',        label: 'Other',           urlTemplate: '' },
+];
+
+function buildTrackingUrl(carrier: string, trackingNo: string): string {
+  const c = CARRIERS.find((x) => x.key === carrier);
+  if (!c || !c.urlTemplate) return '';
+  return c.urlTemplate.replace('{tracking}', encodeURIComponent(trackingNo));
+}
 
 const STATUS_KIND: Record<OrderStatus, StatusKind> = {
   pending: 'pending',
@@ -69,6 +89,13 @@ export function OrdersClient() {
   const [cancelReason, setCancelReason] = useState('');
   const [refundingId, setRefundingId] = useState<number | null>(null);
   const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
+
+  // Phase 2.2 — shipping dialog state
+  const [shippingOrderId, setShippingOrderId] = useState<number | null>(null);
+  const [shipCarrier, setShipCarrier] = useState<string>('USPS');
+  const [shipTrackingNo, setShipTrackingNo] = useState<string>('');
+  const [shippingBusy, setShippingBusy] = useState(false);
+  const [shippingErr, setShippingErr] = useState<string | null>(null);
 
   const filtered = useMemo(
     () => (tab === 'all' ? orders : orders.filter((o: any) => o.status === tab)),
@@ -170,6 +197,94 @@ export function OrdersClient() {
       ),
     );
     setRefundingId(null);
+  };
+
+  // Phase 2.2 — confirm ship + fire shipment email.
+  // 1. Persist carrier / tracking_no / shipped_at to orders via supabase.
+  // 2. Fire shipment_notification email to buyer (best-effort).
+  const confirmShip = async () => {
+    if (shippingOrderId === null) return;
+    if (!shipCarrier) {
+      setShippingErr(isEn ? 'Pick a carrier.' : '请选择物流公司。');
+      return;
+    }
+    if (shipCarrier !== 'Other' && !shipTrackingNo.trim()) {
+      setShippingErr(isEn ? 'Tracking number required.' : '请输入运单号。');
+      return;
+    }
+    setShippingBusy(true);
+    setShippingErr(null);
+
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const trackingNo = shipTrackingNo.trim();
+    const trackingUrl = buildTrackingUrl(shipCarrier, trackingNo);
+    const target = orders.find((o: any) => o.id === shippingOrderId);
+
+    // Optimistic UI update first so the admin sees the change instantly.
+    setOrders(
+      orders.map((o: any) =>
+        o.id === shippingOrderId
+          ? {
+              ...o,
+              status: 'shipped' as const,
+              carrier: shipCarrier,
+              tracking_no: trackingNo,
+              tracking_url: trackingUrl,
+              shipped_at: now,
+              updated_at: now,
+            }
+          : o,
+      ),
+    );
+
+    // Persist to Supabase
+    const ok = await shipOrder(shippingOrderId, shipCarrier, trackingNo);
+
+    // Fire shipment email — best-effort, don't block UI on errors.
+    if (ok && target) {
+      try {
+        const sendRes = await fetch('/.netlify/functions/send-email', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            ...(process.env.NEXT_PUBLIC_INTERNAL_API_TOKEN
+              ? { 'x-internal-token': process.env.NEXT_PUBLIC_INTERNAL_API_TOKEN }
+              : {}),
+          },
+          body: JSON.stringify({
+            kind: 'shipment_notification',
+            to: target.buyer_email ?? '',
+            data: {
+              orderNumber: target.order_no ?? String(target.id),
+              customerName: target.contact_name ?? target.nickname,
+              carrier: shipCarrier,
+              trackingNumber: trackingNo,
+              trackingUrl,
+              siteUrl: typeof window !== 'undefined' ? window.location.origin : '',
+            },
+          }),
+        });
+        if (!sendRes.ok) {
+          // eslint-disable-next-line no-console
+          console.warn('[ship] email send failed:', sendRes.status);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[ship] email dispatch error:', err);
+      }
+    } else if (!ok) {
+      // Roll back the optimistic update
+      setOrders(orders);
+      setShippingErr(isEn ? 'Failed to save shipment.' : '保存发货信息失败,请重试。');
+      setShippingBusy(false);
+      return;
+    }
+
+    setShippingBusy(false);
+    setShippingOrderId(null);
+    setShipTrackingNo('');
+    setShipCarrier('USPS');
+    setDetailId(null);
   };
 
   const requestDelete = (ids: number[]) => setDeletingIds(ids);
@@ -501,8 +616,10 @@ export function OrdersClient() {
                   <button
                     type="button"
                     onClick={() => {
-                      setStatus(detailOrder.id, 'shipped');
-                      setDetailId(null);
+                      setShipCarrier('USPS');
+                      setShipTrackingNo('');
+                      setShippingErr(null);
+                      setShippingOrderId(detailOrder.id);
                     }}
                     className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-700 transition-colors"
                   >
@@ -631,6 +748,100 @@ export function OrdersClient() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Phase 2.2 — Ship dialog (carrier + tracking_no) */}
+      <Modal
+        open={shippingOrderId !== null}
+        title={t.admin.orders.shipTitle ?? 'Mark as shipped'}
+        onClose={() => {
+          if (shippingBusy) return;
+          setShippingOrderId(null);
+          setShippingErr(null);
+        }}
+        width="460px"
+      >
+        <div className="space-y-4">
+          <p className="text-[13px] text-neutral-700">
+            {t.admin.orders.shipBody ?? 'Pick a carrier and enter the tracking number. The buyer will be emailed the tracking link automatically.'}
+          </p>
+
+          <div>
+            <label htmlFor="ship-carrier" className="block text-[12px] font-medium text-neutral-700 mb-1">
+              {isEn ? 'Carrier' : '物流公司'}
+            </label>
+            <select
+              id="ship-carrier"
+              value={shipCarrier}
+              onChange={(e) => setShipCarrier(e.target.value)}
+              disabled={shippingBusy}
+              className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              {CARRIERS.map((c) => (
+                <option key={c.key} value={c.key}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {shipCarrier !== 'Other' && (
+            <div>
+              <label htmlFor="ship-tracking" className="block text-[12px] font-medium text-neutral-700 mb-1">
+                {isEn ? 'Tracking number' : '运单号'}
+              </label>
+              <input
+                id="ship-tracking"
+                type="text"
+                value={shipTrackingNo}
+                onChange={(e) => setShipTrackingNo(e.target.value)}
+                disabled={shippingBusy}
+                placeholder={isEn ? 'e.g. 9405511899223197428490' : '例如: SF1234567890'}
+                className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          )}
+
+          {shipCarrier !== 'Other' && shipTrackingNo.trim() && (
+            <div className="text-[12px] text-neutral-500 break-all">
+              {isEn ? 'Tracking URL preview: ' : '运单链接预览: '}
+              <a
+                href={buildTrackingUrl(shipCarrier, shipTrackingNo.trim())}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-700 hover:underline"
+              >
+                {buildTrackingUrl(shipCarrier, shipTrackingNo.trim())}
+              </a>
+            </div>
+          )}
+
+          {shippingErr && (
+            <div role="alert" className="text-[12.5px] text-rose-700 bg-rose-50 border border-rose-200 rounded px-3 py-2">
+              {shippingErr}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setShippingOrderId(null);
+                setShippingErr(null);
+              }}
+              disabled={shippingBusy}
+              className="px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 transition-colors disabled:opacity-50"
+            >
+              {t.admin.wd.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={confirmShip}
+              disabled={shippingBusy}
+              className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-800 transition-colors disabled:opacity-50"
+            >
+              {shippingBusy ? (isEn ? 'Saving…' : '保存中…') : t.admin.orders.ship}
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* Delete confirm modal */}

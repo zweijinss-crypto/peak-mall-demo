@@ -1221,6 +1221,8 @@ export const COPY = {
       colTime: '时间',
       colAction: '操作',
       ship: '发货',
+      shipTitle: '标记为已发货',
+      shipBody: '选择物流公司并输入运单号。买家将自动收到包含物流链接的邮件。',
       complete: '完成',
       dash: '—',
       empty: '暂无订单',

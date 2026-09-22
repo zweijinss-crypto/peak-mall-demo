@@ -32,7 +32,7 @@ export async function fetchAllOrdersForAdmin(): Promise<AdminOrderRow[] | null> 
 
 /** Mark order as shipped with tracking info. */
 export async function shipOrder(
-  orderId: string,
+  orderId: string | number,
   carrier: string,
   trackingNo: string,
 ): Promise<boolean> {

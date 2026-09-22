@@ -53,6 +53,8 @@ export interface AdminOrder {
   updated_at?: string;
   cancel_reason?: string;
   refunded?: boolean;
+  /** Phase 2.2 — buyer email for shipment notifications. */
+  buyer_email?: string;
   refund_at?: string;
 }
 

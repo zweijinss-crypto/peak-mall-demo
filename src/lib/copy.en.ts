@@ -1247,6 +1247,8 @@ export const COPY_EN = {
       colTime: 'Time',
       colAction: 'Action',
       ship: 'Ship',
+      shipTitle: 'Mark as shipped',
+      shipBody: 'Pick a carrier and enter the tracking number. The buyer will be emailed the tracking link automatically.',
       complete: 'Complete',
       dash: '—',
       empty: 'No orders yet.',
