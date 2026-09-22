@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/peak-mall/ErrorBoundary';
 import SupportWidget from '@/components/peak-mall/SupportWidget';
 import SupabaseSyncBoot from '@/components/peak-mall/SupabaseSyncBoot';
 import SyncErrorToast, { SyncErrorWatcher } from '@/components/peak-mall/SyncErrorToast';
+import { PostHogProvider } from '@/components/peak-mall/PostHogProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://peak-mall-demo.netlify.app'),
@@ -57,6 +58,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SyncErrorWatcher />
         <SyncErrorToast />
         <SupportWidget telegram="MementoCare" agent="Memento Care" hours="Mon–Sun · 13:00–23:30 (UTC+8)" />
+        {/* Phase 3.5.1 — PostHog analytics (consent-gated). */}
+        <PostHogProvider />
       </body>
     </html>
   );
