@@ -33,6 +33,87 @@ interface Address {
   phone: string;
   region: string;
   detail: string;
+  countryCode?: string;
+  regionCode?: string;
+}
+
+// ---------------------------------------------------------------
+// Phase 2.3 — tax rate lookup
+// ---------------------------------------------------------------
+//
+// Static fallback map (must match seed data in
+// supabase/migrations/0005_tax_rates.sql). When Supabase is
+// configured we look up the row first; the static map is the
+// fallback so the function still computes tax on a static
+// export preview without a database.
+
+const STATIC_TAX_FALLBACK: Record<string, number> = {
+  'US': 0,
+  'US:CA': 0.0825,
+  'US:NY': 0.04,
+  'US:TX': 0.0625,
+  'US:WA': 0.065,
+  'US:FL': 0.06,
+  'DE': 0.19,
+  'FR': 0.2,
+  'NL': 0.21,
+  'IT': 0.22,
+  'ES': 0.21,
+  'GB': 0.2,
+  'CA': 0.05,
+  'CA:ON': 0.13,
+  'CA:BC': 0.12,
+  'CA:QC': 0.1495,
+  'CN': 0,
+  'HK': 0,
+  'JP': 0.1,
+  'SG': 0.09,
+  'KR': 0.1,
+  'AU': 0.1,
+  'NZ': 0.15,
+};
+
+async function lookupTaxRate(
+  supabase: SupabaseClient | null,
+  countryCode: string | undefined,
+  regionCode: string | undefined,
+): Promise<number> {
+  const cc = (countryCode ?? '').toUpperCase();
+  const rc = (regionCode ?? '').toUpperCase();
+  if (!cc) return 0;
+
+  if (supabase) {
+    // Try (country, region) first, then fall back to country-only.
+    // Cast through `any` because the generated Supabase types do not
+    // yet know about tax_rates (it was added in 0005 after the type
+    // regeneration snapshot).
+    const try1 = await supabase
+      .from('tax_rates')
+      .select('rate')
+      .eq('country_code', cc)
+      .eq('region', rc)
+      .maybeSingle();
+    const r1 = (try1.data as { rate?: number } | null)?.rate;
+    if (r1 != null) return Number(r1);
+
+    if (rc) {
+      const try2 = await supabase
+        .from('tax_rates')
+        .select('rate')
+        .eq('country_code', cc)
+        .eq('region', '')
+        .maybeSingle();
+      const r2 = (try2.data as { rate?: number } | null)?.rate;
+      if (r2 != null) return Number(r2);
+    }
+  }
+
+  // Static fallback
+  if (rc) {
+    const v = STATIC_TAX_FALLBACK[`${cc}:${rc}`];
+    if (v !== undefined) return v;
+  }
+  return STATIC_TAX_FALLBACK[cc] ?? 0;
 }
 
 interface RequestBody {
@@ -109,6 +190,10 @@ const handler: Handler = async (event) => {
         order_no: created.orderNo,
       },
       shipping_address_collection: { allowed_countries: ['US', 'CN', 'GB', 'DE', 'FR', 'JP', 'KR', 'CA', 'AU'] },
+      // Phase 2.3 — pre-computed tax is forwarded so Stripe displays
+      // it on the Checkout page (and we don't have to rely on Stripe
+      // Tax auto-calculation which needs a separate setup).
+      ...(created.taxCents > 0 ? { tax_amount_cents: created.taxCents } : {}),
     });
 
     if (!session.url) {
@@ -149,7 +234,7 @@ async function createOrderOnServer(
     currency: string;
     couponCode: string | null;
   },
-): Promise<{ orderId: string; orderNo: string } | null> {
+): Promise<{ orderId: string; orderNo: string; taxCents: number } | null> {
   // Generate short readable order_no: OMT + 8 base32 chars + 2 random suffix.
   const alpha = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   let body = '';
@@ -158,6 +243,17 @@ async function createOrderOnServer(
   const orderNo = `OMT${body}-${suffix}`;
 
   const subtotal = input.items.reduce((s, i) => s + i.unitPrice * i.qty, 0);
+
+  // Phase 2.3 — compute tax by (country, region).
+  // unitPrice is in cents (matches Stripe unit_amount); subtotal is
+  // also cents. taxAmount returned is in cents to align with orders.tax.
+  const taxRate = await lookupTaxRate(
+    supabase,
+    input.shipping.countryCode,
+    input.shipping.regionCode,
+  );
+  const taxAmount = Math.round(subtotal * taxRate);
+  const total = subtotal + taxAmount;
 
   const { data: order, error: e1 } = await supabase
     .from('orders')
@@ -168,9 +264,12 @@ async function createOrderOnServer(
       user_id: null,
       subtotal,
       shipping: 0,
-      tax: 0,
+      tax: taxAmount,
+      tax_rate: taxRate,
+      country_code: (input.shipping.countryCode ?? '').toUpperCase() || null,
+      region_code: (input.shipping.regionCode ?? '').toUpperCase() || null,
       discount: 0,
-      total: subtotal,
+      total,
       currency: input.currency,
       coupon_code: input.couponCode,
       status: 'pending',
@@ -232,5 +331,5 @@ async function createOrderOnServer(
     }
   }
 
-  return { orderId: order.id, orderNo: order.order_no };
+  return { orderId: order.id, orderNo: order.order_no, taxCents: taxAmount };
 }

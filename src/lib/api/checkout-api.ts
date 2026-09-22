@@ -33,6 +33,10 @@ export interface CheckoutAddress {
   phone: string;
   region: string;
   detail: string;
+  /** Phase 2.3 — ISO 3166-1 alpha-2 country code (e.g. 'US', 'CN'). */
+  countryCode?: string;
+  /** ISO 3166-2 region code (e.g. 'CA', 'NY'). Optional. */
+  regionCode?: string;
 }
 
 export interface CheckoutResult {
