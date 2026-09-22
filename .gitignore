@@ -43,3 +43,7 @@ test-results/
 
 # Daily memory / heartbeat state — personal to the workspace
 memory/
+
+# local dev artifacts (lighthouse runs, playwright captures)
+crawls/
+.playwright/

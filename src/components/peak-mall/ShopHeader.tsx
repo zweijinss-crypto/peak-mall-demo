@@ -286,10 +286,11 @@ const ShopHeader: FC<ShopHeaderProps> = ({
               autoComplete="off"
               className="flex-1 bg-transparent outline-none text-[13.5px] placeholder:text-neutral-400"
             />
+            {/* Visible text "搜索"/"Go" is the accessible name — no aria-label
+                to satisfy label-content-name-mismatch (LH a11y audit). */}
             <button
               type="submit"
               className="px-3 py-1.5 text-[12px] font-bold text-white bg-orange-700 hover:bg-orange-800 rounded-full transition-colors"
-              aria-label={t.header.searchAria}
             >
               {t.header.submit}
             </button>

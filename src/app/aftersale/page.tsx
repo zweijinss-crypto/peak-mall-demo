@@ -174,7 +174,11 @@ export default function AftersalePage() {
         ) : (
           <div className="space-y-4">
             {tickets.map((tk) => (
-              <article
+              // Use <div role="button"> rather than <article role="button">:
+              // ARIA disallows the button role on <article> per WAI-ARIA 1.2.
+              // Also include the visible text in the aria-label so screen
+              // readers don't read it as "After-sales details AS_1001" only.
+              <div
                 key={tk.id}
                 role="button"
                 tabIndex={0}
@@ -185,10 +189,16 @@ export default function AftersalePage() {
                     setDetailId(tk.id);
                   }
                 }}
-                aria-label={`${t.aftersale.detailTitle} ${tk.id}`}
+                // aria-labelledby (rather than aria-label) so the visible header
+                // text is the accessible name — satisfies LH a11y audit
+                // label-content-name-mismatch without losing the identifier.
+                aria-labelledby={`ticket-${tk.id}-label`}
                 className="bg-white rounded-xl border border-ink-100 overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
               >
-                <header className="flex flex-wrap items-center gap-3 px-5 py-3 bg-ink-50 border-b border-ink-100 text-[12.5px]">
+                <header
+                  id={`ticket-${tk.id}-label`}
+                  className="flex flex-wrap items-center gap-3 px-5 py-3 bg-ink-50 border-b border-ink-100 text-[12.5px]"
+                >
                   <span className="font-mono font-semibold text-ink-900">{tk.id}</span>
                   <span className="text-ink-500">
                     {t.aftersale.orderId}: <b className="text-ink-900">{tk.orderId}</b>
@@ -206,12 +216,13 @@ export default function AftersalePage() {
                   </div>
                 </div>
                 <footer className="flex flex-wrap justify-end items-center gap-3 px-5 py-3.5 bg-ink-50 border-t border-ink-100">
+                  {/* min-h-[28px] ensures 24x24 tap area after text padding. */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       router.push('/orders');
                     }}
-                    className="text-[12.5px] font-semibold text-ink-600 hover:text-ink-900"
+                    className="min-h-[28px] text-[12.5px] font-semibold text-ink-600 hover:text-ink-900"
                   >
                     {t.aftersale.viewOrder} →
                   </button>
@@ -221,12 +232,12 @@ export default function AftersalePage() {
                       setDetailId(tk.id);
                     }}
                     aria-expanded={detailId === tk.id}
-                    className="text-[12.5px] font-semibold text-orange-700 hover:text-orange-800"
+                    className="min-h-[28px] text-[12.5px] font-semibold text-orange-700 hover:text-orange-800"
                   >
                     {t.aftersale.detailTitle} →
                   </button>
                 </footer>
-              </article>
+              </div>
             ))}
           </div>
         )}
