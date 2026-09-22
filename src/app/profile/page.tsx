@@ -69,7 +69,10 @@ export default function ProfilePage() {
     user?.email?.split('@')[0] ||
     (chrome.isEn ? 'Guest' : '游客');
   const memberSince = user
-    ? new Date(user.loggedInAt).toLocaleDateString('en-CA')
+    ? new Date(user.loggedInAt).toLocaleDateString(
+        chrome.isEn ? 'en-CA' : 'zh-CN',
+        { year: 'numeric', month: '2-digit', day: '2-digit' },
+      )
     : '—';
   const initials = displayName.slice(0, 1).toUpperCase();
 

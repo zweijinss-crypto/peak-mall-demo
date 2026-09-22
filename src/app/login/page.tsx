@@ -59,7 +59,7 @@ function LoginPageInner() {
         {currentUser && (
           <div className="max-w-shell mx-auto px-5 pt-3">
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2.5 text-[12.5px]">
-              {t.auth.loggedInAs(currentUser.email, new Date(currentUser.loggedInAt).toLocaleString('en-US', { timeZone: 'UTC' }))}
+              {t.auth.loggedInAs(currentUser.email, new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(new Date(currentUser.loggedInAt)))}
             </div>
           </div>
         )}

@@ -88,7 +88,7 @@ export interface WishItem {
   addedAt: number;
 }
 
-export type Locale = 'zh' | 'en';
+export type Locale = 'zh' | 'en' | 'ja' | 'ko';
 export type CurrencyCode = 'USD' | 'CNY' | 'EUR' | 'GBP' | 'JPY' | 'KRW' | 'AUD' | 'CAD';
 
 interface PeakStore {

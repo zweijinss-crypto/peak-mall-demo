@@ -20,24 +20,24 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 
-export type Lang = 'zh' | 'en';
+export type Lang = 'zh' | 'en' | 'ja' | 'ko';
 
 export const REF_I18N = {
   // 通用 (含 page.tsx 硬编码 section 标题)
   common: {
-    shopNow: { zh: '立即选购', en: 'Shop now' },
-    recommended: { zh: '推荐商品', en: 'Recommended' },
-    itemsTotal: { zh: '共 {n} 件商品', en: '{n} items' },
-    cartDemo: { zh: '购物车演示', en: 'Cart demo' },
-    subtotal: { zh: '小计', en: 'Subtotal' },
-    about: { zh: '关于本演示', en: 'About this demo' },
-    loginToggle: { zh: '登录 / 注册', en: 'Sign in / Sign up' },
-    backToShop: { zh: '回到商城', en: 'Back to shop' },
+    shopNow: { zh: '立即选购', en: 'Shop now', ja: 'Shop now', ko: 'Shop now' },
+    recommended: { zh: '推荐商品', en: 'Recommended', ja: 'Recommended', ko: 'Recommended' },
+    itemsTotal: { zh: '共 {n} 件商品', en: '{n} items', ja: '{n} items', ko: '{n} items' },
+    cartDemo: { zh: '购物车演示', en: 'Cart demo', ja: 'Cart demo', ko: 'Cart demo' },
+    subtotal: { zh: '小计', en: 'Subtotal', ja: 'Subtotal', ko: 'Subtotal' },
+    about: { zh: '关于本演示', en: 'About this demo', ja: 'About this demo', ko: 'About this demo' },
+    loginToggle: { zh: '登录 / 注册', en: 'Sign in / Sign up', ja: 'Sign in / Sign up', ko: 'Sign in / Sign up' },
+    backToShop: { zh: '回到商城', en: 'Back to shop', ja: 'Back to shop', ko: 'Back to shop' },
   },
 
   // 顶栏公告
   announcement: {
-    tag: { zh: '公告', en: 'Notice' },
+    tag: { zh: '公告', en: 'Notice', ja: 'Notice', ko: 'Notice' },
     text: {
       zh: '新用户注册即享专属礼遇 · 全场正品保障 · 多仓直发 48 小时出库',
       en: 'New member perks · Authenticity guaranteed · 48h dispatch from multiple warehouses',
@@ -46,88 +46,88 @@ export const REF_I18N = {
 
   // 分类条
   category: {
-    all: { zh: '全部', en: 'All' },
-    electronics: { zh: '数码电子', en: 'Electronics' },
-    appliances: { zh: '家用电器', en: 'Home appliances' },
-    fashion: { zh: '服饰鞋包', en: 'Fashion & bags' },
-    beauty: { zh: '美妆个护', en: 'Beauty & care' },
+    all: { zh: '全部', en: 'All', ja: 'All', ko: 'All' },
+    electronics: { zh: '数码电子', en: 'Electronics', ja: 'Electronics', ko: 'Electronics' },
+    appliances: { zh: '家用电器', en: 'Home appliances', ja: 'Home appliances', ko: 'Home appliances' },
+    fashion: { zh: '服饰鞋包', en: 'Fashion & bags', ja: 'Fashion & bags', ko: 'Fashion & bags' },
+    beauty: { zh: '美妆个护', en: 'Beauty & care', ja: 'Beauty & care', ko: 'Beauty & care' },
   },
 
   // 商品卡 / modal
   product: {
-    name: { zh: '商品名称', en: 'Product name' },
-    subtitle: { zh: '官方直采 · 正品保障', en: 'Authentic · Direct from brand' },
-    coverFallback: { zh: '📦', en: '📦' },
-    addToCart: { zh: '加入购物车', en: 'Add to cart' },
+    name: { zh: '商品名称', en: 'Product name', ja: 'Product name', ko: 'Product name' },
+    subtitle: { zh: '官方直采 · 正品保障', en: 'Authentic · Direct from brand', ja: 'Authentic · Direct from brand', ko: 'Authentic · Direct from brand' },
+    coverFallback: { zh: '📦', en: '📦', ja: '📦', ko: '📦' },
+    addToCart: { zh: '加入购物车', en: 'Add to cart', ja: 'Add to cart', ko: 'Add to cart' },
     stock: {
-      in: { zh: '现货', en: 'In stock' },
-      low: { zh: '紧张', en: 'Low stock' },
-      out: { zh: '售罄', en: 'Sold out' },
+      in: { zh: '现货', en: 'In stock', ja: 'In stock', ko: 'In stock' },
+      low: { zh: '紧张', en: 'Low stock', ja: 'Low stock', ko: 'Low stock' },
+      out: { zh: '售罄', en: 'Sold out', ja: 'Sold out', ko: 'Sold out' },
     },
   },
 
   // 购物车行
   cart: {
-    name: { zh: '商品', en: 'Item' },
-    coverFallback: { zh: '📦', en: '📦' },
-    remove: { zh: '移除', en: 'Remove' },
+    name: { zh: '商品', en: 'Item', ja: 'Item', ko: 'Item' },
+    coverFallback: { zh: '📦', en: '📦', ja: '📦', ko: '📦' },
+    remove: { zh: '移除', en: 'Remove', ja: 'Remove', ko: 'Remove' },
   },
 
   // 双 banner
   doubleBanner: {
-    slot1Title: { zh: '数码电子', en: 'Electronics' },
+    slot1Title: { zh: '数码电子', en: 'Electronics', ja: 'Electronics', ko: 'Electronics' },
     slot1Subtitle: {
       zh: '从笔记本电脑到蓝牙耳机,精选全球智能数码,官方直采正品。',
       en: 'From laptops to wireless earbuds — global smart gadgets, sourced direct from the brand.',
     },
-    slot1Cta: { zh: '去逛逛', en: 'Browse' },
-    slot2Title: { zh: '家用电器', en: 'Home appliances' },
+    slot1Cta: { zh: '去逛逛', en: 'Browse', ja: 'Browse', ko: 'Browse' },
+    slot2Title: { zh: '家用电器', en: 'Home appliances', ja: 'Home appliances', ko: 'Home appliances' },
     slot2Subtitle: {
       zh: '扫地机器人、智能家电,让科技融入日常,省心更省电。',
       en: 'Robot vacuums and smart home gear — tech that saves effort and energy.',
     },
-    slot2Cta: { zh: '立即抢购', en: 'Shop now' },
+    slot2Cta: { zh: '立即抢购', en: 'Shop now', ja: 'Shop now', ko: 'Shop now' },
   },
 
   // 登录 / 注册 split
   auth: {
-    brandTitle: { zh: '顶峰商城', en: 'Peak Mall' },
+    brandTitle: { zh: '顶峰商城', en: 'Peak Mall', ja: 'Peak Mall', ko: 'Peak Mall' },
     brandSubtitle: {
       zh: '全球精选 · 正品保障 · 安心购物',
       en: 'Curated globally · Authenticity guaranteed · Shop with confidence',
     },
     login: {
-      title: { zh: '登录账户', en: 'Sign in' },
-      cta: { zh: '登录', en: 'Sign in' },
+      title: { zh: '登录账户', en: 'Sign in', ja: 'Sign in', ko: 'Sign in' },
+      cta: { zh: '登录', en: 'Sign in', ja: 'Sign in', ko: 'Sign in' },
     },
     register: {
-      title: { zh: '注册新账号', en: 'Create account' },
-      cta: { zh: '注册', en: 'Sign up' },
+      title: { zh: '注册新账号', en: 'Create account', ja: 'Create account', ko: 'Create account' },
+      cta: { zh: '注册', en: 'Sign up', ja: 'Sign up', ko: 'Sign up' },
     },
     field: {
-      email: { zh: '邮箱', en: 'Email' },
-      password: { zh: '密码', en: 'Password' },
-      nickname: { zh: '昵称', en: 'Nickname' },
-      confirmPassword: { zh: '确认密码', en: 'Confirm password' },
+      email: { zh: '邮箱', en: 'Email', ja: 'Email', ko: 'Email' },
+      password: { zh: '密码', en: 'Password', ja: 'Password', ko: 'Password' },
+      nickname: { zh: '昵称', en: 'Nickname', ja: 'Nickname', ko: 'Nickname' },
+      confirmPassword: { zh: '确认密码', en: 'Confirm password', ja: 'Confirm password', ko: 'Confirm password' },
     },
     placeholder: {
-      email: { zh: 'name@example.com', en: 'name@example.com' },
-      password: { zh: '请输入密码', en: 'Enter your password' },
-      passwordNew: { zh: '至少 6 位', en: 'At least 6 characters' },
-      passwordConfirm: { zh: '请再次输入密码', en: 'Re-enter your password' },
-      nickname: { zh: '展示名称(可留空)', en: 'Display name (optional)' },
+      email: { zh: 'name@example.com', en: 'name@example.com', ja: 'name@example.com', ko: 'name@example.com' },
+      password: { zh: '请输入密码', en: 'Enter your password', ja: 'Enter your password', ko: 'Enter your password' },
+      passwordNew: { zh: '至少 6 位', en: 'At least 6 characters', ja: 'At least 6 characters', ko: 'At least 6 characters' },
+      passwordConfirm: { zh: '请再次输入密码', en: 'Re-enter your password', ja: 'Re-enter your password', ko: 'Re-enter your password' },
+      nickname: { zh: '展示名称(可留空)', en: 'Display name (optional)', ja: 'Display name (optional)', ko: 'Display name (optional)' },
     },
-    remember: { zh: '记住我', en: 'Remember me' },
+    remember: { zh: '记住我', en: 'Remember me', ja: 'Remember me', ko: 'Remember me' },
   },
 
   // modal 通用
   modal: {
-    close: { zh: '关闭', en: 'Close' },
+    close: { zh: '关闭', en: 'Close', ja: 'Close', ko: 'Close' },
   },
 
   // Hero
   hero: {
-    title: { zh: '全球精选 · 品质好物', en: 'Curated globally · Quality goods' },
+    title: { zh: '全球精选 · 品质好物', en: 'Curated globally · Quality goods', ja: 'Curated globally · Quality goods', ko: 'Curated globally · Quality goods' },
     subtitle: {
       zh: '为每一次选择负责 · 官方直采 · 正品保障',
       en: 'Proudly sourced · Authentic guaranteed · Every choice counts',
@@ -160,17 +160,17 @@ export const REF_I18N = {
 
   // 演示商品数据 — 6 件 (id / price / coverEmoji / stockStatus 跟语言无关)
   mockProducts: {
-    p1: { name: { zh: '无线降噪耳机 Pro', en: 'Wireless ANC Headphones Pro' }, subtitle: { zh: '官方直采 · 30 小时续航', en: 'Authentic · 30h battery' } },
-    p2: { name: { zh: '智能手表 X5', en: 'Smartwatch X5' }, subtitle: { zh: 'GPS + 心率监测', en: 'GPS + heart rate' } },
-    p3: { name: { zh: '便携蓝牙音箱', en: 'Portable Bluetooth Speaker' }, subtitle: { zh: 'IPX7 防水', en: 'IPX7 waterproof' } },
-    p4: { name: { zh: '4K 显示器 27"', en: '4K Monitor 27"' }, subtitle: { zh: 'HDR400 · Type-C', en: 'HDR400 · Type-C' } },
-    p5: { name: { zh: '机械键盘 87 键', en: 'Mechanical Keyboard 87 keys' }, subtitle: { zh: '红轴 · RGB 背光', en: 'Red switch · RGB' } },
-    p6: { name: { zh: '人体工学椅', en: 'Ergonomic Chair' }, subtitle: { zh: '腰托 + 4D 扶手', en: 'Lumbar support · 4D armrest' } },
+    p1: { name: { zh: '无线降噪耳机 Pro', en: 'Wireless ANC Headphones Pro', ja: 'Wireless ANC Headphones Pro', ko: 'Wireless ANC Headphones Pro' }, subtitle: { zh: '官方直采 · 30 小时续航', en: 'Authentic · 30h battery', ja: 'Authentic · 30h battery', ko: 'Authentic · 30h battery' } },
+    p2: { name: { zh: '智能手表 X5', en: 'Smartwatch X5', ja: 'Smartwatch X5', ko: 'Smartwatch X5' }, subtitle: { zh: 'GPS + 心率监测', en: 'GPS + heart rate', ja: 'GPS + heart rate', ko: 'GPS + heart rate' } },
+    p3: { name: { zh: '便携蓝牙音箱', en: 'Portable Bluetooth Speaker', ja: 'Portable Bluetooth Speaker', ko: 'Portable Bluetooth Speaker' }, subtitle: { zh: 'IPX7 防水', en: 'IPX7 waterproof', ja: 'IPX7 waterproof', ko: 'IPX7 waterproof' } },
+    p4: { name: { zh: '4K 显示器 27"', en: '4K Monitor 27"', ja: '4K Monitor 27"', ko: '4K Monitor 27"' }, subtitle: { zh: 'HDR400 · Type-C', en: 'HDR400 · Type-C', ja: 'HDR400 · Type-C', ko: 'HDR400 · Type-C' } },
+    p5: { name: { zh: '机械键盘 87 键', en: 'Mechanical Keyboard 87 keys', ja: 'Mechanical Keyboard 87 keys', ko: 'Mechanical Keyboard 87 keys' }, subtitle: { zh: '红轴 · RGB 背光', en: 'Red switch · RGB', ja: 'Red switch · RGB', ko: 'Red switch · RGB' } },
+    p6: { name: { zh: '人体工学椅', en: 'Ergonomic Chair', ja: 'Ergonomic Chair', ko: 'Ergonomic Chair' }, subtitle: { zh: '腰托 + 4D 扶手', en: 'Lumbar support · 4D armrest', ja: 'Lumbar support · 4D armrest', ko: 'Lumbar support · 4D armrest' } },
   },
 
   // 演示购物车数据 — 2 行
   mockCart: {
-    c1: { name: { zh: '无线降噪耳机 Pro', en: 'Wireless ANC Headphones Pro' }, subtitle: { zh: '官方直采', en: 'Authentic' } },
+    c1: { name: { zh: '无线降噪耳机 Pro', en: 'Wireless ANC Headphones Pro', ja: 'Wireless ANC Headphones Pro', ko: 'Wireless ANC Headphones Pro' }, subtitle: { zh: '官方直采', en: 'Authentic', ja: 'Authentic', ko: 'Authentic' } },
   },
 } as const;
 

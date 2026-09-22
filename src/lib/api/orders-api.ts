@@ -41,7 +41,7 @@ export interface OrderItemRow {
   id: number;
   order_id: string;
   product_id: number;
-  product_name: { zh: string; en: string };
+  product_name: { zh: string; en: string; ja?: string; ko?: string };
   cover: string | null;
   unit_price: number;
   qty: number;
@@ -91,7 +91,7 @@ export async function createOrder(input: {
     productId: number;
     qty: number;
     unitPrice: number;
-    name: { zh: string; en: string };
+    name: { zh: string; en: string; ja?: string; ko?: string };
     cover: string | null;
   }>;
   shipping: {

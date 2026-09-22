@@ -34,11 +34,11 @@ const FLOW_SEED: Flow[] = [
   { id: 'F9', type: 'frozen',   amount:   8.50, date: '2026-08-10T10:00:00.000Z', note: '提现申请 W-185 冻结' },
 ];
 
-const FLOW_LABEL: Record<FlowKind, { zh: string; en: string; cls: string }> = {
-  in:       { zh: '入账', en: 'Credit',    cls: 'bg-emerald-100 text-emerald-700' },
-  out:      { zh: '出账', en: 'Debit',     cls: 'bg-rose-100 text-rose-700' },
-  frozen:   { zh: '冻结', en: 'Frozen',    cls: 'bg-amber-100 text-amber-700' },
-  unfreeze: { zh: '解冻', en: 'Released',  cls: 'bg-blue-100 text-blue-700' },
+const FLOW_LABEL: Record<FlowKind, { zh: string; en: string; ja: string; ko: string; cls: string }> = {
+  in:       { zh: '入账', en: 'Credit',    ja: '入金', ko: '입금', cls: 'bg-emerald-100 text-emerald-700' },
+  out:      { zh: '出账', en: 'Debit',     ja: '出金', ko: '출금', cls: 'bg-rose-100 text-rose-700' },
+  frozen:   { zh: '冻结', en: 'Frozen',    ja: '凍結', ko: '동결', cls: 'bg-amber-100 text-amber-700' },
+  unfreeze: { zh: '解冻', en: 'Released',  ja: '解除', ko: '해제', cls: 'bg-blue-100 text-blue-700' },
 };
 
 function csvCell(v: string | number): string {

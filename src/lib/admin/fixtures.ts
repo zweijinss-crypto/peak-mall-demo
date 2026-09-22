@@ -419,21 +419,21 @@ export function usd(n: number): string {
 /** Status badge label helper for tables. */
 export function orderStatusLabel(s: OrderStatus, locale: Locale): string {
   const map: Record<OrderStatus, Record<Locale, string>> = {
-    pending: { zh: '待支付', en: 'Pending' },
-    paid: { zh: '已支付', en: 'Paid' },
-    shipped: { zh: '已发货', en: 'Shipped' },
-    completed: { zh: '已完成', en: 'Completed' },
-    cancelled: { zh: '已取消', en: 'Cancelled' },
+    pending: { zh: '待支付', en: 'Pending', ja: '未払い', ko: '결제 대기' },
+    paid: { zh: '已支付', en: 'Paid', ja: '支払い済み', ko: '결제 완료' },
+    shipped: { zh: '已发货', en: 'Shipped', ja: '発送済み', ko: '배송 완료' },
+    completed: { zh: '已完成', en: 'Completed', ja: '完了', ko: '완료' },
+    cancelled: { zh: '已取消', en: 'Cancelled', ja: 'キャンセル', ko: '취소' },
   };
   return map[s][locale];
 }
 
 export function wdStatusLabel(s: WdStatus, locale: Locale): string {
   const map: Record<WdStatus, Record<Locale, string>> = {
-    pending: { zh: '待审核', en: 'Pending' },
-    approved: { zh: '已通过', en: 'Approved' },
-    paid: { zh: '已到账', en: 'Paid' },
-    rejected: { zh: '已驳回', en: 'Rejected' },
+    pending:   { zh: '待审核', en: 'Pending',  ja: '審査中', ko: '심사 중' },
+    approved:  { zh: '已通过', en: 'Approved', ja: '承認済み', ko: '승인됨' },
+    paid:      { zh: '已到账', en: 'Paid',     ja: '着金済み', ko: '입금 완료' },
+    rejected:  { zh: '已驳回', en: 'Rejected', ja: '却下', ko: '거절' },
   };
   return map[s][locale];
 }

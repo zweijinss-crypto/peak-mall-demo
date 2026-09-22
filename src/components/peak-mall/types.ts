@@ -1,6 +1,6 @@
 // 共用类型定义
 export type CurrencyCode = 'USD' | 'CNY' | 'EUR' | 'GBP' | 'JPY' | 'KRW' | 'AUD' | 'CAD';
-export type LangCode = 'zh' | 'en';
+export type LangCode = 'zh' | 'en' | 'ja' | 'ko';
 
 export interface Product {
   id: number;

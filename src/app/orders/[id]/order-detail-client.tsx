@@ -10,12 +10,12 @@ import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 import type { Order } from '@/lib/store';
 
-const STATUS_LABEL: Record<Order['status'], { zh: string; en: string; cls: string }> = {
-  pending:   { zh: '待支付', en: 'Pending payment', cls: 'bg-amber-100 text-amber-700' },
-  paid:      { zh: '已支付', en: 'Paid',            cls: 'bg-blue-100 text-blue-700' },
-  shipped:   { zh: '已发货', en: 'Shipped',         cls: 'bg-violet-100 text-violet-700' },
-  delivered: { zh: '已收货', en: 'Delivered',       cls: 'bg-emerald-100 text-emerald-700' },
-  cancelled: { zh: '已取消', en: 'Cancelled',       cls: 'bg-ink-200 text-ink-600' },
+const STATUS_LABEL: Record<Order['status'], { zh: string; en: string; ja: string; ko: string; cls: string }> = {
+  pending:   { zh: '待支付', en: 'Pending payment', ja: '未払い', ko: '결제 대기', cls: 'bg-amber-100 text-amber-700' },
+  paid:      { zh: '已支付', en: 'Paid',            ja: '支払い済み', ko: '결제 완료', cls: 'bg-blue-100 text-blue-700' },
+  shipped:   { zh: '已发货', en: 'Shipped',         ja: '発送済み', ko: '배송 중', cls: 'bg-violet-100 text-violet-700' },
+  delivered: { zh: '已收货', en: 'Delivered',       ja: '配達済み', ko: '배송 완료', cls: 'bg-emerald-100 text-emerald-700' },
+  cancelled: { zh: '已取消', en: 'Cancelled',       ja: 'キャンセル', ko: '취소', cls: 'bg-ink-200 text-ink-600' },
 };
 
 const STATUS_T_KEY: Record<Order['status'], keyof ReturnType<typeof useT>['orderDetail']> = {

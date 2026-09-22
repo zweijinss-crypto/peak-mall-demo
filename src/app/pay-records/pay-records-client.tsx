@@ -22,17 +22,17 @@ const NAV_ITEMS_EN = [
   { key: 'pay', label: 'Payments' },
 ];
 
-const STATUS_STYLES: Record<PaymentRecord['status'], { bg: string; fg: string; label: { zh: string; en: string } }> = {
-  success: { bg: 'bg-emerald-50', fg: 'text-emerald-700 border-emerald-200', label: { zh: '已支付', en: 'Paid' } },
-  failed: { bg: 'bg-rose-50', fg: 'text-rose-700 border-rose-200', label: { zh: '失败', en: 'Failed' } },
-  pending: { bg: 'bg-amber-50', fg: 'text-amber-700 border-amber-200', label: { zh: '处理中', en: 'Pending' } },
-  refunded: { bg: 'bg-sky-50', fg: 'text-sky-700 border-sky-200', label: { zh: '已退款', en: 'Refunded' } },
+const STATUS_STYLES: Record<PaymentRecord['status'], { bg: string; fg: string; label: { zh: string; en: string; ja: string; ko: string } }> = {
+  success: { bg: 'bg-emerald-50', fg: 'text-emerald-700 border-emerald-200', label: { zh: '已支付', en: 'Paid', ja: 'Paid', ko: 'Paid' } },
+  failed: { bg: 'bg-rose-50', fg: 'text-rose-700 border-rose-200', label: { zh: '失败', en: 'Failed', ja: 'Failed', ko: 'Failed' } },
+  pending: { bg: 'bg-amber-50', fg: 'text-amber-700 border-amber-200', label: { zh: '处理中', en: 'Pending', ja: 'Pending', ko: 'Pending' } },
+  refunded: { bg: 'bg-sky-50', fg: 'text-sky-700 border-sky-200', label: { zh: '已退款', en: 'Refunded', ja: 'Refunded', ko: 'Refunded' } },
 };
 
-const METHOD_LABEL: Record<PaymentRecord['method'], { zh: string; en: string }> = {
-  card: { zh: '银行卡', en: 'Card' },
-  wallet: { zh: '钱包', en: 'Wallet' },
-  bank: { zh: '网银', en: 'Bank transfer' },
+const METHOD_LABEL: Record<PaymentRecord['method'], { zh: string; en: string; ja: string; ko: string }> = {
+  card: { zh: '银行卡', en: 'Card', ja: 'Card', ko: 'Card' },
+  wallet: { zh: '钱包', en: 'Wallet', ja: 'Wallet', ko: 'Wallet' },
+  bank: { zh: '网银', en: 'Bank transfer', ja: 'Bank transfer', ko: 'Bank transfer' },
 };
 
 const BRAND_COLORS: Record<string, string> = {

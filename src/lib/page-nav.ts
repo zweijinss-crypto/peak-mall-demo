@@ -39,6 +39,8 @@ export const CURRENCY_OPTIONS: Array<{ code: CurrencyCode; label: string }> = [
 export const LANG_OPTIONS: Array<{ code: Locale; label: string }> = [
   { code: 'zh', label: '中文' },
   { code: 'en', label: 'EN' },
+  { code: 'ja', label: '日本語' },
+  { code: 'ko', label: '한국어' },
 ];
 
 /** Nav items for the secondary (account-area) pages. */
@@ -56,6 +58,32 @@ const SUB_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string; href: st
     { key: 'profile', label: '个人中心', href: '/profile' },
   ],
   en: [
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'cart', label: 'Cart', href: '/cart' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'wishlist', label: 'Wishlist', href: '/wishlist' },
+    { key: 'address', label: 'Addresses', href: '/address' },
+    { key: 'aftersale', label: 'After-sales', href: '/aftersale' },
+    { key: 'commissions', label: 'Commissions', href: '/commissions' },
+    { key: 'withdraw', label: 'Withdraw', href: '/withdraw' },
+    { key: 'withdraw-address', label: 'Payout address', href: '/withdraw-address' },
+    { key: 'profile', label: 'Account', href: '/profile' },
+  ],
+
+  ja: [
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'cart', label: 'Cart', href: '/cart' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'wishlist', label: 'Wishlist', href: '/wishlist' },
+    { key: 'address', label: 'Addresses', href: '/address' },
+    { key: 'aftersale', label: 'After-sales', href: '/aftersale' },
+    { key: 'commissions', label: 'Commissions', href: '/commissions' },
+    { key: 'withdraw', label: 'Withdraw', href: '/withdraw' },
+    { key: 'withdraw-address', label: 'Payout address', href: '/withdraw-address' },
+    { key: 'profile', label: 'Account', href: '/profile' },
+  ],
+
+  ko: [
     { key: 'home', label: 'Home', href: '/' },
     { key: 'cart', label: 'Cart', href: '/cart' },
     { key: 'orders', label: 'My orders', href: '/orders' },
@@ -93,12 +121,34 @@ const HOME_NAV_ITEMS: Record<Locale, Array<{ key: string; label: string; href: s
     { key: 'after', label: 'After-sales', href: '/aftersale' },
     { key: 'about', label: 'About', href: '/about' },
   ],
+
+  ja: [
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'all', label: 'All', href: '/shop-all' },
+    { key: 'new', label: 'New', href: '/shop-new' },
+    { key: 'hot', label: 'Hot', href: '/shop-hot' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'after', label: 'After-sales', href: '/aftersale' },
+    { key: 'about', label: 'About', href: '/about' },
+  ],
+
+  ko: [
+    { key: 'home', label: 'Home', href: '/' },
+    { key: 'all', label: 'All', href: '/shop-all' },
+    { key: 'new', label: 'New', href: '/shop-new' },
+    { key: 'hot', label: 'Hot', href: '/shop-hot' },
+    { key: 'orders', label: 'My orders', href: '/orders' },
+    { key: 'after', label: 'After-sales', href: '/aftersale' },
+    { key: 'about', label: 'About', href: '/about' },
+  ],
 };
 
 /** Per-page announcement copy (top scrolling bar). */
 const ANNOUNCE: Record<Locale, { tag: string; text: string }> = {
   zh: { tag: '公告', text: '全场满 $50 包邮 · 7 天无理由退换' },
   en: { tag: 'Notice', text: 'Free shipping over $50 · 7-day no-reason returns' },
+  ja: { tag: 'Notice', text: 'Free shipping over $50 · 7-day no-reason returns' },
+  ko: { tag: 'Notice', text: 'Free shipping over $50 · 7-day no-reason returns' },
 };
 
 export type PageKey =

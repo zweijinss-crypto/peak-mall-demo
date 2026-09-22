@@ -17,17 +17,17 @@ const STATUS_LABEL_EN: Record<PaymentRecord['status'], string> = {
   pending: 'Pending',
   refunded: 'Refunded',
 };
-const METHOD_LABEL: Record<PaymentRecord['method'], { zh: string; en: string }> = {
-  card: { zh: '银行卡', en: 'Card' },
-  wallet: { zh: '钱包', en: 'Wallet' },
-  bank: { zh: '网银', en: 'Bank transfer' },
+const METHOD_LABEL: Record<PaymentRecord['method'], { zh: string; en: string; ja: string; ko: string }> = {
+  card: { zh: '银行卡', en: 'Card', ja: 'Card', ko: 'Card' },
+  wallet: { zh: '钱包', en: 'Wallet', ja: 'Wallet', ko: 'Wallet' },
+  bank: { zh: '网银', en: 'Bank transfer', ja: 'Bank transfer', ko: 'Bank transfer' },
 };
-const ERROR_LABEL: Record<string, { zh: string; en: string }> = {
-  INSUFFICIENT_FUNDS: { zh: '余额不足', en: 'Insufficient funds' },
-  CARD_DECLINED: { zh: '银行拒收', en: 'Declined' },
-  EXPIRED: { zh: '卡片过期', en: 'Expired' },
-  CVV_MISMATCH: { zh: 'CVV 不匹配', en: 'CVV mismatch' },
-  NETWORK: { zh: '网络异常', en: 'Network error' },
+const ERROR_LABEL: Record<string, { zh: string; en: string; ja: string; ko: string }> = {
+  INSUFFICIENT_FUNDS: { zh: '余额不足', en: 'Insufficient funds', ja: 'Insufficient funds', ko: 'Insufficient funds' },
+  CARD_DECLINED: { zh: '银行拒收', en: 'Declined', ja: 'Declined', ko: 'Declined' },
+  EXPIRED: { zh: '卡片过期', en: 'Expired', ja: 'Expired', ko: 'Expired' },
+  CVV_MISMATCH: { zh: 'CVV 不匹配', en: 'CVV mismatch', ja: 'CVV mismatch', ko: 'CVV mismatch' },
+  NETWORK: { zh: '网络异常', en: 'Network error', ja: 'Network error', ko: 'Network error' },
 };
 
 export interface PaymentDetailDialogProps {

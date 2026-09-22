@@ -185,9 +185,9 @@ export const ROUTE_RESOURCE: Record<string, AdminResource> = {
 /**
  * UI label per role. Used in the admin shell footer / user menu.
  */
-export const ROLE_LABEL: Record<AdminRole, { zh: string; en: string }> = {
-  super_admin: { zh: '超级管理员', en: 'Super admin' },
-  ops:         { zh: '运营',       en: 'Operations' },
-  cs:          { zh: '客服',       en: 'Customer support' },
-  finance:     { zh: '财务',       en: 'Finance' },
+export const ROLE_LABEL: Record<AdminRole, { zh: string; en: string; ja: string; ko: string }> = {
+  super_admin: { zh: '超级管理员', en: 'Super admin', ja: 'スーパー管理者', ko: '최고 관리자' },
+  ops:         { zh: '运营',       en: 'Operations',  ja: '運営',           ko: '운영' },
+  cs:          { zh: '客服',       en: 'Customer support', ja: 'カスタマーサポート', ko: '고객 지원' },
+  finance:     { zh: '财务',       en: 'Finance',     ja: '財務',           ko: '재무' },
 };
