@@ -34,23 +34,22 @@ export function UsersClient() {
   const t = useT();
   const [users, setUsers, mounted] = useAdminStore('users');
 
-  // Phase 1.1 stub: Supabase connectivity probe.
-  // Full switch deferred to Phase 1.3 (admin auth) + uuid id migration.
+  // Phase 1.1.8: hydrate from Supabase users when configured. The local
+  // user table is refreshed in place so the rest of the component
+  // (selection / detail / role toggle) keeps working unchanged.
   useEffect(() => {
     if (!mounted || !isSupabaseConfigured()) return;
     let cancelled = false;
     void fetchAllUsers().then((rows) => {
-      if (cancelled || rows === null) return;
+      if (cancelled || rows === null || rows.length === 0) return;
       // eslint-disable-next-line no-console
-      console.info(
-        `[admin/users] Supabase reachable — ${rows.length} users in db. ` +
-          'Remote sync deferred to Phase 1.3 (requires admin RLS + uuid id migration).',
-      );
+      console.info(`[admin/users] hydrated ${rows.length} users from Supabase`);
+      setUsers(rows);
     });
     return () => {
       cancelled = true;
     };
-  }, [mounted]);
+  }, [mounted, setUsers]);
   const [orders] = useAdminStore('orders');
 
   const [selected, setSelected] = useState<Set<number>>(new Set());

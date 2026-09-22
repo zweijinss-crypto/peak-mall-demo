@@ -39,25 +39,18 @@ export {
 
 export {
   fetchAllProducts,
-  updateProduct,
-  archiveProduct,
+  setProductStock,
+  setProductStatus,
 } from './admin-products-api';
 
 export {
-  fetchAllOrdersForAdmin,
-  shipOrder,
-  completeOrder,
-  adminCancelOrder,
-  refundOrder,
-  type AdminOrderRow,
-  type RefundResult,
+  fetchAllOrders,
+  setOrderStatus,
 } from './admin-orders-api';
 
 export {
   fetchAllUsers,
   setUserStatus,
-  setUserRole,
-  type AdminUserRow,
 } from './admin-users-api';
 
 export {

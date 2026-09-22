@@ -8,8 +8,10 @@ import { PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
-import { fetchAllOrdersForAdmin, isSupabaseConfigured } from '@/lib/api';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllOrders } from '@/lib/api/admin-orders-api';
 import { shipOrder, refundOrder } from '@/lib/api/admin-orders-api';
+import { adminStore } from '@/lib/admin/fixtures';
 
 type Tab = 'all' | OrderStatus;
 
@@ -59,25 +61,26 @@ export function OrdersClient() {
   const t = useT();
   const [orders, setOrders, mounted, isEn] = useAdminStore('orders');
 
-  // Phase 1.1 stub: fetch from Supabase once per mount to validate
-  // connectivity. The local fixture table remains the source of truth
-  // until admin auth (Phase 1.3) and the uuid id migration land — both
-  // are prerequisites for a full switch.
+  // Phase 1.1.8: hydrate from Supabase orders + users into the local
+  // adminStore so the existing component logic keeps working without
+  // mutator changes. setOrders() continues to write through adminStore;
+  // ship/refund go through supabase-api helpers (already wired).
   useEffect(() => {
     if (!mounted || !isSupabaseConfigured()) return;
     let cancelled = false;
-    void fetchAllOrdersForAdmin().then((rows) => {
-      if (cancelled || rows === null) return;
+    void fetchAllOrders().then((rows) => {
+      if (cancelled || rows === null || rows.length === 0) return;
       // eslint-disable-next-line no-console
-      console.info(
-        `[admin/orders] Supabase reachable — ${rows.length} orders in db. ` +
-          'Switching to remote data requires Phase 1.3 (admin auth) + ' +
-          'uuid id migration. Currently ignored to preserve fixture UX.',
-      );
+      console.info(`[admin/orders] hydrated ${rows.length} orders from Supabase`);
+      adminStore.orders.write(rows);
+      // Force the hook to re-read by triggering a state bump:
+      const hydrated = adminStore.orders.read();
+      setOrders(hydrated);
     });
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   const [tab, setTab] = useState<Tab>('all');
@@ -212,9 +215,9 @@ export function OrdersClient() {
     }
     setRefundBusy(true);
     setRefundErr(null);
-    const result = await refundOrder(String(refundingOrder.id), amt, refundReason);
+    const result = await refundOrder(refundingOrder.id, amt, refundReason);
     if (!result.ok) {
-      setRefundErr(result.error);
+      setRefundErr(result.error ?? 'Unknown error');
       setRefundBusy(false);
       return;
     }

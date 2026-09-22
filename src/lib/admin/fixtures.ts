@@ -60,6 +60,15 @@ export interface AdminOrder {
   refund_amount?: number;
   /** Phase 2.4 — 'none' | 'partial' | 'full' from orders.refund_state. */
   refund_state?: 'none' | 'partial' | 'full';
+  /** Phase 2.2 — Phase 2.2 carrier + tracking for shipping flow. */
+  carrier?: string;
+  tracking_no?: string;
+  tracking_url?: string;
+  shipped_at?: string;
+  /** Phase 2.4 — payment_status mirror (pending/success/failed/refunded). */
+  payment_status?: 'pending' | 'success' | 'failed' | 'refunded';
+  /** Phase 1.1.8 — Supabase orders uuid, set when row comes from DB. */
+  uuid?: string;
 }
 
 export interface AdminUser {
@@ -73,6 +82,8 @@ export interface AdminUser {
   created_at: string;
   balance: number;
   withdraw_address?: string;
+  /** Phase 1.1.8 — Supabase users uuid, set when row comes from DB. */
+  uuid?: string;
 }
 
 export interface AdminAgent {
