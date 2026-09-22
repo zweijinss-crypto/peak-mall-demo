@@ -61,3 +61,13 @@ export {
 export {
   useSyncStatus,
 } from './sync-status';
+
+export {
+  createCheckoutSession,
+  parseCheckoutReturn,
+  type CheckoutResult,
+  type CheckoutLineItem,
+  type CheckoutAddress,
+} from './checkout-api';
+
+export { isStripeBrowserConfigured } from './stripe-browser';

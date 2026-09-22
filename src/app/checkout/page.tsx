@@ -12,6 +12,11 @@ import {
 import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
+import {
+  createCheckoutSession,
+  parseCheckoutReturn,
+  isStripeBrowserConfigured,
+} from '@/lib/api';
 
 const ADDR_KEY = 'peak_addresses';
 /** E1: 记住上次选的地址 + 支付方式 */
@@ -157,7 +162,7 @@ export default function CheckoutPage() {
     setCardHolder('');
   };
 
-  const confirmPay = () => {
+  const confirmPay = async () => {
     if (!pendingOrder) return;
     setPayError(null);
 
@@ -171,15 +176,81 @@ export default function CheckoutPage() {
     }
 
     setPaying(true);
-    // Simulate payment latency
-    window.setTimeout(() => {
-      setPaying(false);
+
+    // Phase 1.2: real path — call the serverless endpoint, then either
+    // redirect to Stripe Checkout OR fall back to the demo "pending"
+    // path when Stripe is not configured in this build.
+    const checkoutItems = pendingOrder.items.map((it) => ({
+      productId: it.productId,
+      name: it.name,
+      unitPrice: Math.round(Number(it.price) * 100), // dollars → cents
+      qty: it.qty,
+      cover: it.cover ?? null,
+    }));
+
+    try {
+      const picked = addresses.find((a) => a.id === pickedAddrId);
+      const session = await createCheckoutSession({
+        items: checkoutItems,
+        shipping: {
+          name: picked?.name ?? '—',
+          phone: picked?.phone ?? '—',
+          region: picked?.region ?? '—',
+          detail: picked?.detail ?? '—',
+        },
+        currency: chrome.currency,
+        couponCode: null,
+      });
+
+      if (!session) {
+        setPayError(
+          chrome.isEn
+            ? 'Payment session failed. Please retry.'
+            : '创建支付会话失败,请重试',
+        );
+        setPaying(false);
+        return;
+      }
+
+      if (isStripeBrowserConfigured()) {
+        // Stripe.js v9 dropped redirectToCheckout — the cleanest path
+        // is to navigate directly to the Session URL we just created.
+        // Stripe's hosted page handles the rest.
+        window.location.href = session.url;
+        return; // navigation in progress
+      }
+
+      // Fallback path (no Stripe configured): go straight to /orders.
+      // The order is in 'pending' state; webhook / Phase 1.5 will flip it.
       setPendingOrder(null);
       justPaid.current = true;
-      router.push('/orders');
-      window.setTimeout(() => { justPaid.current = false; }, 2000);
-    }, 1500);
+      router.push(`/orders?paid=pending&order=${session.orderId}`);
+      window.setTimeout(() => { justPaid.current = false; }, 4000);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[checkout] confirmPay failed:', err);
+      setPayError(
+        chrome.isEn ? 'Payment failed. Please retry.' : '支付失败,请重试',
+      );
+    } finally {
+      setPaying(false);
+    }
   };
+
+  // Parse ?cancelled=1 on mount so the user can tell the back-from-stripe case.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ret = parseCheckoutReturn(window.location.href);
+    if (ret.sessionId && !ret.paid) {
+      // Came back from Stripe without the success param (e.g. user closed
+      // the tab mid-flow). Show a soft toast.
+      setPayError(
+        chrome.isEn
+          ? 'Payment cancelled — your cart is still here.'
+          : '支付已取消 — 购物车仍保留。',
+      );
+    }
+  }, [chrome.isEn]);
 
   const formatCardNumber = (raw: string) => {
     const digits = raw.replace(/\D/g, '').slice(0, 19);
