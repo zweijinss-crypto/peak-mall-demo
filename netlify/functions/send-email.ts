@@ -24,10 +24,16 @@ import {
   shipmentNotification,
   passwordReset,
   welcome,
+  refundNotification,
 } from '../../src/lib/email/templates';
 
 interface SendEmailRequest {
-  kind: 'order_confirmation' | 'shipment_notification' | 'password_reset' | 'welcome';
+  kind:
+    | 'order_confirmation'
+    | 'shipment_notification'
+    | 'password_reset'
+    | 'welcome'
+    | 'refund_notification';
   to: string;
   data: Record<string, unknown>;
 }
@@ -86,6 +92,11 @@ export const handler: Handler = async (event) => {
       break;
     case 'welcome':
       rendered = welcome(data as unknown as Parameters<typeof welcome>[0]);
+      break;
+    case 'refund_notification':
+      rendered = refundNotification(
+        data as unknown as Parameters<typeof refundNotification>[0],
+      );
       break;
     default:
       return { statusCode: 400, body: `unknown kind: ${body.kind}` };

@@ -48,7 +48,9 @@ export {
   shipOrder,
   completeOrder,
   adminCancelOrder,
+  refundOrder,
   type AdminOrderRow,
+  type RefundResult,
 } from './admin-orders-api';
 
 export {

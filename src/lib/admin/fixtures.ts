@@ -56,6 +56,10 @@ export interface AdminOrder {
   /** Phase 2.2 — buyer email for shipment notifications. */
   buyer_email?: string;
   refund_at?: string;
+  /** Phase 2.4 — running sum of succeeded refunds. */
+  refund_amount?: number;
+  /** Phase 2.4 — 'none' | 'partial' | 'full' from orders.refund_state. */
+  refund_state?: 'none' | 'partial' | 'full';
 }
 
 export interface AdminUser {

@@ -101,3 +101,41 @@ export async function adminCancelOrder(
   }
   return true;
 }
+
+/**
+ * Phase 2.4 — admin-initiated refund via the stripe-refund netlify
+ * function. Returns the audit id + Stripe refund id on success; null
+ * on transport failure. The server returns 4xx/5xx with a body
+ * message which we propagate in `error`.
+ */
+export interface RefundResult {
+  refundId: string;
+  auditId: string;
+  amount: number;
+  currency: string;
+}
+export async function refundOrder(
+  orderId: string,
+  amount: number,
+  reason?: string,
+  note?: string,
+): Promise<{ ok: true; data: RefundResult } | { ok: false; error: string }> {
+  const res = await fetch('/.netlify/functions/stripe-refund', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(process.env.NEXT_PUBLIC_INTERNAL_API_TOKEN
+        ? { 'x-internal-token': process.env.NEXT_PUBLIC_INTERNAL_API_TOKEN }
+        : {}),
+    },
+    body: JSON.stringify({ orderId, amount, reason, note }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'unknown error');
+    // eslint-disable-next-line no-console
+    console.error('[admin-orders-api] refundOrder:', res.status, text);
+    return { ok: false, error: text || `HTTP ${res.status}` };
+  }
+  const data = (await res.json()) as RefundResult;
+  return { ok: true, data };
+}

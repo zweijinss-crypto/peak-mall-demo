@@ -9,7 +9,7 @@ import { useT } from '@/lib/use-t';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
 import { fetchAllOrdersForAdmin, isSupabaseConfigured } from '@/lib/api';
-import { shipOrder } from '@/lib/api/admin-orders-api';
+import { shipOrder, refundOrder } from '@/lib/api/admin-orders-api';
 
 type Tab = 'all' | OrderStatus;
 
@@ -89,6 +89,12 @@ export function OrdersClient() {
   const [cancelReason, setCancelReason] = useState('');
   const [refundingId, setRefundingId] = useState<number | null>(null);
   const [deletingIds, setDeletingIds] = useState<number[] | null>(null);
+
+  // Phase 2.4 — refund dialog state (amount + reason)
+  const [refundAmount, setRefundAmount] = useState<string>('');
+  const [refundReason, setRefundReason] = useState<string>('requested_by_customer');
+  const [refundBusy, setRefundBusy] = useState(false);
+  const [refundErr, setRefundErr] = useState<string | null>(null);
 
   // Phase 2.2 — shipping dialog state
   const [shippingOrderId, setShippingOrderId] = useState<number | null>(null);
@@ -188,15 +194,55 @@ export function OrdersClient() {
     });
   };
 
-  const confirmRefund = () => {
-    if (refundingId === null) return;
+  const confirmRefund = async () => {
+    if (refundingId === null || !refundingOrder) return;
+    const remaining = Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0);
+    const amt = Number(refundAmount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      setRefundErr(isEn ? 'Enter a positive amount.' : '请输入大于 0 的金额。');
+      return;
+    }
+    if (amt > remaining + 0.005) {
+      setRefundErr(
+        isEn
+          ? `Maximum refundable is ${usd(remaining)}.`
+          : `可退金额上限 ${usd(remaining)}。`,
+      );
+      return;
+    }
+    setRefundBusy(true);
+    setRefundErr(null);
+    const result = await refundOrder(String(refundingOrder.id), amt, refundReason);
+    if (!result.ok) {
+      setRefundErr(result.error);
+      setRefundBusy(false);
+      return;
+    }
+    // Optimistic UI update — server has already persisted.
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const newRefundedTotal = Number(refundingOrder.refund_amount ?? 0) + amt;
+    const orderTotal = Number(refundingOrder.amount);
+    const isFull = newRefundedTotal >= orderTotal - 0.005;
     setOrders(
       orders.map((o: any) =>
-        o.id === refundingId ? { ...o, status: 'cancelled' as const, refunded: true, refund_at: now, updated_at: now } : o,
+        o.id === refundingId
+          ? {
+              ...o,
+              refunded: true,
+              refund_at: isFull ? now : o.refund_at,
+              refund_amount: newRefundedTotal,
+              refund_state: isFull ? 'full' : 'partial',
+              status: isFull ? ('cancelled' as const) : o.status,
+              payment_status: isFull ? 'refunded' : o.payment_status,
+              updated_at: now,
+            }
+          : o,
       ),
     );
     setRefundingId(null);
+    setRefundAmount('');
+    setRefundReason('requested_by_customer');
+    setRefundBusy(false);
   };
 
   // Phase 2.2 — confirm ship + fire shipment email.
@@ -718,11 +764,16 @@ export function OrdersClient() {
         )}
       </Modal>
 
-      {/* Refund confirm modal */}
+      {/* Refund confirm modal — Phase 2.4 with amount + reason */}
       <Modal
         open={refundingId !== null}
         title={t.admin.orders.refundTitle}
-        onClose={() => setRefundingId(null)}
+        onClose={() => {
+          if (refundBusy) return;
+          setRefundingId(null);
+          setRefundAmount('');
+          setRefundErr(null);
+        }}
         width="440px"
       >
         {refundingOrder && (
@@ -730,10 +781,65 @@ export function OrdersClient() {
             <p className="text-[13px] text-neutral-700 mb-3">
               {t.admin.orders.refundBody(usd(refundingOrder.amount), refundingOrder.order_no)}
             </p>
+            <p className="text-[12px] text-neutral-500 mb-3">
+              {isEn
+                ? `Already refunded: ${usd(Number(refundingOrder.refund_amount ?? 0))} • Refundable: ${usd(Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)))}`
+                : `已退款：${usd(Number(refundingOrder.refund_amount ?? 0))} · 可退金额：${usd(Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)))}`}
+            </p>
+
+            <label className="block text-[12px] font-medium text-neutral-700 mb-1" htmlFor="refund-amount">
+              {isEn ? 'Refund amount (USD)' : '退款金额（美元）'}
+            </label>
+            <input
+              id="refund-amount"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={refundAmount}
+              onChange={(e) => setRefundAmount(e.target.value)}
+              placeholder={String(
+                Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)).toFixed(2),
+              )}
+              disabled={refundBusy}
+              aria-label={isEn ? 'Refund amount in USD' : '退款金额（美元）'}
+              className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md mb-3 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+            />
+
+            <label className="block text-[12px] font-medium text-neutral-700 mb-1" htmlFor="refund-reason">
+              {isEn ? 'Reason' : '原因'}
+            </label>
+            <select
+              id="refund-reason"
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              disabled={refundBusy}
+              aria-label={isEn ? 'Refund reason' : '退款原因'}
+              className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md mb-3 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+            >
+              <option value="requested_by_customer">
+                {isEn ? 'Customer request' : '客户申请'}
+              </option>
+              <option value="duplicate">{isEn ? 'Duplicate charge' : '重复扣款'}</option>
+              <option value="fraudulent">{isEn ? 'Fraud' : '欺诈'}</option>
+              <option value="damaged">{isEn ? 'Damaged item' : '商品损坏'}</option>
+              <option value="other">{isEn ? 'Other' : '其他'}</option>
+            </select>
+
+            {refundErr && (
+              <div role="alert" className="text-[12px] text-rose-700 bg-rose-50 border border-rose-200 rounded-md px-2.5 py-1.5 mb-3">
+                {refundErr}
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setRefundingId(null)}
+                onClick={() => {
+                  if (refundBusy) return;
+                  setRefundingId(null);
+                  setRefundAmount('');
+                  setRefundErr(null);
+                }}
                 className="px-3 py-1.5 text-[12.5px] font-medium border border-neutral-300 rounded-md text-neutral-700 hover:bg-neutral-50 transition-colors"
               >
                 {t.admin.wd.cancel}
@@ -741,9 +847,14 @@ export function OrdersClient() {
               <button
                 type="button"
                 onClick={confirmRefund}
-                className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-rose-600 text-white hover:bg-rose-700 transition-colors"
+                disabled={refundBusy}
+                className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {t.admin.orders.confirmRefund}
+                {refundBusy
+                  ? isEn
+                    ? 'Processing…'
+                    : '处理中…'
+                  : t.admin.orders.confirmRefund}
               </button>
             </div>
           </div>

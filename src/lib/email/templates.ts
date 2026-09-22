@@ -37,6 +37,15 @@ export interface WelcomeData {
   siteUrl: string;
 }
 
+export interface RefundNotificationData {
+  orderNumber: string;
+  customerName?: string;
+  refundAmountFormatted: string;
+  currency?: string;
+  reason?: string;
+  siteUrl: string;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -222,5 +231,41 @@ export function welcome(
   const text = `Welcome to Peak Mall
 
 Your account is ready. Start shopping: ${data.siteUrl}/`;
+  return { subject, html, text };
+}
+
+// ---------------------------------------------------------------
+// 5. Refund notification (Phase 2.4)
+// ---------------------------------------------------------------
+
+export function refundNotification(
+  data: RefundNotificationData,
+): { subject: string; html: string; text: string } {
+  const greeting = data.customerName ? `Hi ${escapeHtml(data.customerName)},` : 'Hi,';
+  const reasonLine = data.reason
+    ? `<p style="margin:8px 0 0 0;font-size:14px;line-height:1.6;color:#6b6b70;">Reason: ${escapeHtml(data.reason)}</p>`
+    : '';
+  const subject = `Refund issued for order ${data.orderNumber}`;
+  const html = shell(
+    'Peak Mall',
+    subject,
+    `<tr><td style="padding:16px 36px 8px 36px;">
+  <h1 style="margin:0;font-size:22px;line-height:1.3;color:#1d1d1f;">Your refund is on its way</h1>
+  <p style="margin:8px 0 0 0;font-size:14px;line-height:1.6;color:#6b6b70;">${greeting} we've issued a refund of <strong>${escapeHtml(data.refundAmountFormatted)}</strong>${data.currency ? ' ' + escapeHtml(data.currency) : ''} for order <strong>#${escapeHtml(data.orderNumber)}</strong>.</p>
+  ${reasonLine}
+  <p style="margin:8px 0 0 0;font-size:14px;line-height:1.6;color:#6b6b70;">Depending on your bank, the funds typically arrive within 5–10 business days.</p>
+</td></tr>
+<tr><td style="padding:0 36px 16px 36px;">
+  ${ctaButton(`${data.siteUrl}/orders`, 'View order details')}
+</td></tr>`,
+  );
+  const text = `Your refund is on its way
+
+Order: ${data.orderNumber}
+Refund amount: ${data.refundAmountFormatted}${data.currency ? ' ' + data.currency : ''}
+${data.reason ? 'Reason: ' + data.reason + '\n' : ''}
+Funds typically arrive within 5–10 business days.
+
+View order: ${data.siteUrl}/orders`;
   return { subject, html, text };
 }

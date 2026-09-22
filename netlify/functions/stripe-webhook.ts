@@ -169,10 +169,32 @@ const handler: Handler = async (event) => {
         const charge = stripeEvent.data.object as Stripe.Charge;
         const orderId = charge.metadata?.order_id;
         if (!orderId) break;
-        await supabase
-          .from('orders')
-          .update({ payment_status: 'refunded', status: 'cancelled' })
-          .eq('id', orderId);
+
+        // Phase 2.4 — record the refund in order_refunds if we
+        // didn't already issue it via the admin path (i.e. it
+        // originated in the Stripe dashboard or via a refund.* event
+        // we missed). We dedupe on stripe_refund_id so re-delivery
+        // is safe.
+        const refundsList = charge.refunds?.data ?? [];
+        for (const r of refundsList) {
+          await supabase.from('order_refunds').upsert(
+            {
+              order_id: orderId,
+              stripe_refund_id: r.id,
+              stripe_payment_intent: (charge.payment_intent as string) ?? null,
+              amount: (r.amount ?? 0) / 100,
+              currency: (charge.currency ?? 'usd').toUpperCase(),
+              reason: r.reason ?? null,
+              status: 'succeeded',
+              processed_at: new Date().toISOString(),
+            },
+            { onConflict: 'stripe_refund_id', ignoreDuplicates: true },
+          );
+        }
+
+        // Roll up orders.refund_state from order_refunds (authoritative).
+        await supabase.rpc('recompute_order_refund_state', { p_order_id: orderId });
+
         await supabase.from('payments').insert({
           order_id: orderId,
           provider: 'stripe',
