@@ -18,6 +18,7 @@
 import type { Handler } from '@netlify/functions';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getStripeServer } from '../../src/lib/api/stripe-server';
+import { logger } from './_shared/logger';
 
 interface LineItem {
   productId: number;
@@ -47,7 +48,10 @@ const handler: Handler = async (event) => {
   }
 
   const stripe = getStripeServer();
-  if (!stripe) return { statusCode: 503, body: 'Stripe not configured' };
+  if (!stripe) {
+    logger.warn('stripe-session: Stripe not configured');
+    return { statusCode: 503, body: 'Stripe not configured' };
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -126,8 +130,8 @@ const handler: Handler = async (event) => {
       }),
     };
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[stripe-session] create failed:', err);
+    logger.error('stripe-session: create failed', err);
+    await logger.flush();
     return { statusCode: 500, body: 'Stripe session create failed' };
   }
 };
@@ -181,8 +185,7 @@ async function createOrderOnServer(
     .single();
 
   if (e1 || !order) {
-    // eslint-disable-next-line no-console
-    console.error('[stripe-session] order insert:', e1);
+    logger.error('stripe-session: order insert failed', e1);
     return null;
   }
 
@@ -199,8 +202,9 @@ async function createOrderOnServer(
       })),
     );
     if (e2) {
-      // eslint-disable-next-line no-console
-      console.error('[stripe-session] order_items insert:', e2);
+      logger.error('stripe-session: order_items insert failed', e2, {
+        orderId: order.id,
+      });
       // Order header is already committed; Phase 1.5 surfaces this as a
       // reconciliation job rather than a hard fail.
     }

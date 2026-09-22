@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import CookieBanner from '@/components/peak-mall/CookieBanner';
+import { ErrorBoundary } from '@/components/peak-mall/ErrorBoundary';
 import SupportWidget from '@/components/peak-mall/SupportWidget';
 import SupabaseSyncBoot from '@/components/peak-mall/SupabaseSyncBoot';
 import SyncErrorToast, { SyncErrorWatcher } from '@/components/peak-mall/SyncErrorToast';
@@ -48,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh">
       <body className="bg-[var(--color-bg-page)] text-ink-900 font-sans">
-        {children}
+        <ErrorBoundary>{children}</ErrorBoundary>
         <CookieBanner />
         {/* Phase 1.1: mirror server state into zustand once per session. */}
         <SupabaseSyncBoot />

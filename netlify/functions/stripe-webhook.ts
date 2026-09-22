@@ -25,6 +25,7 @@ import Stripe from 'stripe';
 import { getStripeServer, getWebhookSecret } from '../../src/lib/api/stripe-server';
 import { sendEmail } from '../../src/lib/email/resend-client';
 import { orderConfirmation } from '../../src/lib/email/templates';
+import { logger } from './_shared/logger';
 
 // Wire format helpers — Stripe + Supabase share little type structure here.
 interface OrderUpdate {
@@ -44,6 +45,10 @@ const handler: Handler = async (event) => {
   const stripe = getStripeServer();
   const webhookSecret = getWebhookSecret();
   if (!stripe || !webhookSecret) {
+    logger.warn('stripe-webhook: Stripe not configured', {
+      hasStripe: Boolean(stripe),
+      hasSecret: Boolean(webhookSecret),
+    });
     return { statusCode: 503, body: 'Stripe not configured' };
   }
 
@@ -59,7 +64,7 @@ const handler: Handler = async (event) => {
     );
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error('[stripe-webhook] signature verification failed:', err);
+    logger.error('stripe-webhook: signature verification failed', err);
     return { statusCode: 400, body: 'Invalid signature' };
   }
 
@@ -67,6 +72,10 @@ const handler: Handler = async (event) => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) {
+    logger.warn('stripe-webhook: Supabase not configured', {
+      hasUrl: Boolean(url),
+      hasServiceKey: Boolean(serviceKey),
+    });
     return { statusCode: 503, body: 'Supabase not configured' };
   }
   const supabase = createClient<any, 'public', any>(url, serviceKey, {
@@ -84,10 +93,11 @@ const handler: Handler = async (event) => {
     });
   if (dedupeErr && dedupeErr.code === '23505') {
     // Already processed — Stripe retries on 5xx, so ack and bail.
+    logger.info('stripe-webhook: duplicate ignored', { eventId: stripeEvent.id });
     return { statusCode: 200, body: 'Duplicate ignored' };
   } else if (dedupeErr) {
     // eslint-disable-next-line no-console
-    console.error('[stripe-webhook] dedupe insert failed:', dedupeErr);
+    logger.error('stripe-webhook: dedupe insert failed', dedupeErr);
     return { statusCode: 500, body: 'Dedupe write failed' };
   }
 
@@ -181,10 +191,15 @@ const handler: Handler = async (event) => {
       .update({ processed: true, processed_at: new Date().toISOString() })
       .eq('id', stripeEvent.id);
 
+    logger.info('stripe-webhook: processed', {
+      eventId: stripeEvent.id,
+      type: stripeEvent.type,
+    });
+    await logger.flush();
     return { statusCode: 200, body: 'ok' };
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error('[stripe-webhook] handler crashed:', err);
+    logger.error('stripe-webhook: handler crashed', err);
     return { statusCode: 500, body: 'Handler error' };
   }
 };
@@ -236,12 +251,9 @@ async function fireOrderConfirmation(
     const buyerName = (order as { users?: { nickname?: string } | null }).users
       ?.nickname;
     if (!buyerEmail) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[stripe-webhook] no buyer email for order',
+      logger.warn('stripe-webhook: no buyer email for order — skipping', {
         orderId,
-        '— skipping confirmation email',
-      );
+      });
       return;
     }
 
@@ -297,18 +309,15 @@ async function fireOrderConfirmation(
       error_message: result.ok ? null : result.error,
     });
 
-    // eslint-disable-next-line no-console
-    console.log('[stripe-webhook] order confirmation email', {
+    logger.info('stripe-webhook: order confirmation email dispatched', {
       orderId,
       to: buyerEmail,
       result,
     });
   } catch (err) {
     // Never block the webhook response on email errors
-    // eslint-disable-next-line no-console
-    console.error(
-      '[stripe-webhook] order confirmation email failed:',
-      err instanceof Error ? err.message : err,
-    );
+    logger.error('stripe-webhook: order confirmation email failed', err, {
+      orderId,
+    });
   }
 }

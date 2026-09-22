@@ -18,6 +18,7 @@
  */
 import type { Handler } from '@netlify/functions';
 import { sendEmail } from '../../src/lib/email/resend-client';
+import { logger } from './_shared/logger';
 import {
   orderConfirmation,
   shipmentNotification,
@@ -45,9 +46,7 @@ export const handler: Handler = async (event) => {
     }
   } else if (process.env.NODE_ENV !== 'production') {
     // eslint-disable-next-line no-console
-    console.warn(
-      '[send-email] INTERNAL_API_TOKEN unset — running with no auth (dev only).',
-    );
+    logger.warn('send-email: INTERNAL_API_TOKEN unset — no auth (dev only)');
   }
 
   if (event.httpMethod !== 'POST') {
@@ -101,13 +100,20 @@ export const handler: Handler = async (event) => {
 
   if (!result.ok) {
     // eslint-disable-next-line no-console
-    console.error('[send-email] Resend error:', result.error, {
+    logger.error('send-email: Resend dispatch failed', result.error, {
       kind: body.kind,
       to: body.to,
     });
+    await logger.flush();
     return { statusCode: 502, body: JSON.stringify({ error: result.error }) };
   }
 
+  logger.info('send-email: dispatched', {
+    kind: body.kind,
+    to: body.to,
+    id: result.id,
+  });
+  await logger.flush();
   return {
     statusCode: 200,
     body: JSON.stringify({ id: result.id, kind: body.kind }),
