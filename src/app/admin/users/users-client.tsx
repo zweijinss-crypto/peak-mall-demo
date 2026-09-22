@@ -9,6 +9,7 @@ import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 import { Modal } from '@/components/admin/Modal';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, orderStatusLabel } from '@/lib/admin/fixtures';
+import { fetchAllUsers, isSupabaseConfigured } from '@/lib/api';
 
 const STATUS_KIND: Record<'active' | 'frozen', StatusKind> = {
   active: 'active',
@@ -32,6 +33,24 @@ const ROLE_KIND: Record<'fx' | 'agent', StatusKind> = {
 export function UsersClient() {
   const t = useT();
   const [users, setUsers, mounted] = useAdminStore('users');
+
+  // Phase 1.1 stub: Supabase connectivity probe.
+  // Full switch deferred to Phase 1.3 (admin auth) + uuid id migration.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllUsers().then((rows) => {
+      if (cancelled || rows === null) return;
+      // eslint-disable-next-line no-console
+      console.info(
+        `[admin/users] Supabase reachable — ${rows.length} users in db. ` +
+          'Remote sync deferred to Phase 1.3 (requires admin RLS + uuid id migration).',
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted]);
   const [orders] = useAdminStore('orders');
 
   const [selected, setSelected] = useState<Set<number>>(new Set());

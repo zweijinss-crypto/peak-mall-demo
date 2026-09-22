@@ -62,6 +62,19 @@ export const COPY_EN = {
 
   langLabel: { zh: 'Chinese', en: 'EN' },
 
+  sync: {
+    title: 'Sync failed',
+    addToCart: 'Could not add to cart — restored previous state',
+    updateQty: 'Could not update quantity — restored previous state',
+    removeFromCart: 'Could not remove item — restored previous state',
+    clearCart: 'Could not clear cart — restored previous state',
+    toggleSelect: 'Selection sync failed',
+    setAllSelected: 'Select-all sync failed',
+    toggleWish: 'Wishlist sync failed',
+    cancelOrder: 'Could not cancel order — restored previous state',
+    placeOrder: 'Could not sync order to server — please retry',
+  },
+
   header: {
     welcome: 'Welcome to Peak Mall',
     login: 'Sign in / Register',

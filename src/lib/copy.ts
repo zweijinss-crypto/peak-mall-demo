@@ -62,6 +62,19 @@ export const COPY = {
 
   langLabel: { zh: '中文', en: 'EN' },
 
+  sync: {
+    title: '同步失败',
+    addToCart: '加入购物车失败,已恢复原状态',
+    updateQty: '更新数量失败,已恢复原状态',
+    removeFromCart: '删除商品失败,已恢复原状态',
+    clearCart: '清空购物车失败,已恢复原状态',
+    toggleSelect: '选择状态同步失败',
+    setAllSelected: '全选状态同步失败',
+    toggleWish: '收藏状态同步失败',
+    cancelOrder: '取消订单失败,已恢复原状态',
+    placeOrder: '订单同步到服务器失败,请稍后重试',
+  },
+
   header: {
     welcome: '您好,欢迎来到顶峰',
     login: '登录 / 注册',

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import CookieBanner from '@/components/peak-mall/CookieBanner';
 import SupportWidget from '@/components/peak-mall/SupportWidget';
+import SupabaseSyncBoot from '@/components/peak-mall/SupabaseSyncBoot';
+import SyncErrorToast, { SyncErrorWatcher } from '@/components/peak-mall/SyncErrorToast';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://peak-mall-demo.netlify.app'),
@@ -48,6 +50,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-[var(--color-bg-page)] text-ink-900 font-sans">
         {children}
         <CookieBanner />
+        {/* Phase 1.1: mirror server state into zustand once per session. */}
+        <SupabaseSyncBoot />
+        {/* Phase 1.1.6: surface sync failures to the user. */}
+        <SyncErrorWatcher />
+        <SyncErrorToast />
         <SupportWidget telegram="MementoCare" agent="Memento Care" hours="Mon–Sun · 13:00–23:30 (UTC+8)" />
       </body>
     </html>

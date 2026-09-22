@@ -9,6 +9,7 @@ import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import type { AdminProduct } from '@/lib/admin/fixtures';
+import { fetchAllProducts, isSupabaseConfigured } from '@/lib/api';
 
 /**
  * ProductsClient — admin product CRUD + bulk ops + edit history (5s undo).
@@ -117,6 +118,20 @@ function renderMarkdown(md: string): string {
 export function ProductsClient() {
   const t = useT();
   const [products, setProducts, mounted] = useAdminStore('products');
+
+  // Phase 1.1: hydrate from Supabase once per page load when configured.
+  useEffect(() => {
+    if (!mounted) return;
+    if (!isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllProducts().then((rows) => {
+      if (cancelled || rows === null) return;
+      setProducts(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setProducts]);
 
   // Bulk selection — set of product ids.
   const [selected, setSelected] = useState<Set<number>>(new Set());

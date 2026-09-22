@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DataTable, Th, Td } from '@/components/admin/DataTable';
 import { StatusBadge, type StatusKind } from '@/components/admin/StatusBadge';
 import { Modal } from '@/components/admin/Modal';
@@ -8,6 +8,7 @@ import { PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { orderStatusLabel, usd, type OrderStatus } from '@/lib/admin/fixtures';
+import { fetchAllOrdersForAdmin, isSupabaseConfigured } from '@/lib/api';
 
 type Tab = 'all' | OrderStatus;
 
@@ -37,6 +38,27 @@ const STATUS_KIND: Record<OrderStatus, StatusKind> = {
 export function OrdersClient() {
   const t = useT();
   const [orders, setOrders, mounted, isEn] = useAdminStore('orders');
+
+  // Phase 1.1 stub: fetch from Supabase once per mount to validate
+  // connectivity. The local fixture table remains the source of truth
+  // until admin auth (Phase 1.3) and the uuid id migration land — both
+  // are prerequisites for a full switch.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllOrdersForAdmin().then((rows) => {
+      if (cancelled || rows === null) return;
+      // eslint-disable-next-line no-console
+      console.info(
+        `[admin/orders] Supabase reachable — ${rows.length} orders in db. ` +
+          'Switching to remote data requires Phase 1.3 (admin auth) + ' +
+          'uuid id migration. Currently ignored to preserve fixture UX.',
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted]);
 
   const [tab, setTab] = useState<Tab>('all');
   const [selected, setSelected] = useState<Set<number>>(new Set());

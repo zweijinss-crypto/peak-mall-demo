@@ -103,10 +103,11 @@ export default function OrdersPage() {
     setPendingCancel(id);
   };
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (!pendingCancel) return;
-    const ok = cancelOrder(pendingCancel);
+    const id = pendingCancel;
     setPendingCancel(null);
+    const ok = await cancelOrder(id);
     if (ok) flashToast(t.orders.cancelled);
   };
 

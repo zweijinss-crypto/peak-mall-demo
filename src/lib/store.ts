@@ -1,5 +1,15 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import {
+  fetchMyCart,
+  saveMyCart,
+  fetchMyWishlist,
+  toggleMyWish as toggleMyWishRemote,
+  fetchMyOrders,
+  createOrder as createOrderRemote,
+  cancelOwnOrder as cancelOwnOrderRemote,
+  isSupabaseConfigured,
+} from './api';
 
 export interface CartItem {
   id: number;
@@ -106,11 +116,34 @@ interface PeakStore {
   toggleWish: (id: number) => void;
   placeOrder: () => Order | null;
   /** 取消订单(仅 pending 可取消) */
-  cancelOrder: (id: string) => boolean;
+  cancelOrder: (id: string) => Promise<boolean>;
   /** 再买一次 — 把订单 items 加回购物车 */
   reorder: (id: string) => boolean;
   setLocale: (l: Locale) => void;
   setCurrency: (c: CurrencyCode) => void;
+
+  // ============================================================
+  // Phase 1.1: Supabase sync actions.
+  // When Supabase is configured and the user is signed in, these
+  // mirror local state to the server; otherwise they no-op and the
+  // demo keeps its localStorage behaviour.
+  // ============================================================
+  /** Hydrate cart + orders + wishlist from Supabase once. Idempotent. */
+  syncFromServer: () => Promise<void>;
+  /** Whether we've already attempted the one-time server hydration. */
+  syncedFromServer: boolean;
+  /** Whether Supabase is configured (env vars present). */
+  supabaseEnabled: boolean;
+  /** Manually flag sync complete (used by login flow / on-demand). */
+  markSynced: () => void;
+
+  // Phase 1.1.6 — observability for sync calls
+  /** Key of the action currently mirroring to server (UI spinner target). */
+  syncingAction: string | null;
+  /** Last sync error message (UI toast target). null when healthy. */
+  lastSyncError: string | null;
+  setSyncingAction: (k: string | null) => void;
+  setSyncError: (msg: string | null) => void;
 }
 
 export const usePeakStore = create<PeakStore>()(
@@ -123,8 +156,55 @@ export const usePeakStore = create<PeakStore>()(
       currency: 'USD',
       coupon: null,
       lastCouponCode: null,
+      syncedFromServer: false,
+      supabaseEnabled: isSupabaseConfigured(),
+      syncingAction: null,
+      lastSyncError: null,
 
-      addToCart: (item, qty = 1) =>
+      setSyncingAction: (k) => set({ syncingAction: k }),
+      setSyncError: (msg) => set({ lastSyncError: msg }),
+
+      // --------------------------------------------------------
+      // Supabase sync (Phase 1.1). When env vars are missing or
+      // the user is not signed in, these silently no-op.
+      // --------------------------------------------------------
+      syncFromServer: async () => {
+        if (!isSupabaseConfigured()) return;
+        if (get().syncedFromServer) return;
+
+        const [cart, orders, wishlist] = await Promise.all([
+          fetchMyCart(),
+          fetchMyOrders(),
+          fetchMyWishlist(),
+        ]);
+
+        set((s) => ({
+          ...(cart !== null && {
+            cart: cart.map((c) => ({
+              id: c.productId,
+              name: '', // name filled by remote lookup (Phase 1.3)
+              price: 0,
+              qty: c.qty,
+              cover: undefined,
+              selected: c.selected ?? true,
+            })),
+          }),
+          ...(wishlist !== null && {
+            wishlist: wishlist.map((id) => ({ id, addedAt: Date.now() })),
+          }),
+          ...(orders !== null && {
+            orders: orders.map(mapRemoteOrderToLocal),
+          }),
+          syncedFromServer: true,
+        }));
+      },
+
+      markSynced: () => set({ syncedFromServer: true }),
+
+      addToCart: async (item, qty = 1) => {
+        // Snapshot for rollback.
+        const before = get().cart;
+        // Local optimistic update first.
         set((s) => {
           const existing = s.cart.find((c) => c.id === item.id);
           if (existing) {
@@ -135,31 +215,143 @@ export const usePeakStore = create<PeakStore>()(
             };
           }
           return { cart: [...s.cart, { ...item, qty, selected: true }] };
-        }),
+        });
+        // Then mirror to Supabase if configured.
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'addToCart' });
+        try {
+          const newCart = get().cart.map((c) => ({
+            productId: c.id,
+            qty: c.qty,
+            selected: c.selected,
+          }));
+          const ok = await saveMyCart(newCart);
+          if (!ok) {
+            set({ cart: before, lastSyncError: 'addToCart' });
+          }
+        } catch (e) {
+          set({ cart: before, lastSyncError: 'addToCart' });
+          // eslint-disable-next-line no-console
+          console.error('[store] addToCart sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      updateQty: (id, qty) =>
+      updateQty: async (id, qty) => {
+        const before = get().cart;
         set((s) => ({
           cart: s.cart
             .map((c) => (c.id === id ? { ...c, qty } : c))
             .filter((c) => c.qty > 0),
-        })),
+        }));
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'updateQty' });
+        try {
+          const newCart = get().cart.map((c) => ({
+            productId: c.id,
+            qty: c.qty,
+            selected: c.selected,
+          }));
+          const ok = await saveMyCart(newCart);
+          if (!ok) set({ cart: before, lastSyncError: 'updateQty' });
+        } catch (e) {
+          set({ cart: before, lastSyncError: 'updateQty' });
+          // eslint-disable-next-line no-console
+          console.error('[store] updateQty sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      removeFromCart: (id) =>
-        set((s) => ({ cart: s.cart.filter((c) => c.id !== id) })),
+      removeFromCart: async (id) => {
+        const before = get().cart;
+        set((s) => ({ cart: s.cart.filter((c) => c.id !== id) }));
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'removeFromCart' });
+        try {
+          const newCart = get().cart.map((c) => ({
+            productId: c.id,
+            qty: c.qty,
+            selected: c.selected,
+          }));
+          const ok = await saveMyCart(newCart);
+          if (!ok) set({ cart: before, lastSyncError: 'removeFromCart' });
+        } catch (e) {
+          set({ cart: before, lastSyncError: 'removeFromCart' });
+          // eslint-disable-next-line no-console
+          console.error('[store] removeFromCart sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      clearCart: () => set({ cart: [], coupon: null }),
+      clearCart: async () => {
+        const before = { cart: get().cart, coupon: get().coupon };
+        set({ cart: [], coupon: null });
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'clearCart' });
+        try {
+          const ok = await saveMyCart([]);
+          if (!ok) set({ ...before, lastSyncError: 'clearCart' });
+        } catch (e) {
+          set({ ...before, lastSyncError: 'clearCart' });
+          // eslint-disable-next-line no-console
+          console.error('[store] clearCart sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      toggleSelect: (id) =>
+      toggleSelect: async (id) => {
+        const before = get().cart;
         set((s) => ({
           cart: s.cart.map((c) =>
             c.id === id ? { ...c, selected: c.selected === false ? true : false } : c
           ),
-        })),
+        }));
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'toggleSelect' });
+        try {
+          const newCart = get().cart.map((c) => ({
+            productId: c.id,
+            qty: c.qty,
+            selected: c.selected,
+          }));
+          const ok = await saveMyCart(newCart);
+          if (!ok) set({ cart: before, lastSyncError: 'toggleSelect' });
+        } catch (e) {
+          set({ cart: before, lastSyncError: 'toggleSelect' });
+          // eslint-disable-next-line no-console
+          console.error('[store] toggleSelect sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      setAllSelected: (selected) =>
+      setAllSelected: async (selected) => {
+        const before = get().cart;
         set((s) => ({
           cart: s.cart.map((c) => ({ ...c, selected })),
-        })),
+        }));
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'setAllSelected' });
+        try {
+          const newCart = get().cart.map((c) => ({
+            productId: c.id,
+            qty: c.qty,
+            selected: c.selected,
+          }));
+          const ok = await saveMyCart(newCart);
+          if (!ok) set({ cart: before, lastSyncError: 'setAllSelected' });
+        } catch (e) {
+          set({ cart: before, lastSyncError: 'setAllSelected' });
+          // eslint-disable-next-line no-console
+          console.error('[store] setAllSelected sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
       applyCoupon: (code) => {
         const valid: CouponCode[] = ['SAVE10', 'FREESHIP', 'VIP20'];
@@ -170,7 +362,9 @@ export const usePeakStore = create<PeakStore>()(
 
       removeCoupon: () => set({ coupon: null }),
 
-      toggleWish: (id) =>
+      toggleWish: async (id) => {
+        const before = get().wishlist;
+        // Local first.
         set((s) => {
           const exists = s.wishlist.some((w) => w.id === id);
           return {
@@ -178,16 +372,49 @@ export const usePeakStore = create<PeakStore>()(
               ? s.wishlist.filter((w) => w.id !== id)
               : [...s.wishlist, { id, addedAt: Date.now() }],
           };
-        }),
+        });
+        // Then mirror to Supabase.
+        if (!isSupabaseConfigured()) return;
+        set({ syncingAction: 'toggleWish' });
+        try {
+          const ok = await toggleMyWishRemote(id);
+          if (!ok) {
+            set({ wishlist: before, lastSyncError: 'toggleWish' });
+          }
+        } catch (e) {
+          set({ wishlist: before, lastSyncError: 'toggleWish' });
+          // eslint-disable-next-line no-console
+          console.error('[store] toggleWish sync failed:', e);
+        } finally {
+          set({ syncingAction: null });
+        }
+      },
 
-      cancelOrder: (id) => {
+      cancelOrder: async (id) => {
         const order = get().orders.find((o) => o.id === id);
         if (!order || order.status !== 'pending') return false;
+        const before = get().orders;
         set((s) => ({
           orders: s.orders.map((o) =>
             o.id === id ? { ...o, status: 'cancelled' as const, cancelledAt: Date.now() } : o
           ),
         }));
+        if (!isSupabaseConfigured()) return true;
+        set({ syncingAction: 'cancelOrder' });
+        try {
+          const ok = await cancelOwnOrderRemote(id);
+          if (!ok) {
+            set({ orders: before, lastSyncError: 'cancelOrder' });
+            return false;
+          }
+        } catch (e) {
+          set({ orders: before, lastSyncError: 'cancelOrder' });
+          // eslint-disable-next-line no-console
+          console.error('[store] cancelOrder sync failed:', e);
+          return false;
+        } finally {
+          set({ syncingAction: null });
+        }
         return true;
       },
 
@@ -228,10 +455,57 @@ export const usePeakStore = create<PeakStore>()(
             qty: c.qty,
             cover: c.cover,
           })),
-          total: s.cart.reduce((sum, c) => sum + c.price * c.qty, 0),
+          total: s.cart.reduce((sum, c) => sum + Number(c.price) * c.qty, 0),
           status: 'pending',
         };
         set({ orders: [order, ...s.orders], cart: [], coupon: null, lastCouponCode: s.coupon?.code ?? s.lastCouponCode });
+
+        // Phase 1.1: mirror order to Supabase if configured.
+        // Payment is still mocked here; Phase 1.2 wires Stripe.
+        if (isSupabaseConfigured()) {
+          set({ syncingAction: 'placeOrder' });
+          void createOrderRemote({
+            items: s.cart.map((c) => ({
+              productId: c.id,
+              qty: c.qty,
+              unitPrice: Number(c.price),
+              name: { zh: c.name, en: c.name },
+              cover: c.cover ?? null,
+            })),
+            shipping: {
+              name: '—',
+              phone: '—',
+              region: '—',
+              detail: '—',
+            },
+            total: {
+              subtotal: order.total,
+              shipping: 0,
+              tax: 0,
+              discount: 0,
+              total: order.total,
+            },
+            currency: s.currency,
+            couponCode: s.coupon?.code ?? null,
+          }).then((res) => {
+            if (res) {
+              // Replace local placeholder id with real remote order id
+              set((cur) => ({
+                orders: cur.orders.map((o) =>
+                  o.id === order.id ? { ...o, id: res.orderId } : o,
+                ),
+              }));
+            } else {
+              set({ lastSyncError: 'placeOrder' });
+            }
+          }).catch((e) => {
+            set({ lastSyncError: 'placeOrder' });
+            // eslint-disable-next-line no-console
+            console.error('[store] placeOrder sync failed:', e);
+          }).finally(() => {
+            set({ syncingAction: null });
+          });
+        }
         return order;
       },
 
@@ -248,8 +522,41 @@ export const usePeakStore = create<PeakStore>()(
         locale: s.locale,
         currency: s.currency,
         coupon: s.coupon,
-        lastCouponCode: s.lastCouponCode,
+              lastCouponCode: s.lastCouponCode,
       }),
     }
   )
 );
+
+// ============================================================
+// Phase 1.1: mappers between Supabase OrderRow and local Order shape.
+// Order items are NOT fetched here (would need a second roundtrip);
+// they're lazily loaded when the user opens an order detail page in
+// Phase 1.3.
+import type { OrderRow } from './api';
+function mapRemoteOrderToLocal(remote: OrderRow): Order {
+  return {
+    id: remote.id,
+    createdAt: new Date(remote.created_at).getTime(),
+    items: [], // filled on demand from /api/orders/[id] in Phase 1.3
+    total: Number(remote.total),
+    // SQL enum uses 'completed'; local shape uses 'delivered' for the same
+    // terminal state. Phase 2 normalises the local enum when admin orders
+    // gets a real backend.
+    status: remote.status === 'completed' ? 'delivered' : remote.status,
+    payment: remote.payment_id
+      ? ({
+          amount: Number(remote.total),
+          currency: remote.currency as 'USD' | 'CNY' | 'EUR',
+          status: remote.payment_status,
+          authCode: remote.payment_id,
+          // method / brand / bin / last4 come from the payments table in
+          // Phase 1.2 when Stripe webhook lands. For now we leave them out
+          // and the order detail page falls back to a placeholder block.
+        } as Partial<Order['payment']> as Order['payment'])
+      : undefined,
+    cancelledAt: remote.cancelled_at
+      ? new Date(remote.cancelled_at).getTime()
+      : undefined,
+  };
+}
