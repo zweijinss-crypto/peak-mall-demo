@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type {
   BrandInfo,
   ContactInfo,
@@ -32,8 +33,14 @@ const Footer: FC<FooterProps> = ({
   contact,
   payLogos = ['VISA', 'MasterCard'],
   year = 2026,
-  locale = 'zh',
+  locale: localeProp,
 }) => {
+  // Caller can pass locale explicitly. If not, infer from URL path —
+  // works in both SSR (headers()) and client (usePathname()) since the
+  // pathname is identical on both sides at hydration time.
+  const pathname = usePathname() ?? '';
+  const isEnPath = pathname === '/en' || pathname.startsWith('/en/');
+  const locale: 'zh' | 'en' = localeProp ?? (isEnPath ? 'en' : 'zh');
   const cp = locale === 'en' ? COPY_EN : COPY;
 
   const DEFAULT_BRAND: BrandInfo = {
