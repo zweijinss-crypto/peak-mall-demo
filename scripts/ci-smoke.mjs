@@ -117,6 +117,16 @@ function fail(msg) {
 }
 
 async function main() {
+  // --serve-only flag: run the static server and keep it alive for
+  // external test runners (Playwright config). Default behaviour is
+  // unchanged: serve + smoke + exit.
+  if (process.argv.includes('--serve-only')) {
+    await serve();
+    console.log(`[ci-smoke] static server up at http://${HOST}:${PORT} (serve-only mode)`);
+    // Keep alive until killed by Playwright's webServer.
+    process.stdin.resume();
+    return;
+  }
   const server = await serve();
   const base = `http://${HOST}:${PORT}`;
   console.log(`[ci-smoke] static server up at ${base}`);

@@ -9,7 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "ci:smoke": "node scripts/ci-smoke.mjs",
-    "ci:lighthouse": "node scripts/ci-lighthouse.mjs"
+    "ci:lighthouse": "node scripts/ci-lighthouse.mjs",
+    "ci:e2e": "playwright test",
+    "ci:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.75.1",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@netlify/functions": "^6.0.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "22.10.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.1",
