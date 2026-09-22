@@ -141,7 +141,7 @@ export function UsersClient() {
       ...users,
       {
         id,
-        nickname: '新用户',
+        nickname: 'New user',
         username: `user_${id.slice(0, 8)}`,
         role: 'fx',
         referrer: '—',
@@ -218,7 +218,7 @@ export function UsersClient() {
               />
             </Th>
             <Th>ID</Th>
-            <Th>{t.admin.users.colRole.replace('角色', '用户').replace('Role', 'Member')}</Th>
+            <Th>{t.admin.users.colRole.replace('角色', 'Member').replace('Role', 'Member')}</Th>
             <Th>{t.admin.users.colRole}</Th>
             <Th>{t.admin.users.colReferrer}</Th>
             <Th>{t.admin.users.colTeam}</Th>
@@ -339,11 +339,11 @@ export function UsersClient() {
                   <dd className="text-neutral-700">{detail.created_at}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">昵称</dt>
+                  <dt className="text-neutral-500">{t.admin.users.colNickname ?? 'Nickname'}</dt>
                   <dd className="font-semibold text-neutral-800">{detail.nickname}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-neutral-500">账号</dt>
+                  <dt className="text-neutral-500">{t.admin.users.colUsername ?? 'Username'}</dt>
                   <dd className="font-mono text-neutral-700">@{detail.username}</dd>
                 </div>
                 <div className="flex justify-between">

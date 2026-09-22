@@ -124,7 +124,7 @@ export function DashboardClient() {
   }, [users, orders, wd, comm, tickets]);
 
   if (!mounted) {
-    return <div className="text-neutral-500 text-[13px]">{isEn ? 'Loading…' : '加载中…'}</div>;
+    return <div className="text-neutral-500 text-[13px]">{isEn ? 'Loading…' : 'Loading…'}</div>;
   }
 
   const usdStr = (n: number) => '$' + n.toFixed(2);
@@ -134,7 +134,7 @@ export function DashboardClient() {
     <div>
       <PageBanner
         title={t.admin.dashboard.title}
-        subtitle={isEn ? 'Overview of members, orders and withdrawals' : '会员、订单与提现概览'}
+        subtitle={isEn ? 'Overview of members, orders and withdrawals' : 'Overview of members, orders and withdrawals'}
         accent="emerald"
       />
 
@@ -159,7 +159,7 @@ export function DashboardClient() {
           <StatCard
             label={t.admin.dashboard.kpiTotalComm}
             value={usdStr(computed.totalCommission)}
-            sub={`${t.admin.dashboard.kpiToday} ${usdStr(computed.todayComm)} · 待结算 ${usdStr(computed.pendingCommission)}`}
+            sub={`${t.admin.dashboard.kpiToday} ${usdStr(computed.todayComm)} · pending ${usdStr(computed.pendingCommission)}`}
             accent="positive"
           />
         </Link>
@@ -183,14 +183,14 @@ export function DashboardClient() {
           <StatCard
             label={t.admin.dashboard.kpiShippable}
             value={String(computed.paidOrders.length)}
-            sub={`已发货 ${computed.shippedOrders.length} / 已完成 ${computed.completedOrders.length}`}
+            sub={`shipped ${computed.shippedOrders.length} / completed ${computed.completedOrders.length}`}
           />
         </Link>
         <Link href="/admin/tickets">
           <StatCard
             label={t.admin.dashboard.kpiOpenTickets}
             value={String(computed.openTickets.length)}
-            sub={computed.openTickets.length === 0 ? '✓' : '需处理'}
+            sub={computed.openTickets.length === 0 ? '✓' : 'action needed'}
             accent={computed.openTickets.length > 0 ? 'danger' : 'positive'}
           />
         </Link>

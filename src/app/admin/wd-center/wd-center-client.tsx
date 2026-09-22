@@ -102,7 +102,7 @@ export function WdCenterClient() {
   const submit = () => {
     setMsg(null);
     if (!currentUser) {
-      setMsg({ kind: 'err', text: isEnPath ? 'Pick a demo user first.' : '请先选择演示账号。' });
+      setMsg({ kind: 'err', text: isEnPath ? 'Pick a demo user first.' : 'Pick a demo user first.' });
       return;
     }
     const v = Number(amt);

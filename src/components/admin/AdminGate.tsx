@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthed, logout, verifyAdmin, getAdminMfaStatus } from '@/lib/admin/auth';
 import { getSupabase } from '@/lib/api/supabase-client';
+import { useT } from '@/lib/use-t';
 
 /**
  * AdminGate — client-side guard for every /admin/* page.
@@ -22,6 +23,7 @@ import { getSupabase } from '@/lib/api/supabase-client';
  */
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const t = useT();
   const [ok, setOk] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     // this loading state via its own check.
     return (
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center text-[13px] text-neutral-500">
-        正在校验登录态…
+        {t.admin.gateChecking ?? 'Checking sign-in…'}
       </div>
     );
   }

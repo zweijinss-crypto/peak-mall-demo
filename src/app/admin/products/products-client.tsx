@@ -254,7 +254,7 @@ export function ProductsClient() {
       ...editing,
       name,
       sku,
-      category: draft.category.trim() || '未分类',
+      category: draft.category.trim() || 'Uncategorized',
       price,
       comparePrice,
       cost,
@@ -301,7 +301,7 @@ export function ProductsClient() {
         id,
         name: t.admin.products.colName + ' #' + id.slice(0, 4),
         sku,
-        category: '数码电子',
+        category: 'Electronics',
         price: 0,
         comparePrice: undefined,
         cost: undefined,
@@ -781,7 +781,7 @@ export function ProductsClient() {
                     rows={4}
                     value={draft.description}
                     onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                    placeholder={'## 卖点\n- ...\n\n## 售后\n...'}
+                    placeholder={'## Highlights\n- ...\n\n## Warranty\n...'}
                     className="w-full border border-neutral-300 rounded-md px-3 py-2 text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-orange-500/40 resize-y"
                   />
                 ) : (

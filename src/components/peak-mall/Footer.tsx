@@ -113,7 +113,7 @@ const Footer: FC<FooterProps> = ({
             </p>
             <div className="flex gap-2.5">
               <a href="/about" aria-label="f — Facebook" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">f</a>
-              <a href="/about" aria-label="X — 社交媒体" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
+              <a href="/about" aria-label="X — Social" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">X</a>
               <a href="/about" aria-label="in — LinkedIn" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">in</a>
               <a href="/about" aria-label="IG — Instagram" className="w-8 h-8 rounded-full bg-neutral-800 hover:bg-orange-500 text-white text-[13px] flex items-center justify-center transition-colors">IG</a>
             </div>

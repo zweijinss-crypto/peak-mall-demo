@@ -58,7 +58,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   // /admin/login is the sign-in screen itself — let it render
   // without checking auth (otherwise we'd infinite-loop).
-  const isLoginPage = pathname === '/admin/login';
+  // Static export rewrites URLs to the trailing-slash form, so
+  // match both shapes here.
+  const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
 
   useEffect(() => {
     if (isLoginPage) {

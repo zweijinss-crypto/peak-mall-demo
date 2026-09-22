@@ -79,15 +79,15 @@ export function AuditClient() {
   return (
     <div className="px-5 py-6">
       <div className="max-w-shell mx-auto">
-        <h1 className="text-[20px] font-bold text-neutral-800 mb-1">{t.admin.auditTitle ?? '操作日志'}</h1>
-        <p className="text-[12.5px] text-neutral-500 mb-5">{t.admin.auditSubtitle ?? '最近 100 条 admin 操作记录。仅 super_admin 可见。'}</p>
+        <h1 className="text-[20px] font-bold text-neutral-800 mb-1">{t.admin.auditTitle ?? 'Audit log'}</h1>
+        <p className="text-[12.5px] text-neutral-500 mb-5">{t.admin.auditSubtitle ?? 'Last 100 admin actions. Super admin only.'}</p>
 
         <div className="flex gap-3 mb-4 flex-wrap">
           <input
             type="text"
             value={resourceFilter}
             onChange={(e) => setResourceFilter(e.target.value)}
-            placeholder={t.admin.auditFilterResource ?? '按资源过滤 (orders/products/...)'}
+            placeholder={t.admin.auditFilterResource ?? 'Filter by resource (orders/products/...)'}
             className="px-3 py-2 border border-neutral-200 rounded-md text-[13px] w-[260px] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             aria-label={t.admin.auditFilterResource ?? 'Filter by resource'}
           />
@@ -95,7 +95,7 @@ export function AuditClient() {
             type="text"
             value={actorFilter}
             onChange={(e) => setActorFilter(e.target.value)}
-            placeholder={t.admin.auditFilterActor ?? '按操作者邮箱过滤'}
+            placeholder={t.admin.auditFilterActor ?? 'Filter by actor email'}
             className="px-3 py-2 border border-neutral-200 rounded-md text-[13px] w-[240px] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
             aria-label={t.admin.auditFilterActor ?? 'Filter by actor'}
           />
@@ -108,18 +108,18 @@ export function AuditClient() {
           <div className="text-neutral-500 text-[13px]">Loading…</div>
         ) : rows.length === 0 ? (
           <div className="bg-white border border-neutral-200 rounded-lg p-8 text-center text-neutral-500 text-[13px]">
-            {t.admin.auditEmpty ?? '还没有操作记录。'}
+            {t.admin.auditEmpty ?? 'No actions yet.'}
           </div>
         ) : (
           <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
             <table className="w-full text-[12.5px]">
               <thead>
                 <tr className="bg-neutral-50 text-neutral-600 text-left">
-                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColTime ?? '时间'}</th>
-                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColActor ?? '操作者'}</th>
-                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColAction ?? '动作'}</th>
-                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColResource ?? '资源'}</th>
-                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColDiff ?? '变更'}</th>
+                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColTime ?? 'Time'}</th>
+                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColActor ?? 'Actor'}</th>
+                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColAction ?? 'Action'}</th>
+                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColResource ?? 'Resource'}</th>
+                  <th className="px-3 py-2.5 font-medium">{t.admin.auditColDiff ?? 'Diff'}</th>
                 </tr>
               </thead>
               <tbody>

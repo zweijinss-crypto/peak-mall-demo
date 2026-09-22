@@ -202,14 +202,14 @@ export function OrdersClient() {
     const remaining = Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0);
     const amt = Number(refundAmount);
     if (!Number.isFinite(amt) || amt <= 0) {
-      setRefundErr(isEn ? 'Enter a positive amount.' : '请输入大于 0 的金额。');
+      setRefundErr(isEn ? 'Enter a positive amount.' : 'Enter a positive amount.');
       return;
     }
     if (amt > remaining + 0.005) {
       setRefundErr(
         isEn
           ? `Maximum refundable is ${usd(remaining)}.`
-          : `可退金额上限 ${usd(remaining)}。`,
+          : `Maximum refundable is ${usd(remaining)}.`,
       );
       return;
     }
@@ -254,11 +254,11 @@ export function OrdersClient() {
   const confirmShip = async () => {
     if (shippingOrderId === null) return;
     if (!shipCarrier) {
-      setShippingErr(isEn ? 'Pick a carrier.' : '请选择物流公司。');
+      setShippingErr(isEn ? 'Pick a carrier.' : 'Pick a carrier.');
       return;
     }
     if (shipCarrier !== 'Other' && !shipTrackingNo.trim()) {
-      setShippingErr(isEn ? 'Tracking number required.' : '请输入运单号。');
+      setShippingErr(isEn ? 'Tracking number required.' : 'Tracking number required.');
       return;
     }
     setShippingBusy(true);
@@ -324,7 +324,7 @@ export function OrdersClient() {
     } else if (!ok) {
       // Roll back the optimistic update
       setOrders(orders);
-      setShippingErr(isEn ? 'Failed to save shipment.' : '保存发货信息失败,请重试。');
+      setShippingErr(isEn ? 'Failed to save shipment.' : 'Failed to save shipment.');
       setShippingBusy(false);
       return;
     }
@@ -787,11 +787,11 @@ export function OrdersClient() {
             <p className="text-[12px] text-neutral-500 mb-3">
               {isEn
                 ? `Already refunded: ${usd(Number(refundingOrder.refund_amount ?? 0))} • Refundable: ${usd(Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)))}`
-                : `已退款：${usd(Number(refundingOrder.refund_amount ?? 0))} · 可退金额：${usd(Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)))}`}
+                : `Refunded: ${usd(Number(refundingOrder.refund_amount ?? 0))} · Refundable: ${usd(Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)))}`}
             </p>
 
             <label className="block text-[12px] font-medium text-neutral-700 mb-1" htmlFor="refund-amount">
-              {isEn ? 'Refund amount (USD)' : '退款金额（美元）'}
+              {isEn ? 'Refund amount (USD)' : 'Refund amount (USD)'}
             </label>
             <input
               id="refund-amount"
@@ -804,28 +804,28 @@ export function OrdersClient() {
                 Math.max(0, Number(refundingOrder.amount) - Number(refundingOrder.refund_amount ?? 0)).toFixed(2),
               )}
               disabled={refundBusy}
-              aria-label={isEn ? 'Refund amount in USD' : '退款金额（美元）'}
+              aria-label={isEn ? 'Refund amount in USD' : 'Refund amount in USD'}
               className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md mb-3 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
             />
 
             <label className="block text-[12px] font-medium text-neutral-700 mb-1" htmlFor="refund-reason">
-              {isEn ? 'Reason' : '原因'}
+              {isEn ? 'Reason' : 'Reason'}
             </label>
             <select
               id="refund-reason"
               value={refundReason}
               onChange={(e) => setRefundReason(e.target.value)}
               disabled={refundBusy}
-              aria-label={isEn ? 'Refund reason' : '退款原因'}
+              aria-label={isEn ? 'Refund reason' : 'Refund reason'}
               className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md mb-3 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
             >
               <option value="requested_by_customer">
-                {isEn ? 'Customer request' : '客户申请'}
+                {isEn ? 'Customer request' : 'Customer request'}
               </option>
-              <option value="duplicate">{isEn ? 'Duplicate charge' : '重复扣款'}</option>
-              <option value="fraudulent">{isEn ? 'Fraud' : '欺诈'}</option>
-              <option value="damaged">{isEn ? 'Damaged item' : '商品损坏'}</option>
-              <option value="other">{isEn ? 'Other' : '其他'}</option>
+              <option value="duplicate">{isEn ? 'Duplicate charge' : 'Duplicate charge'}</option>
+              <option value="fraudulent">{isEn ? 'Fraud' : 'Fraud'}</option>
+              <option value="damaged">{isEn ? 'Damaged item' : 'Damaged item'}</option>
+              <option value="other">{isEn ? 'Other' : 'Other'}</option>
             </select>
 
             {refundErr && (
@@ -856,7 +856,7 @@ export function OrdersClient() {
                 {refundBusy
                   ? isEn
                     ? 'Processing…'
-                    : '处理中…'
+                    : 'Processing…'
                   : t.admin.orders.confirmRefund}
               </button>
             </div>
@@ -882,7 +882,7 @@ export function OrdersClient() {
 
           <div>
             <label htmlFor="ship-carrier" className="block text-[12px] font-medium text-neutral-700 mb-1">
-              {isEn ? 'Carrier' : '物流公司'}
+              {isEn ? 'Carrier' : 'Carrier'}
             </label>
             <select
               id="ship-carrier"
@@ -900,7 +900,7 @@ export function OrdersClient() {
           {shipCarrier !== 'Other' && (
             <div>
               <label htmlFor="ship-tracking" className="block text-[12px] font-medium text-neutral-700 mb-1">
-                {isEn ? 'Tracking number' : '运单号'}
+                {isEn ? 'Tracking number' : 'Tracking number'}
               </label>
               <input
                 id="ship-tracking"
@@ -908,7 +908,7 @@ export function OrdersClient() {
                 value={shipTrackingNo}
                 onChange={(e) => setShipTrackingNo(e.target.value)}
                 disabled={shippingBusy}
-                placeholder={isEn ? 'e.g. 9405511899223197428490' : '例如: SF1234567890'}
+                placeholder={isEn ? 'e.g. 9405511899223197428490' : 'e.g. SF1234567890'}
                 className="w-full px-3 py-2 text-[13px] border border-neutral-300 rounded-md font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -916,7 +916,7 @@ export function OrdersClient() {
 
           {shipCarrier !== 'Other' && shipTrackingNo.trim() && (
             <div className="text-[12px] text-neutral-500 break-all">
-              {isEn ? 'Tracking URL preview: ' : '运单链接预览: '}
+              {isEn ? 'Tracking URL preview: ' : 'Tracking URL preview: '}
               <a
                 href={buildTrackingUrl(shipCarrier, shipTrackingNo.trim())}
                 target="_blank"
@@ -952,7 +952,7 @@ export function OrdersClient() {
               disabled={shippingBusy}
               className="px-3 py-1.5 text-[12.5px] font-bold rounded-md bg-emerald-700 text-white hover:bg-emerald-800 transition-colors disabled:opacity-50"
             >
-              {shippingBusy ? (isEn ? 'Saving…' : '保存中…') : t.admin.orders.ship}
+              {shippingBusy ? (isEn ? 'Saving…' : 'Saving…') : t.admin.orders.ship}
             </button>
           </div>
         </div>

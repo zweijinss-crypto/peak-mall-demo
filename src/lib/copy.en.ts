@@ -1172,12 +1172,19 @@ export const COPY_EN = {
     auditColAction: 'Action',
     auditColResource: 'Resource',
     auditColDiff: 'Change',
+    // Phase 1.1.8 — admin data source indicator
+    fromRemote: 'Synced with Supabase',
+    fromLocal: 'Local cache',
+    syncing: 'Syncing…',
     groupOverview: 'Overview',
     groupMall: 'Mall',
     groupDistribute: 'Distribution',
     groupFunds: 'Funds',
     groupTools: 'Tools',
     backToShop: 'Back to shop',
+    // Phase 1.3 — admin i18n 收口
+    brandName: 'Peak Mall',
+    leaveConfirm: 'Leave the admin and go back to the shop?',
     saved: 'Saved',
     dashboard: {
       title: 'Dashboard',

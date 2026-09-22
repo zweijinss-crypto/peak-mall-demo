@@ -37,7 +37,7 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
 
   const handleBackToShop = () => {
     if (typeof window === 'undefined') return;
-    if (window.confirm(isEn ? 'Leave the admin and go back to the shop?' : '确认离开管理后台,返回前台商城?')) {
+    if (window.confirm(t.admin.leaveConfirm ?? 'Leave the admin and go back to the shop?')) {
       window.location.href = isEn ? '/en' : '/';
     }
   };
@@ -56,7 +56,7 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
         <div className="px-[22px] py-5 border-b border-white/10">
           <Link href="/" className="block group">
             <div className="text-[18px] font-bold leading-tight tracking-wide text-white group-hover:text-neutral-200 transition-colors">
-              顶峰商城
+              {t.admin.brandName ?? 'Peak Mall'}
             </div>
             <small className="block text-[11px] font-normal text-neutral-300 mt-1 tracking-wider">
               PEAK MALL · {t.admin.roleAdmin}

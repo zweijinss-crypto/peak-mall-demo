@@ -1157,6 +1157,9 @@ export const COPY = {
     groupFunds: '资金管理',
     groupTools: '工具',
     backToShop: '返回前台',
+    // Phase 1.3 — admin i18n 收口
+    brandName: '顶峰商城',
+    leaveConfirm: '确认离开管理后台,返回前台商城?',
     saved: '已保存',
     dashboard: {
       title: '数据看板',

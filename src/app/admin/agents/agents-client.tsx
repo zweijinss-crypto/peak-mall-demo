@@ -50,6 +50,7 @@ function validate(d: DraftRow, t: any): string | null {
 
 export function AgentsClient() {
   const t = useT();
+  const isEn = (t.admin.agents.colAction === 'Action') || (typeof document !== 'undefined' && document.documentElement.lang === 'en');
   const [agents, setAgents, mounted] = useAdminStore('agents');
   const [drafts, setDrafts] = useState<Record<string, DraftRow>>({});
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -192,7 +193,7 @@ export function AgentsClient() {
           className="mb-3 inline-flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium rounded-md bg-amber-50 border border-amber-200 text-amber-800"
         >
           <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-          {dirtyCount} {t.admin.agents.colAction === '操作' ? '行未保存' : 'row(s) unsaved'}
+          {dirtyCount} {isEn ? 'row(s) unsaved' : '行未保存'}
         </div>
       )}
 
