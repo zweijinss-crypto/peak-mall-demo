@@ -7,7 +7,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "499.00",
     "stock": 36,
-    "cover": "/covers/p16.svg",
+    "cover": "/uploads/p16.png",
     "description": "14-inch ultra-slim laptop with Intel Core i5, 16GB RAM, 512GB SSD, and 18-hour battery life.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z",
@@ -98,7 +98,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "499.00",
     "stock": 40,
-    "cover": "/covers/p15.svg",
+    "cover": "/uploads/p15.png",
     "description": "Foldable GPS drone with 4K camera, 45-min flight time, and obstacle avoidance. Includes carrying case.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -109,7 +109,7 @@ export const PRODUCTS: Product[] = [
     "category": "家用电器",
     "price": "399.00",
     "stock": 60,
-    "cover": "/covers/p14.svg",
+    "cover": "/uploads/p14.png",
     "description": "Smart robot vacuum with LiDAR navigation, 4000Pa suction, and app control. Maps entire home automatically.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -120,7 +120,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "399.00",
     "stock": 60,
-    "cover": "/covers/p13.svg",
+    "cover": "/uploads/p13.png",
     "description": "Over-ear wireless headphones with adaptive ANC, 50-hour battery, and premium sound. Foldable design for travel.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -131,7 +131,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "299.00",
     "stock": 80,
-    "cover": "/covers/p12.svg",
+    "cover": "/uploads/p12.png",
     "description": "Mini 1080P projector with 300 ANSI lumens. Supports HDMI/USB/Screen Mirroring, built-in speakers.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -142,7 +142,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "299.00",
     "stock": 80,
-    "cover": "/covers/p11.svg",
+    "cover": "/uploads/p11.png",
     "description": "4K 60fps action camera with 6-axis EIS, 20MP photos, and 40m underwater capability. Touchscreen included.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -153,7 +153,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "199.00",
     "stock": 119,
-    "cover": "/covers/p10.svg",
+    "cover": "/uploads/p10.png",
     "description": "Compact portable photo printer with ZINK zero-ink technology. Prints 2x3 inch photos wirelessly from phones.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -164,7 +164,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "199.00",
     "stock": 119,
-    "cover": "/covers/p09.svg",
+    "cover": "/uploads/p09.png",
     "description": "GPS sports watch with AMOLED display, 100+ workout modes, and 14-day battery life. 5ATM water resistant.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -175,7 +175,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "99.90",
     "stock": 199,
-    "cover": "/covers/p08.svg",
+    "cover": "/uploads/p08.png",
     "description": "Smart fitness band with heart rate monitor, SpO2 tracking, and 14-day battery. 50+ sport modes.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -186,7 +186,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "99.90",
     "stock": 199,
-    "cover": "/covers/p07.svg",
+    "cover": "/uploads/p07.png",
     "description": "Active Noise Cancelling true wireless earbuds with 40dB reduction. 30-hour total battery, Hi-Res Audio certified.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -197,7 +197,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "49.90",
     "stock": 300,
-    "cover": "/covers/p06.svg",
+    "cover": "/uploads/p06.png",
     "description": "10000mAh wireless power bank with 15W Qi charging. Dual USB-C ports, LED display, slim design.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -208,7 +208,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "49.90",
     "stock": 300,
-    "cover": "/covers/p05.svg",
+    "cover": "/uploads/p05.png",
     "description": "Pocket-sized Bluetooth 5.3 speaker with rich bass and 12-hour battery life. IPX7 waterproof.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -219,7 +219,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "29.90",
     "stock": 400,
-    "cover": "/covers/p04.svg",
+    "cover": "/uploads/p04.png",
     "description": "Extendable Bluetooth selfie stick with tripod base. Remote shutter included, compatible with iOS and Android.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -230,7 +230,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "29.90",
     "stock": 400,
-    "cover": "/covers/p03.svg",
+    "cover": "/uploads/p03.png",
     "description": "30W GaN foldable fast charger with PD 3.0 and QC 4.0. Supports laptops, tablets and phones.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -241,7 +241,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "19.90",
     "stock": 498,
-    "cover": "/covers/p02.svg",
+    "cover": "/uploads/p02.png",
     "description": "Compact USB-powered desk fan with 3 speed settings. Perfect for home and office cooling.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
@@ -252,7 +252,7 @@ export const PRODUCTS: Product[] = [
     "category": "数码电子",
     "price": "19.90",
     "stock": 497,
-    "cover": "/covers/p01.svg",
+    "cover": "/uploads/p01.png",
     "description": "Magnetic cable management box with 6 compartments. Keeps desks tidy and cables organized.",
     "status": 1,
     "created_at": "2026-09-14T11:56:05.000Z"
