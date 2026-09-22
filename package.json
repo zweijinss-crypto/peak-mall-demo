@@ -6,7 +6,10 @@
     "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start -p 3002",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "ci:smoke": "node scripts/ci-smoke.mjs",
+    "ci:lighthouse": "node scripts/ci-lighthouse.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.75.1",

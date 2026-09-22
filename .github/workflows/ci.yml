@@ -1,0 +1,154 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel any in-flight run for the same ref when a new commit
+# lands. Saves CI minutes on rapid pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ------------------------------------------------------------
+  # 1. Static checks — typecheck + lint + build. Fastest gate.
+  # ------------------------------------------------------------
+  static:
+    name: Static checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.31.0
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build (Next.js static export)
+        run: pnpm build
+        env:
+          # CI doesn't need real Supabase / Stripe keys — the static
+          # export path tolerates both being unset. Keep these as
+          # empty strings so any code that reads process.env.X gets
+          # the same falsy value as a fresh local clone.
+          NEXT_PUBLIC_SUPABASE_URL: ''
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ''
+          STRIPE_SECRET_KEY: ''
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ''
+          SENTRY_AUTH_TOKEN: ''
+
+      - name: Upload out/
+        uses: actions/upload-artifact@v4
+        with:
+          name: peak-mall-out
+          path: out/
+          retention-days: 3
+
+  # ------------------------------------------------------------
+  # 2. E2E smoke — boot a static server against out/, hit key
+  # routes with Playwright chromium, assert no regression.
+  # ------------------------------------------------------------
+  smoke:
+    name: E2E smoke
+    runs-on: ubuntu-latest
+    needs: static
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.31.0
+
+      - name: Install Playwright
+        run: |
+          npm i --no-save --prefix /tmp/ci-pw playwright@1.49
+          npx --prefix /tmp/ci-pw playwright install --with-deps chromium
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: peak-mall-out
+          path: out
+
+      - name: Run smoke
+        run: pnpm ci:smoke
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: /tmp/ci-pw/.cache
+
+  # ------------------------------------------------------------
+  # 3. Lighthouse budget — fail PR if a11y/BP/SEO drop below the
+  # configured thresholds on any swept route. Performance is
+  # intentionally excluded — GH runners skew LCP.
+  # ------------------------------------------------------------
+  lighthouse:
+    name: Lighthouse budget
+    runs-on: ubuntu-latest
+    needs: static
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.31.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Lighthouse
+        run: |
+          mkdir -p /tmp/lh
+          cd /tmp/lh
+          npm i --no-save [email protected]
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: peak-mall-out
+          path: out
+
+      - name: Run Lighthouse
+        run: pnpm ci:lighthouse
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: /tmp/lh-*/
+          retention-days: 7
