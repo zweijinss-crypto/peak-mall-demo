@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { isAuthed } from '@/lib/admin/auth';
+import { isAuthed, logout, verifyAdmin } from '@/lib/admin/auth';
 
 /**
  * AdminGate — client-side guard for every /admin/* page.
  *
- * On mount we read localStorage. If not authed, redirect to /admin/login.
- * We render a lightweight placeholder during the check to avoid flashing
+ * 1. Sync fast-path: if localStorage flag is missing → redirect to
+ *    /admin/login immediately.
+ * 2. On mount, verifyAdmin() re-checks public.users.role === 'admin'
+ *    against Supabase to catch stale flags after a server-side role
+ *    downgrade. If role isn't admin → logout + redirect to /admin/login
+ *    with `?reason=not_admin`.
+ *
+ * Renders a lightweight placeholder during the check to avoid flashing
  * the admin chrome before the redirect.
  */
 export function AdminGate({ children }: { children: React.ReactNode }) {
@@ -16,12 +22,24 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const [ok, setOk] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (isAuthed()) {
-      setOk(true);
-    } else {
-      setOk(false);
+    let cancelled = false;
+    if (!isAuthed()) {
       router.replace('/admin/login');
+      return;
     }
+    void (async () => {
+      const verified = await verifyAdmin();
+      if (cancelled) return;
+      if (verified) {
+        setOk(true);
+      } else {
+        await logout();
+        router.replace('/admin/login?reason=not_admin');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   if (ok !== true) {

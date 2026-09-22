@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
 import {
   AnnouncementBar,
   ShopHeader,
@@ -15,11 +15,26 @@ import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
+  );
+}
+
+function LoginPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useT();
   const chrome = usePageChrome('home', 'home');
   const [error, setError] = useState<string | null>(null);
   const currentUser = getCurrentUser();
+  const reason = searchParams.get('reason');
+  const reasonMessage =
+    reason === 'not_admin'
+      ? (t.admin as Record<string, string>).loginReasonNotAdmin ??
+        'Your admin privileges were revoked'
+      : null;
   // 管理员 tab 内 AdminLoginForm 自带已登录检测(自动 redirect 到 /admin/dashboard)
 
   const announceText = t.auth.announce;
@@ -59,6 +74,13 @@ export default function LoginPage() {
             </div>
           </div>
         )}
+        {reasonMessage && (
+          <div className="max-w-shell mx-auto px-5 pt-3">
+            <div role="alert" className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2.5 text-[12.5px]">
+              {reasonMessage}
+            </div>
+          </div>
+        )}
 
         <AuthTabs
           initial="user"
@@ -88,7 +110,7 @@ export default function LoginPage() {
                 }}
                 onLogin={async (p) => {
                   setError(null);
-                  const r = fakeLogin(p.email, p.password);
+                  const r = await fakeLogin(p.email, p.password);
                   if (!r.ok) {
                     const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.loginErrorShort : t.auth.loginErrorGeneric;
                     setError(msg);
@@ -99,7 +121,7 @@ export default function LoginPage() {
                 }}
                 onRegister={async (p) => {
                   setError(null);
-                  const r = fakeRegister({ email: p.email, password: p.password, nickname: p.nickname });
+                  const r = await fakeRegister({ email: p.email, password: p.password, nickname: p.nickname });
                   if (!r.ok) {
                     const msg = r.error === 'PASSWORD_TOO_SHORT' ? t.auth.registerErrorShort : t.auth.registerErrorGeneric;
                     setError(msg);

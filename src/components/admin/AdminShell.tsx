@@ -39,8 +39,8 @@ export function AdminShell({ active, children }: { active: AdminKey; children: R
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     window.location.href = isEn ? '/en/admin/login' : '/admin/login';
   };
 

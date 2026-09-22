@@ -36,11 +36,26 @@ const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboar
     setChecking(false);
   }, [router, redirectTo]);
 
-  const submit = (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = login(username.trim(), password);
+    setError(null);
+    const res = await login(username.trim(), password);
     if (!res.ok) {
-      setError(res.error ?? t.admin.loginErrorBad);
+      const code = (res.error as string | undefined) ?? '';
+      // Map auth codes to localized messages
+      const msg =
+        code === 'NOT_ADMIN'
+          ? t.admin.loginErrorNotAdmin ?? '该账号不是管理员'
+          : code === 'INVALID_CREDENTIALS'
+            ? t.admin.loginErrorBad ?? '账号或密码错误'
+            : code === 'EMAIL_NOT_CONFIRMED'
+              ? t.admin.loginErrorNotConfirmed ?? '请先在邮箱中确认注册链接'
+              : code === 'NETWORK'
+                ? t.admin.loginErrorNetwork ?? '网络错误,请稍后重试'
+                : code === 'NOT_CONFIGURED'
+                  ? t.admin.loginErrorNotConfigured ?? '服务器未配置鉴权,请联系运维'
+                  : (res.error as string) || t.admin.loginErrorBad;
+      setError(msg);
       return;
     }
     router.replace(redirectTo);

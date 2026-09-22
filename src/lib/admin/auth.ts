@@ -1,20 +1,53 @@
 /**
- * admin/auth — mock client-side auth for the admin demo gate.
+ * admin/auth — Supabase Auth gate for /admin/*.
  *
- * Demo credentials (hard-coded for the static demo; never use this for
- * anything real):
- *   username: admin
- *   password: admin123
+ * Flow:
+ *   1. login(email, password) → supabase.auth.signInWithPassword
+ *   2. After sign-in, fetch public.users row for this uid and check role
+ *      - if role === 'admin': allow, persist "1" to localStorage as a
+ *        sync fast-path flag (cleared on logout)
+ *      - else: signOut immediately and return NOT_ADMIN
+ *   3. isAuthed() is a sync fast-path that reads the localStorage flag;
+ *      AdminGuard separately re-verifies with Supabase to catch stale
+ *      flags from before a server-side role change.
  *
- * The state is stored in localStorage so it survives reload. There is no
- * server round-trip — this is purely a UX gate matching the source
- * site's "click in" admin entry, except we ask for a demo password too.
+ * Offline fallback: if Supabase env is missing, falls back to the
+ * demo creds (admin/admin123) so the static demo stays clickable.
  */
+import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
+
 const STORAGE_KEY = 'peak_admin_authed';
+
+// Legacy demo creds — used only when Supabase isn't configured (static
+// demo on a host without NEXT_PUBLIC_SUPABASE_URL).
 export const DEMO_USERNAME = 'admin';
 export const DEMO_PASSWORD = 'admin123';
 
-export function isAuthed(): boolean {
+export type AdminAuthError =
+  | 'MISSING_FIELDS'
+  | 'INVALID_CREDENTIALS'
+  | 'EMAIL_NOT_CONFIRMED'
+  | 'NOT_ADMIN'
+  | 'NETWORK'
+  | 'NOT_CONFIGURED'
+  | 'UNKNOWN';
+
+export interface AdminAuthResult {
+  ok: boolean;
+  error?: AdminAuthError | string;
+}
+
+function writeFlag(v: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (v) window.localStorage.setItem(STORAGE_KEY, '1');
+    else window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function readFlag(): boolean {
   if (typeof window === 'undefined') return false;
   try {
     return window.localStorage.getItem(STORAGE_KEY) === '1';
@@ -23,24 +56,132 @@ export function isAuthed(): boolean {
   }
 }
 
-export function login(username: string, password: string): { ok: boolean; error?: string } {
-  if (!username || !password) return { ok: false, error: '请输入账号与密码' };
-  if (username !== DEMO_USERNAME || password !== DEMO_PASSWORD) {
-    return { ok: false, error: '账号或密码错误' };
+function mapAuthError(message: string): AdminAuthError {
+  const m = message.toLowerCase();
+  if (m.includes('invalid login credentials')) return 'INVALID_CREDENTIALS';
+  if (m.includes('email not confirmed')) return 'EMAIL_NOT_CONFIRMED';
+  if (m.includes('network') || m.includes('fetch')) return 'NETWORK';
+  return 'UNKNOWN';
+}
+
+/**
+ * isAuthed — sync fast-path. Returns true if the previous login wrote
+ * the localStorage flag. Use AdminGuard for a server-verified check.
+ */
+export function isAuthed(): boolean {
+  return readFlag();
+}
+
+/**
+ * login — Supabase Auth + role check.
+ *
+ * @param emailOrUsername — Supabase expects an email. The legacy
+ *   "admin/admin123" form is also accepted when Supabase is not
+ *   configured (offline demo fallback).
+ * @param password
+ */
+export async function login(
+  emailOrUsername: string,
+  password: string,
+): Promise<AdminAuthResult> {
+  if (!emailOrUsername || !password) {
+    return { ok: false, error: 'MISSING_FIELDS' };
   }
+
+  const supabase = getSupabase();
+  if (!supabase) {
+    if (!isSupabaseConfigured()) {
+      // Offline fallback — legacy demo gate
+      if (
+        emailOrUsername === DEMO_USERNAME &&
+        password === DEMO_PASSWORD
+      ) {
+        writeFlag(true);
+        return { ok: true };
+      }
+      return { ok: false, error: 'INVALID_CREDENTIALS' };
+    }
+    // Env reported as configured but client couldn't init — treat as
+    // unconfigured so the demo flow still works.
+    return { ok: false, error: 'NOT_CONFIGURED' };
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: emailOrUsername,
+    password,
+  });
+  if (error || !data.session || !data.user) {
+    return {
+      ok: false,
+      error: error ? mapAuthError(error.message) : 'UNKNOWN',
+    };
+  }
+
+  // Role check — public.users row is auto-created by handle_new_user
+  // trigger (0002_auth_trigger.sql). Admin email is bootstrapped to
+  // role='admin' in the same migration.
+  let role: string | null = null;
   try {
-    window.localStorage.setItem(STORAGE_KEY, '1');
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+    role = (profile as { role?: string } | null)?.role ?? null;
   } catch {
-    // ignore quota errors
+    role = null;
   }
+
+  if (role !== 'admin') {
+    // Sign out immediately so a regular user can't hit admin APIs.
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+    writeFlag(false);
+    return { ok: false, error: 'NOT_ADMIN' };
+  }
+
+  writeFlag(true);
   return { ok: true };
 }
 
-export function logout(): void {
-  if (typeof window === 'undefined') return;
+export async function logout(): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore network errors on logout
+    }
+  }
+  writeFlag(false);
+}
+
+/**
+ * verifyAdmin — re-check role from Supabase. Used by AdminGuard on
+ * mount to catch stale localStorage flags after a server-side role
+ * downgrade.
+ */
+export async function verifyAdmin(): Promise<boolean> {
+  const supabase = getSupabase();
+  if (!supabase) return readFlag();
   try {
-    window.localStorage.removeItem(STORAGE_KEY);
+    const sessionResult = supabase.auth.getSession() as unknown as {
+      data: { session: { user?: { id?: string } } | null };
+    };
+    const uid = sessionResult.data.session?.user?.id;
+    if (!uid) return false;
+    const { data } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', uid)
+      .maybeSingle();
+    const ok = (data as { role?: string } | null)?.role === 'admin';
+    writeFlag(ok);
+    return ok;
   } catch {
-    // ignore
+    return false;
   }
 }
