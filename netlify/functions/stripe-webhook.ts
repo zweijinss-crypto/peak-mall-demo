@@ -273,7 +273,7 @@ async function fireOrderConfirmation(
     const { data: order } = await supabase
       .from('orders')
       .select(
-        'id, order_number, currency, total_amount, user_id, users:user_id(email, nickname)',
+        'id, order_number, currency, total_amount, user_id, users:user_id(email, nickname, locale)',
       )
       .eq('id', orderId)
       .maybeSingle();
@@ -283,6 +283,8 @@ async function fireOrderConfirmation(
       ?.email;
     const buyerName = (order as { users?: { nickname?: string } | null }).users
       ?.nickname;
+    const buyerLocale = ((order as { users?: { locale?: string } | null }).users
+      ?.locale ?? 'zh') as 'zh' | 'en';
     if (!buyerEmail) {
       logger.warn('stripe-webhook: no buyer email for order — skipping', {
         orderId,
@@ -323,6 +325,7 @@ async function fireOrderConfirmation(
       totalFormatted,
       siteUrl,
       currency: ctx.currency,
+      locale: buyerLocale,
     });
 
     const result = await sendEmail({

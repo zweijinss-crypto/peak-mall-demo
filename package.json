@@ -8,6 +8,7 @@
     "start": "next start -p 3002",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test:email": "tsx scripts/test-email-templates.mjs",
     "ci:smoke": "node scripts/ci-smoke.mjs",
     "ci:lighthouse": "node scripts/ci-lighthouse.mjs",
     "ci:e2e": "playwright test",

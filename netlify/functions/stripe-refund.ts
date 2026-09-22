@@ -281,17 +281,19 @@ export const handler: Handler = async (event) => {
   try {
     const { data: buyer } = await supabase
       .from('users')
-      .select('email, nickname')
+      .select('email, nickname, locale')
       .eq('id', (order as { user_id?: string }).user_id ?? '')
       .maybeSingle();
     if (buyer?.email) {
+      const buyerLocale = ((buyer as { locale?: string }).locale ?? 'zh') as 'zh' | 'en';
       const html = refundNotification({
         orderNumber: order.order_no ?? '',
-        customerName: buyer.nickname ?? undefined,
+        customerName: (buyer as { nickname?: string | null }).nickname ?? undefined,
         refundAmountFormatted: formatMoney(body.amount, order.currency),
         currency: order.currency,
         reason: body.reason,
         siteUrl: siteUrl(),
+        locale: buyerLocale,
       });
       // sendEmail returns { ok, id?, error? } via resend-client.
       // Reuse resend-client via dispatchEmail helper to stay DRY.
