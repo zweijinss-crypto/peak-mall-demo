@@ -11,23 +11,16 @@
  *      AdminGuard separately re-verifies with Supabase to catch stale
  *      flags from before a server-side role change.
  *
- * Offline fallback: if Supabase env is missing, falls back to the
- * demo creds (admin/admin123) so the static demo stays clickable.
+ * No demo fallback: Supabase env MUST be configured for admin login
+ * to work. The earlier admin/admin123 path is gone — the static
+ * demo build still renders every admin page because AdminLayout's
+ * `!isSupabaseConfigured()` branch short-circuits to demo mode and
+ * opens the admin shell without an auth check. Demo-mode AdminLoginForm
+ * shows the Supabase-not-configured error to anyone trying to sign in.
  */
 import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
 
 const STORAGE_KEY = 'peak_admin_authed';
-
-// Legacy demo creds — used ONLY when Supabase isn't configured
-// (static demo on a host without NEXT_PUBLIC_SUPABASE_URL). Read
-// from NEXT_PUBLIC_DEMO_ADMIN_USER / NEXT_PUBLIC_DEMO_ADMIN_PASS so
-// deployers can override before the next build (no hardcoded creds
-// shipped to public deployments). Falls back to admin/admin123 only
-// when neither env var is set, to keep local dev friction-free.
-export const DEMO_USERNAME: string =
-  process.env.NEXT_PUBLIC_DEMO_ADMIN_USER || 'admin';
-export const DEMO_PASSWORD: string =
-  process.env.NEXT_PUBLIC_DEMO_ADMIN_PASS || 'admin123';
 
 export type AdminAuthError =
   | 'MISSING_FIELDS'
@@ -110,19 +103,8 @@ export async function login(
 
   const supabase = getSupabase();
   if (!supabase) {
-    if (!isSupabaseConfigured()) {
-      // Offline fallback — legacy demo gate
-      if (
-        emailOrUsername === DEMO_USERNAME &&
-        password === DEMO_PASSWORD
-      ) {
-        writeFlag(true);
-        return { ok: true };
-      }
-      return { ok: false, error: 'INVALID_CREDENTIALS' };
-    }
-    // Env reported as configured but client couldn't init — treat as
-    // unconfigured so the demo flow still works.
+    // Env reported as configured but client couldn't init, OR Supabase
+    // was never configured at all. Either way admin login is unavailable.
     return { ok: false, error: 'NOT_CONFIGURED' };
   }
 

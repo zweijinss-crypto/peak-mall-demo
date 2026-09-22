@@ -763,6 +763,7 @@ export const COPY_EN = {
     fundPwdHint: 'Fund password is used for withdrawals — 6 digits',
     pwdIntro: 'At least 6 characters. Changes take effect immediately.',
     fundPwdIntro: 'Fund password is exactly 6 digits, used to authorise withdrawals.',
+    fundPwdDefault: 'Default is 123456 on first use. Change it on the fund password page.',
   },
 
   profile: {
@@ -1108,10 +1109,10 @@ export const COPY_EN = {
     lastUpdated: 'Last updated',
     termsSections: [
       { heading: 'Acceptance', body: 'By accessing or using Peak Mall you agree to these Terms of Service. If you disagree, stop using the service.' },
-      { heading: 'Scope of service', body: 'Peak Mall is a demo static e-commerce prototype. All products, prices, and orders are fictional and do not represent real merchandise or transactions.' },
-      { heading: 'Account responsibility', body: 'No signup is required. All state (cart, wishlist, address, orders) lives in your browser localStorage only and is never uploaded to a server.' },
-      { heading: 'Prohibited use', body: 'Do not use this demo for any illegal activity, reverse-engineering, or malicious content injection.' },
-      { heading: 'Disclaimer', body: 'This project is provided AS-IS with no warranty for any direct or indirect damages.' },
+      { heading: 'Scope of service', body: 'Peak Mall is a B2C online retail platform offering discovery, ordering, and checkout for global brand merchandise. Product images, descriptions, prices, and stock shown on product pages are commercial information provided by the platform; the page at the time you place your order and the final checkout page govern the transaction.' },
+      { heading: 'Account responsibility', body: 'Placing an order requires a Peak Mall account. Account state (cart, wishlist, addresses, orders) syncs across devices after sign-in. You are responsible for all activity under your account — please safeguard your password and fund password.' },
+      { heading: 'Prohibited use', body: 'You may not use the platform for illegal transactions, fake orders, cashing out, fake reviews, or malicious content injection. Violations result in account suspension and may incur legal liability.' },
+      { heading: 'Disclaimer', body: 'The platform is provided AS-IS, but to the maximum extent permitted by applicable law, we are not liable for damages caused by force majeure, carrier negligence, or banking-system failures.' },
       { heading: 'Changes', body: 'We may update these terms at any time. Continued use means you accept the revised version.' },
     ],
     privacySections: [

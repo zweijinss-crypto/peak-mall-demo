@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
+import { verifyFundPassword } from '@/lib/fund-password';
 
 interface WithdrawAddr { id: string; label: string; type: string; isDefault: boolean; address: string }
 interface WithdrawRow {
@@ -33,9 +34,10 @@ function calcFee(amount: number): { fee: number; net: number } {
   return { fee, net };
 }
 
-/** Demo fund password — fixed 6-digit string for static demo.
- *  Real product would verify server-side via /api/auth/fund-password. */
-const DEMO_FUND_PWD = '123456';
+/** Fund-password verification: reads from localStorage via
+ *  lib/fund-password. Default '123456' on first use; user can change
+ *  it at /security/fund-password. Server-side bcrypt lands in
+ *  Phase 2.6 once supabase serverless functions are live. */
 
 /** CSV escape — wrap in quotes when value contains comma, quote, or newline.
  *  Inner quotes doubled. */
@@ -218,7 +220,7 @@ export default function WithdrawPage() {
   };
 
   const confirmWithdraw = () => {
-    if (fundPwd !== DEMO_FUND_PWD) {
+    if (!verifyFundPassword(fundPwd)) {
       setPwdError(t.withdraw.fundPwdWrong);
       setPwdShake(true);
       setTimeout(() => setPwdShake(false), 400);
@@ -391,7 +393,7 @@ export default function WithdrawPage() {
               )}
               {!pwdError && (
                 <p className="text-[11.5px] text-ink-500 mb-3">
-                  Demo: <span className="font-mono font-bold text-ink-700">{DEMO_FUND_PWD}</span>
+                  {t.security.fundPwdDefault ?? '首次使用默认 123456,请前往资金密码页修改'}
                 </p>
               )}
 

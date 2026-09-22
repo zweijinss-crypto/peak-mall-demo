@@ -4,11 +4,16 @@ import { useState } from 'react';
 import { PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
+import { getFundPassword, setFundPassword } from '@/lib/fund-password';
 
 /**
  * /security/fund-password — 6-digit numeric fund password (withdraw
  * authorization). Split out from /profile to match the source site's left
  * rail nav.
+ *
+ * Phase 1.5: writes through to localStorage via the fund-password lib so
+ * /withdraw's verifyFundPassword() reads the new value. Server-side
+ * bcrypt lands in Phase 2.6 once supabase functions are live.
  */
 export default function FundPasswordClient() {
   const t = useT();
@@ -25,6 +30,16 @@ export default function FundPasswordClient() {
     }
     if (n1 !== n2) {
       setMsg({ kind: 'error', text: t.security.pwdMismatch });
+      return;
+    }
+    // Verify the current password matches before allowing a change.
+    if (cur && cur !== getFundPassword()) {
+      setMsg({ kind: 'error', text: t.security.currentPasswordWrong ?? '当前密码不正确' });
+      return;
+    }
+    const res = setFundPassword(n1);
+    if (!res.ok) {
+      setMsg({ kind: 'error', text: t.security.pwdTooShort });
       return;
     }
     setMsg({ kind: 'ok', text: t.security.savedOk });
