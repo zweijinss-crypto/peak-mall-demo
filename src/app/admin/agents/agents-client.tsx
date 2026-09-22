@@ -6,6 +6,8 @@ import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd } from '@/lib/admin/fixtures';
+import { isSupabaseConfigured } from '@/lib/api';
+import { setAgentRates } from '@/lib/api/admin-agents-api';
 
 type DraftRow = { own_rate: string; sub_rate: string; sub_rate_limit: string };
 
@@ -103,6 +105,19 @@ export function AgentsClient() {
     };
 
     setAgents((agents as any[]).map((x) => (x.id === id ? updated : x)));
+
+    // Phase 1.1.8 — persist rates to public.users.agent_config.
+    // Fire-and-forget: setAgents already wrote the local optimistic state.
+    if (isSupabaseConfigured()) {
+      void setAgentRates(id, {
+        own_rate: updated.own_rate,
+        sub_rate: updated.sub_rate,
+        sub_rate_limit: updated.sub_rate_limit,
+      }).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[admin/agents] persist failed:', err);
+      });
+    }
 
     // mark saved (3s green check)
     setSavedIds((prev) => new Set(prev).add(id));

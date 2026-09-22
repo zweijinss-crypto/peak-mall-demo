@@ -5,6 +5,8 @@ import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { DEFAULT_RULES } from '@/lib/admin/fixtures';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllConfig, saveConfigAll } from '@/lib/api/admin-config-api';
 
 const BTN_SAVE = 'px-4 py-2 rounded-md bg-orange-700 text-white font-bold text-[13px] hover:bg-orange-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-1 transition-colors disabled:bg-neutral-200 disabled:text-neutral-500 disabled:cursor-not-allowed disabled:hover:bg-neutral-200';
 const INPUT_BASE = 'w-full border rounded px-2 py-1.5 text-[13px] bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-1';
@@ -34,6 +36,19 @@ export function RulesClient() {
   const t = useT();
   const [stored, setStored, mounted] = useAdminStore('rules');
   const [local, setLocal] = useState<typeof DEFAULT_RULES>(DEFAULT_RULES);
+
+  // Phase 1.1.8 — hydrate from Supabase config_kv on mount.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllConfig().then((cfg) => {
+      if (cancelled || !cfg) return;
+      setStored(cfg.rules);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setStored]);
 
   // Toast — single-flight 3s; replaces the inline <div> msg from v1.
   const [toast, setToast] = useState<{ kind: 'success' | 'info' | 'danger'; text: string } | null>(null);

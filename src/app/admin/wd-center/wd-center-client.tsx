@@ -5,6 +5,8 @@ import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllWd } from '@/lib/api/admin-wd-api';
 
 type Tab = 'all' | WdStatus;
 
@@ -40,6 +42,19 @@ export function WdCenterClient() {
   const [users, , usersMounted] = useAdminStore('users');
   const [rules] = useAdminStore('rules');
   const [tab, setTab] = useState<Tab>('all');
+
+  // Phase 1.1.8 — hydrate from Supabase withdrawals on mount.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllWd().then((rows) => {
+      if (cancelled || rows === null || rows.length === 0) return;
+      setWd(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setWd]);
   const [amt, setAmt] = useState('');
   const [method, setMethod] = useState<'usdt_trc20' | 'card'>('usdt_trc20');
   const [account, setAccount] = useState('');

@@ -95,6 +95,8 @@ export interface AdminAgent {
   sub_rate: number;
   sub_rate_limit: number;
   withdraw_address?: string;
+  /** Phase 1.1.8 — Supabase users uuid, set when row comes from DB. */
+  uuid?: string;
 }
 
 export interface AdminInvite {
@@ -125,6 +127,8 @@ export interface AdminCommLog {
   rate: number;
   status: 'settled' | 'pending';
   created_at: string;
+  /** Phase 1.1.8 — Supabase commissions uuid, set when row comes from DB. */
+  uuid?: string;
 }
 
 export interface AdminWd {
@@ -138,6 +142,10 @@ export interface AdminWd {
   bound_address?: string;
   account?: string;
   created_at: string;
+  processed_at?: string;
+  paid_at?: string;
+  /** Phase 1.1.8 — Supabase withdrawals uuid, set when row comes from DB. */
+  uuid?: string;
 }
 
 export interface AdminRules {

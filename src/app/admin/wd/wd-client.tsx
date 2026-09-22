@@ -9,6 +9,8 @@ import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 import { Modal } from '@/components/admin/Modal';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllWd, setWdStatus } from '@/lib/api/admin-wd-api';
 
 // Shared button classes — admin-wide emerald/rose + ghost + focus rings.
 const BTN_APPROVE = 'px-2 py-0.5 text-[11px] font-medium rounded bg-emerald-700 text-white hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 transition-colors mr-1';
@@ -42,6 +44,19 @@ export function WdClient() {
   const t = useT();
   const [wd, setWd, mounted, isEn] = useAdminStore('wd');
   const [users, setUsers] = useAdminStore('users');
+
+  // Phase 1.1.8 — hydrate from Supabase withdrawals on mount.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllWd().then((rows) => {
+      if (cancelled || rows === null || rows.length === 0) return;
+      setWd(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setWd]);
 
   // Modal state — one at a time so the focus trap is straightforward.
   const [rejectingId, setRejectingId] = useState<number | null>(null);
@@ -85,6 +100,7 @@ export function WdClient() {
           : w,
       ),
     );
+    if (isSupabaseConfigured()) void setWdStatus(id, 'approved');
     setApprovingId(null);
     showToast('success', t.admin.wd.approvedToast(id));
   };
@@ -104,6 +120,7 @@ export function WdClient() {
           : w,
       ),
     );
+    if (isSupabaseConfigured()) void setWdStatus(id, 'rejected', reason);
     setRejectingId(null);
     setRejectReason('');
     setReasonError(false);
@@ -132,6 +149,7 @@ export function WdClient() {
           : w,
       ),
     );
+    if (isSupabaseConfigured()) void setWdStatus(id, 'paid');
     setPayingId(null);
     showToast('success', t.admin.wd.paidToast(id));
   };

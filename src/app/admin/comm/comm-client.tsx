@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd } from '@/lib/admin/fixtures';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllComm } from '@/lib/api/admin-comm-api';
 
 const STATUS_CLASS: Record<'settled' | 'pending', string> = {
   settled: 'bg-emerald-100 text-emerald-700',
@@ -12,7 +15,20 @@ const STATUS_CLASS: Record<'settled' | 'pending', string> = {
 
 export function CommClient() {
   const t = useT();
-  const [comm, mounted] = useAdminStore('comm');
+  const [comm, setComm, mounted] = useAdminStore('comm');
+
+  // Phase 1.1.8 — hydrate from Supabase commissions on mount.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllComm().then((rows) => {
+      if (cancelled || rows === null || rows.length === 0) return;
+      setComm(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setComm]);
 
   if (!mounted) return <div className="text-neutral-500 text-[13px]">Loading…</div>;
 

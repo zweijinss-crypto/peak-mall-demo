@@ -5,12 +5,27 @@ import { useT } from '@/lib/use-t';
 import { PageBanner } from '@/components/peak-mall';
 import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { DEFAULT_SUPPORT } from '@/lib/admin/fixtures';
+import { isSupabaseConfigured } from '@/lib/api';
+import { fetchAllConfig } from '@/lib/api/admin-config-api';
 
 export function SupportClient() {
   const t = useT();
   const [stored, setStored, mounted] = useAdminStore('supportCfg');
   const [local, setLocal] = useState(DEFAULT_SUPPORT);
   const [msg, setMsg] = useState('');
+
+  // Phase 1.1.8 — hydrate from Supabase config_kv on mount.
+  useEffect(() => {
+    if (!mounted || !isSupabaseConfigured()) return;
+    let cancelled = false;
+    void fetchAllConfig().then((cfg) => {
+      if (cancelled || !cfg) return;
+      setStored(cfg.support);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, setStored]);
 
   useEffect(() => {
     if (mounted) setLocal(stored);
