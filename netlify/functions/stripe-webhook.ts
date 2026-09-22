@@ -23,6 +23,8 @@ import type { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { getStripeServer, getWebhookSecret } from '../../src/lib/api/stripe-server';
+import { sendEmail } from '../../src/lib/email/resend-client';
+import { orderConfirmation } from '../../src/lib/email/templates';
 
 // Wire format helpers — Stripe + Supabase share little type structure here.
 interface OrderUpdate {
@@ -67,7 +69,7 @@ const handler: Handler = async (event) => {
   if (!url || !serviceKey) {
     return { statusCode: 503, body: 'Supabase not configured' };
   }
-  const supabase = createClient(url, serviceKey, {
+  const supabase = createClient<any, 'public', any>(url, serviceKey, {
     auth: { persistSession: false },
   });
 
@@ -116,6 +118,12 @@ const handler: Handler = async (event) => {
           currency: session.currency?.toUpperCase() ?? 'USD',
           status: 'success',
           raw_payload: session as any,
+        });
+
+        // Phase 1.4 — fire order confirmation email (best-effort, async).
+        await fireOrderConfirmation(supabase, orderId, {
+          amountTotal: session.amount_total ?? 0,
+          currency: session.currency?.toUpperCase() ?? 'USD',
         });
         break;
       }
@@ -182,3 +190,125 @@ const handler: Handler = async (event) => {
 };
 
 export { handler };
+
+// ---------------------------------------------------------------
+// Phase 1.4 — email helpers
+// ---------------------------------------------------------------
+
+function formatMoney(amountInMinor: number, currency: string): string {
+  // Stripe gives amounts in the smallest unit (cents for USD). For
+  // zero-decimal currencies (JPY/KRW) the amount IS the major unit.
+  const zeroDecimal = new Set(['JPY', 'KRW', 'VND', 'CLP', 'PYG', 'XAF', 'XOF']);
+  const major = zeroDecimal.has(currency)
+    ? amountInMinor
+    : amountInMinor / 100;
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+    }).format(major);
+  } catch {
+    return `${currency} ${major.toFixed(2)}`;
+  }
+}
+
+type SupabaseClient = ReturnType<typeof createClient<any, 'public', any>>;
+void ({} as SupabaseClient); // suppress unused-type lint when helpers change
+
+async function fireOrderConfirmation(
+  supabase: SupabaseClient,
+  orderId: string,
+  ctx: { amountTotal: number; currency: string },
+): Promise<void> {
+  try {
+    // Look up order + items + buyer email + nickname
+    const { data: order } = await supabase
+      .from('orders')
+      .select(
+        'id, order_number, currency, total_amount, user_id, users:user_id(email, nickname)',
+      )
+      .eq('id', orderId)
+      .maybeSingle();
+    if (!order) return;
+
+    const buyerEmail = (order as { users?: { email?: string } | null }).users
+      ?.email;
+    const buyerName = (order as { users?: { nickname?: string } | null }).users
+      ?.nickname;
+    if (!buyerEmail) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[stripe-webhook] no buyer email for order',
+        orderId,
+        '— skipping confirmation email',
+      );
+      return;
+    }
+
+    const { data: items } = await supabase
+      .from('order_items')
+      .select('quantity, unit_price, products:product_id(name)')
+      .eq('order_id', orderId);
+
+    const list = (items ?? []).map((it) => {
+      const row = it as {
+        quantity: number;
+        unit_price: number;
+        products?: { name?: string } | null;
+      };
+      return {
+        name: row.products?.name ?? 'Item',
+        quantity: row.quantity,
+        priceFormatted: formatMoney(
+          Math.round(row.unit_price * row.quantity * 100),
+          ctx.currency,
+        ),
+      };
+    });
+
+    const totalFormatted = formatMoney(ctx.amountTotal, ctx.currency);
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+
+    const rendered = orderConfirmation({
+      orderNumber:
+        (order as { order_number?: string }).order_number ?? orderId.slice(0, 8),
+      customerName: buyerName ?? undefined,
+      items: list,
+      totalFormatted,
+      siteUrl,
+      currency: ctx.currency,
+    });
+
+    const result = await sendEmail({
+      to: buyerEmail,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
+    });
+
+    // Phase 1.4 — audit log
+    await supabase.from('email_log').insert({
+      user_id: (order as { user_id?: string }).user_id ?? null,
+      to_email: buyerEmail,
+      kind: 'order_confirmation',
+      provider_id: result.ok ? result.id : null,
+      status: result.ok ? 'sent' : 'failed',
+      error_message: result.ok ? null : result.error,
+    });
+
+    // eslint-disable-next-line no-console
+    console.log('[stripe-webhook] order confirmation email', {
+      orderId,
+      to: buyerEmail,
+      result,
+    });
+  } catch (err) {
+    // Never block the webhook response on email errors
+    // eslint-disable-next-line no-console
+    console.error(
+      '[stripe-webhook] order confirmation email failed:',
+      err instanceof Error ? err.message : err,
+    );
+  }
+}

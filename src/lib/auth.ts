@@ -281,3 +281,61 @@ export function onAuthStateChange(
   });
   return () => data.subscription.unsubscribe();
 }
+
+// ---------------------------------------------------------------
+// Phase 1.4 — password reset flow
+// ---------------------------------------------------------------
+
+/**
+ * Request a password reset link by sending a Supabase Auth magic email.
+ *
+ * The user gets an email from Supabase's built-in SMTP; we override
+ * the redirectTo so the link lands on /reset-password on this site.
+ *
+ * @returns ok:false with NOT_CONFIGURED when Supabase env is missing.
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ ok: boolean; error?: AuthError | string }> {
+  if (!email || !email.includes('@')) {
+    return { ok: false, error: 'INVALID_EMAIL' };
+  }
+  const supabase = getSupabase();
+  if (!supabase) {
+    if (!isSupabaseConfigured()) return { ok: false, error: 'NOT_CONFIGURED' };
+    return { ok: false, error: 'UNKNOWN' };
+  }
+
+  const baseUrl =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000');
+  const redirectTo =
+    process.env.NEXT_PUBLIC_SITE_URL
+      ? `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`
+      : `${baseUrl}/reset-password`;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  if (error) return { ok: false, error: mapAuthError(error.message) };
+  return { ok: true };
+}
+
+/**
+ * Update the password of the currently signed-in user. Used after the
+ * user clicks the email link and lands on /reset-password.
+ */
+export async function updatePassword(
+  newPassword: string,
+): Promise<{ ok: boolean; error?: AuthError | string }> {
+  if (!newPassword || newPassword.length < 6) {
+    return { ok: false, error: 'PASSWORD_TOO_SHORT' };
+  }
+  const supabase = getSupabase();
+  if (!supabase) return { ok: false, error: 'NOT_CONFIGURED' };
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { ok: false, error: mapAuthError(error.message) };
+  return { ok: true };
+}
