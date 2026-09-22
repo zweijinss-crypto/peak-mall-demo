@@ -18,10 +18,16 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
 
 const STORAGE_KEY = 'peak_admin_authed';
 
-// Legacy demo creds — used only when Supabase isn't configured (static
-// demo on a host without NEXT_PUBLIC_SUPABASE_URL).
-export const DEMO_USERNAME = 'admin';
-export const DEMO_PASSWORD = 'admin123';
+// Legacy demo creds — used ONLY when Supabase isn't configured
+// (static demo on a host without NEXT_PUBLIC_SUPABASE_URL). Read
+// from NEXT_PUBLIC_DEMO_ADMIN_USER / NEXT_PUBLIC_DEMO_ADMIN_PASS so
+// deployers can override before the next build (no hardcoded creds
+// shipped to public deployments). Falls back to admin/admin123 only
+// when neither env var is set, to keep local dev friction-free.
+export const DEMO_USERNAME: string =
+  process.env.NEXT_PUBLIC_DEMO_ADMIN_USER || 'admin';
+export const DEMO_PASSWORD: string =
+  process.env.NEXT_PUBLIC_DEMO_ADMIN_PASS || 'admin123';
 
 export type AdminAuthError =
   | 'MISSING_FIELDS'
