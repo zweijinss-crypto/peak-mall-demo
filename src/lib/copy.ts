@@ -681,6 +681,7 @@ export const COPY = {
   },
   aftersale: {
     title: '我的售后',
+    tabAll: '全部',
     empty: '没有售后记录',
     emptyDesc: '订单有售后需求时可在此发起申请',
     requestBtn: '申请售后',

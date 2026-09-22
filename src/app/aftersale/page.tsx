@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserShell, PageBanner } from '@/components/peak-mall';
 import { useT } from '@/lib/use-t';
@@ -18,18 +18,34 @@ interface AfterSaleTicket {
   createdAt: number;
 }
 
-const SEED: AfterSaleTicket[] = [
-  { id: 'AS_1001', orderId: 'ORD-7841', reason: 'Wrong color', status: 'pending', createdAt: 1726800000000 },
-  { id: 'AS_1002', orderId: 'ORD-7815', reason: 'Damaged on arrival', status: 'approved', createdAt: 1725840000000 },
-  { id: 'AS_1003', orderId: 'ORD-7798', reason: 'Wrong size', status: 'refunded', createdAt: 1725321600000 },
-];
+const SEED: AfterSaleTicket[] = (() => {
+  // Demo seeds. createdAt is relative to "now" so the dates stay
+  // current across reloads; computing it on module load means SEED
+  // is captured once per page lifecycle (matches the rest of the
+  // demo data — no per-render churn).
+  const now = Date.now();
+  const day = 86_400_000;
+  return [
+    { id: 'AS_1001', orderId: 'ORD-7841', reason: 'Wrong color',       status: 'pending' as Status,  createdAt: now - 1 * day },
+    { id: 'AS_1002', orderId: 'ORD-7815', reason: 'Damaged on arrival', status: 'approved' as Status, createdAt: now - 4 * day },
+    { id: 'AS_1003', orderId: 'ORD-7798', reason: 'Wrong size',         status: 'refunded' as Status, createdAt: now - 7 * day },
+  ];
+})();
 
 export default function AftersalePage() {
   const t = useT();
   const router = useRouter();
   const chrome = usePageChrome('aftersale');
   const orders = usePeakStore((s) => s.orders);
-  const [tickets] = useState<AfterSaleTicket[]>(SEED);
+  // Tickets live in local state so user submissions actually show up
+  // in the list instead of just flashing a toast. Production would
+  // back this with the API + Supabase table.
+  const [tickets, setTickets] = useState<AfterSaleTicket[]>(SEED);
+  // Status filter tab — defaults to "all" so first paint matches the
+  // previous behaviour. Counts are derived from the full list so a
+  // tab always reflects the real total even when other tabs are
+  // active.
+  const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all');
   const [requestOpen, setRequestOpen] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [reason, setReason] = useState('');
@@ -37,6 +53,10 @@ export default function AftersalePage() {
   const [submitted, setSubmitted] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  // Ref for the "Request after-sale" button — used to restore focus
+  // after the modal/submit flow so keyboard users don't lose their
+  // place (WAI-ARIA modal-dialog pattern).
+  const requestBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const STATUS_COLOR: Record<Status, string> = {
     pending: 'bg-amber-100 text-amber-700',
@@ -70,14 +90,48 @@ export default function AftersalePage() {
     { pending: 0, approved: 0, rejected: 0, completed: 0, refunded: 0 },
   );
 
+  // Filtered list — drives both the tab badge counts and the rendered
+  // rows. Empty filter renders the empty state, not the ticket list.
+  const visibleTickets = statusFilter === 'all'
+    ? tickets
+    : tickets.filter((tk) => tk.status === statusFilter);
+
+  // G2.4 — Modal a11y: close on Esc, restore focus to the trigger.
+  useEffect(() => {
+    if (!ticket) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setDetailId(null);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [ticket]);
+
   const submit = () => {
     if (!orderId || !reason) return;
-    // Demo: just show success banner. Real impl would POST /api/aftersale.
+    // Demo: append a new ticket with status=pending so the user sees
+    // their submission in the list. Real impl would POST /api/aftersale
+    // and reconcile the response.
+    const newTicket: AfterSaleTicket = {
+      id: 'AS_' + Math.floor(Date.now() / 1000).toString().slice(-6),
+      orderId,
+      reason,
+      note: note || undefined,
+      status: 'pending',
+      createdAt: Date.now(),
+    };
+    setTickets((prev) => [newTicket, ...prev]);
+    setStatusFilter('pending'); // jump to the new pending row
     setSubmitted(true);
     setRequestOpen(false);
     setOrderId('');
     setReason('');
     setNote('');
+    // Move focus back to the request button so keyboard users land
+    // in a sensible spot after the success toast.
+    requestBtnRef.current?.focus();
     setTimeout(() => setSubmitted(false), 2400);
   };
 
@@ -96,13 +150,49 @@ export default function AftersalePage() {
           ]}
           trailing={
             <button
+              ref={requestBtnRef}
               onClick={() => setRequestOpen(true)}
-              className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors flex-shrink-0"
+              aria-haspopup="dialog"
+              className="px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white text-[13px] font-bold rounded-md transition-colors flex-shrink-0 min-h-[28px]"
             >
               + {t.aftersale.requestBtn}
             </button>
           }
         />
+
+        {/* Status filter tabs — single-select, count badges reflect the
+            full list (not the filtered view). Default "all". */}
+        <div role="tablist" aria-label={t.aftersale.title} className="flex gap-2 mb-5 flex-wrap">
+          {([
+            { key: 'all', label: t.aftersale.tabAll, count: tickets.length },
+            { key: 'pending', label: t.aftersale.statusPending, count: statusCounts.pending },
+            { key: 'approved', label: t.aftersale.statusApproved, count: statusCounts.approved },
+            { key: 'refunded', label: t.aftersale.statusRefunded, count: statusCounts.refunded },
+            { key: 'rejected', label: t.aftersale.statusRejected, count: statusCounts.rejected },
+          ] as const).map((tab) => {
+            const active = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setStatusFilter(tab.key as Status | 'all')}
+                className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-bold border transition-colors min-h-[28px] ${
+                  active
+                    ? 'bg-orange-700 text-white border-orange-700'
+                    : 'bg-white text-ink-700 border-ink-200 hover:border-orange-400'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10.5px] font-bold ${
+                  active ? 'bg-white/20 text-white' : 'bg-ink-100 text-ink-600'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
         {submitted && (
           <div className="mb-5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-[13px]">
@@ -165,7 +255,7 @@ export default function AftersalePage() {
           </div>
         )}
 
-        {tickets.length === 0 ? (
+        {visibleTickets.length === 0 ? (
           <div className="bg-white rounded-xl py-14 text-center border border-ink-100">
             <div className="text-[40px] mb-3">🛠️</div>
             <div className="text-[14px] font-bold text-ink-900 mb-1.5">{t.aftersale.empty}</div>
@@ -173,7 +263,7 @@ export default function AftersalePage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {tickets.map((tk) => (
+            {visibleTickets.map((tk) => (
               // Use <div role="button"> rather than <article role="button">:
               // ARIA disallows the button role on <article> per WAI-ARIA 1.2.
               // Also include the visible text in the aria-label so screen

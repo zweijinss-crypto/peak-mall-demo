@@ -466,6 +466,7 @@ export const COPY_EN = {
   },
   aftersale: {
     title: 'After-sales',
+    tabAll: 'All',
     empty: 'No after-sales requests',
     emptyDesc: 'Submit a request here when you need help with an order',
     requestBtn: 'Request after-sales',
