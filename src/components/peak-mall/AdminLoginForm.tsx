@@ -31,12 +31,19 @@ const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboar
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (isAuthed()) {
-      router.replace(redirectTo);
-      return;
-    }
+    // NOTE: previously we did `router.replace(redirectTo)` here when
+    // isAuthed() returned true. That broke /login?tab=admin in demo
+    // mode (no Supabase env, isAuthed() short-circuits to true) and
+    // also for any user who has a stale peak-admin-auth flag from an
+    // earlier session — they could never re-authenticate as a
+    // different admin, the form just bounced them straight to the
+    // dashboard.
+    //
+    // Login page exists to *sign in*. Don't auto-redirect; let the
+    // user fill the form or click the "already signed in → dashboard"
+    // link we render in the header below.
     setChecking(false);
-  }, [router, redirectTo]);
+  }, []);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,6 +110,16 @@ const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboar
           <p className="text-[12.5px] text-neutral-600 leading-relaxed">
             {t.auth.adminPanelSub ?? t.admin.loginIntro}
           </p>
+          {isAuthed() && (
+            <div className="pt-1">
+              <a
+                href={redirectTo}
+                className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+              >
+                {isEn ? 'Already signed in — go to dashboard →' : '已登录,直接进入管理后台 →'}
+              </a>
+            </div>
+          )}
         </header>
 
         <div className="space-y-1.5">
