@@ -10,9 +10,10 @@
  */
 
 import { useEffect, useState, type FC, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { isAuthed, login } from '@/lib/admin/auth';
 import { useT } from '@/lib/use-t';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 
 export interface AdminLoginFormProps {
   /** 登录成功后跳转路径(默认 /admin/dashboard) */
@@ -21,7 +22,9 @@ export interface AdminLoginFormProps {
 
 const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboard' }) => {
   const router = useRouter();
+  const pathname = usePathname() ?? '';
   const t = useT();
+  const isEn = pathname === '/en' || pathname.startsWith('/en/');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +41,18 @@ const AdminLoginForm: FC<AdminLoginFormProps> = ({ redirectTo = '/admin/dashboar
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    // Phase 2.7 — preflight rate limit (5 attempts / 5 min / IP).
+    // Pre-flighting means the lockout message is visible without
+    // wasting a Supabase auth call.
+    const rl = await checkRateLimit('admin_login');
+    if (!rl.allowed) {
+      setError(
+        isEn
+          ? `Too many attempts. Please wait ${rl.retryAfter}s and try again.`
+          : `尝试次数过多,请 ${rl.retryAfter} 秒后再试。`,
+      );
+      return;
+    }
     const res = await login(username.trim(), password);
     if (!res.ok) {
       const code = (res.error as string | undefined) ?? '';

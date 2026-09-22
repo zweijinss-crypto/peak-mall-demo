@@ -13,6 +13,7 @@ import {
 import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
+import { checkRateLimit } from '@/lib/api/rate-limit';
 import {
   createCheckoutSession,
   parseCheckoutReturn,
@@ -199,6 +200,18 @@ export default function CheckoutPage() {
 
     try {
       const picked = addresses.find((a) => a.id === pickedAddrId);
+      // Phase 2.7 — preflight checkout rate limit (20 / 5min / IP)
+      // so burst-clicking "place order" can't drain Stripe API quota.
+      const rl = await checkRateLimit('checkout');
+      if (!rl.allowed) {
+        setPayError(
+          chrome.isEn
+            ? `Too many attempts. Please wait ${rl.retryAfter}s and try again.`
+            : `提交次数过多,请 ${rl.retryAfter} 秒后再试。`,
+        );
+        setPaying(false);
+        return;
+      }
       const session = await createCheckoutSession({
         items: checkoutItems,
         shipping: {
