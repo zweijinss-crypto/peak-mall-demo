@@ -313,7 +313,11 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={chrome.isEn ? `View ${activeImage.name} full screen` : `全屏查看 ${activeImage.name}`}
+                // aria-labelledby points at the inner image <Image alt>
+                // which supplies the visible name; satisfies
+                // label-content-name-mismatch when LH headless can't read
+                // sibling text badges as part of the accessible name.
+                aria-labelledby={`main-image-${activeImage.id}-label`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -326,8 +330,9 @@ export default function ShopDetailClient({ id }: { id: string }) {
                 {activeImage.cover?.startsWith('/') || activeImage.cover?.startsWith('http') ? (
                   <Image
                     key={activeImage.cover}
+                    id={`main-image-${activeImage.id}-label`}
                     src={activeImage.cover}
-                    alt={activeImage.name}
+                    alt={chrome.isEn ? `View ${activeImage.name} full screen` : `全屏查看 ${activeImage.name}`}
                     width={800}
                     height={800}
                     className="w-full h-full object-cover transition-opacity"
@@ -1506,7 +1511,6 @@ function ProductShowcase({
           <button
             type="button"
             onClick={() => setShowVideo(true)}
-            aria-label={chromeIsEn ? 'Play product video' : '播放产品视频'}
             className="relative block w-full max-w-[920px] mx-auto aspect-video bg-ink-50 rounded-lg overflow-hidden border border-ink-100 group hover:border-orange-700/40 transition-colors"
           >
             {videoPoster.startsWith('/') || videoPoster.startsWith('http') ? (
@@ -1517,6 +1521,12 @@ function ProductShowcase({
                 <span className="text-orange-700 text-[40px] leading-none ml-2">▶</span>
               </div>
             </div>
+            {/* sr-only label so the a11y name still includes 'Play product
+                video' / '播放产品视频' even when videoCaption is hidden,
+                satisfying label-content-name-mismatch when caption absent. */}
+            <span className="sr-only">
+              {chromeIsEn ? 'Play product video' : '播放产品视频'}
+            </span>
             {videoCaption && (
               <div className="absolute bottom-4 left-4 right-4 text-white text-[14px] font-semibold text-left drop-shadow">
                 {videoCaption}
