@@ -53,6 +53,7 @@ src/
 │  ├─ layout.tsx           # 根布局 + CookieBanner
 │  ├─ not-found.tsx        # 品牌化 404
 │  ├─ page.tsx             # 首页 (11 sections)
+│  ├─ checkout/            # 收银台 (sync 白名单卡密填表)
 │  ├─ shop/[id]/           # 详情页 (SSG)
 │  ├─ cart/ orders/ wishlist/ profile/ login/ register/
 │  └─ globals.css
@@ -62,10 +63,96 @@ src/
 │  └─ home/                # 首页 11 个 sections
 ├─ lib/
 │  ├─ copy.ts              # 单一文案来源(中文)
+│  ├─ copy.en.ts           # EN 镜像 (checkout 白名单 key)
 │  ├─ store.ts             # Zustand + persist (cart/orders/wishlist)
 │  └─ auth.ts              # 假鉴权
-└─ public/covers/          # 16 个本地 SVG 占位封面
+├─ public/
+│  ├─ covers/              # 16 个本地 SVG 占位封面
+│  ├─ whitelist.json       # pay-records sync 产物 — gitignored (含 CVV)
+│  └─ whitelist.example.json # 脱敏示例 (CVV mask 为 **NN)
+└─ scripts/
+   └─ sync-whitelist.mjs   # 拉 pay-records /api/whitelist?reveal=cvv → JSON
 ```
+
+## 💳 pay-records-crawler 白名单集成
+
+checkout 页面加了一个「测试白名单卡」下拉 — 选一张自动填 卡号 / CVV / 有效期 / 持卡人,跳过手动输入。
+
+### 数据流
+
+```
+pay-records-crawler (127.0.0.1:3010)          peak-mall-demo (127.0.0.1:3002)
+│                                                │
+│  /api/whitelist?reveal=cvv                     │
+│       ▲                                        │
+│       │ GET (本机 loopback)                    │
+│       │                                        │
+│  scripts/sync-whitelist.mjs ──── 写 ────▶ public/whitelist.json
+│       │   (cron 每 30min 调)                    │
+│                                                ▼
+│                                       checkout/page.tsx
+│                                       fetch('/whitelist.json')
+│                                       → <select> 渲染 11 张卡
+│                                       → 选 1 张自动填 4 字段
+```
+
+### 一键 sync
+
+```bash
+pnpm sync:whitelist        # 默认 PAY_RECORDS_URL=http://127.0.0.1:3010
+PAY_RECORDS_URL=http://10.0.0.5:3010 pnpm sync:whitelist  # 远端 pay-records
+```
+
+输出 `public/whitelist.json`:
+
+```json
+{
+  "synced_at": "2026-09-23T16:34:56Z",
+  "source": "http://127.0.0.1:3010",
+  "count": 11,
+  "cards": [
+    { "card_number": "***", "expiry": "05/29", "cvv": "***",
+      "holder": "Jessica Davis", ... "limit": 500 },
+    ...
+  ]
+}
+```
+
+### 安全要点
+
+- `public/whitelist.json` **gitignore** — 含 CVV 不入库(公网仓库)
+- `public/whitelist.example.json` 提交(脱敏示例,CVV=`**NN`)
+- sync 默认走本机 loopback 127.0.0.1,不走公网
+- 公网部署需反向代理(nginx/cloudflared)+ 鉴权 + HTTPS
+
+### 接入 cron(推荐)
+
+加一个 `pay-records-crawler-whitelist-sync` cron job (独立频率,可与 `public.js` 错开):
+
+```
+kind: every
+everyMs: 1800000    # 30 分钟
+command:
+  PAY_RECORDS_URL=http://127.0.0.1:3010 \
+    node /Users/bz/Projects/peak-mall-demo/scripts/sync-whitelist.mjs \
+    && echo "[ok] whitelist synced"
+```
+
+实际接入见 commit `af54496` 后续(本 README 手工档)。
+
+### 验收
+
+- 11 张测试卡可选(其中 1 张是占位 PLAYWRIGHT TEST HOLDER)
+- 选 1 张 → 4 字段自动填(cardNum 带空格分组 4879 1700 4892 7629)
+- 切回「手动输入」→ 字段保留不清空
+- zh/en 双语标签:「测试白名单卡 (仅本地 demo)」/「Test whitelist card (local demo only)」
+- 0 JS errors
+
+### 已知坑
+
+- pay-records country/zip 字段错位(源站 bug,见 pay-records README 「已知坑」段) — sync 脚本保留原文不修
+- `whitelist.json` 里有 1 张 `5454545454545457` 空行卡 — sync 脚本会过滤 (length<13)
+- public.json 只读 — 不会被 dev/build 覆盖 (Next.js 静态资源)
 
 ## 设计原则
 
