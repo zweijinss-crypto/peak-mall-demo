@@ -76,6 +76,29 @@ function detectBrand(num: string): 'visa' | 'mastercard' | null {
   return null;
 }
 
+/**
+ * Phase 4 #12 — Luhn mod-10 卡号校验 (ISO/IEC 7812)
+ * 1. 从右到左每隔一位翻倍 (>9 则 -9)
+ * 2. 全部求和 → 应能被 10 整除
+ * 返回: 'valid' | 'invalid' | 'incomplete' (<13 位 不验证)
+ */
+function luhnCheck(num: string): 'valid' | 'invalid' | 'incomplete' {
+  const d = num.replace(/\D/g, '');
+  if (d.length < 13) return 'incomplete';
+  let sum = 0;
+  let alt = false;
+  for (let i = d.length - 1; i >= 0; i--) {
+    let n = d.charCodeAt(i) - 48;  // char → digit (avoid parseInt overhead)
+    if (alt) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+    alt = !alt;
+  }
+  return sum % 10 === 0 ? 'valid' : 'invalid';
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const t = useT();
@@ -243,6 +266,7 @@ export default function CheckoutPage() {
 
   const cardValid =
     cardNum.replace(/\s/g, '').length >= 13 &&
+    luhnCheck(cardNum) === 'valid' &&
     /^\d{2}\/\d{2}$/.test(cardExp) &&
     /^\d{3,4}$/.test(cardCvv) &&
     cardHolder.trim().length > 0;
@@ -250,6 +274,8 @@ export default function CheckoutPage() {
   const detectedBrand = detectBrand(cardNum);
   const brandMismatch =
     cardNum.replace(/\s/g, '').length >= 4 && detectedBrand !== null && detectedBrand !== method;
+  const luhnStatus = luhnCheck(cardNum);
+  const luhnInvalid = luhnStatus === 'invalid';
 
   // Phase 3: 礼品码核销 — 调用 /api/redeem, 拿 amount_used 回填
   // Phase 4 #1: 输入到 4 位后自动 debounce 核销, onBlur 立即核销
@@ -364,7 +390,14 @@ export default function CheckoutPage() {
     setPayError(null);
 
     if (!cardValid) {
-      setPayError(t.checkout.cardCvv + ' / ' + t.checkout.cardHolder);
+      // Phase 4 #12 — 区分 Luhn vs 其他错误
+      if (luhnInvalid) {
+        setPayError(chrome.isEn
+          ? 'Invalid card number (Luhn check failed). Please re-enter.'
+          : '卡号校验失败 (Luhn 算法不通过) — 请检查后重新输入。');
+      } else {
+        setPayError(t.checkout.cardCvv + ' / ' + t.checkout.cardHolder);
+      }
       return;
     }
     if (brandMismatch) {
@@ -948,6 +981,14 @@ export default function CheckoutPage() {
                       {brandMismatch && (
                         <span className="block mt-1.5 text-[11.5px] text-rose-600">
                           {t.checkout.brandUnknown}
+                        </span>
+                      )}
+                      {/* Phase 4 #12 — Luhn 校验失败提示 */}
+                      {luhnInvalid && (
+                        <span role="alert" className="block mt-1.5 text-[11.5px] text-rose-600">
+                          {chrome.isEn
+                            ? '⚠ Invalid card number (Luhn check failed). Please re-enter.'
+                            : '⚠ 卡号校验失败 (Luhn 算法不通过) — 请检查后重新输入。'}
                         </span>
                       )}
                     </label>
