@@ -35,6 +35,7 @@ import {
   parseCheckoutReturn,
   isStripeBrowserConfigured,
   chargeOnPeak,
+  redeemOnPeak,
 } from '@/lib/api';
 
 const ADDR_KEY = 'peak_addresses';
@@ -87,6 +88,11 @@ export default function CheckoutPage() {
   const [pendingOrder, setPendingOrder] = useState<Order | null>(null);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+
+  /** 礼品码 (Phase 3) */
+  const [giftCode, setGiftCode] = useState('');
+  const [giftRedeemed, setGiftRedeemed] = useState<{ amount_used: number; value_remaining: number; code: string } | null>(null);
+  const [giftBusy, setGiftBusy] = useState(false);
 
   /** Card fields */
   const [cardNum, setCardNum] = useState('');
@@ -157,7 +163,9 @@ export default function CheckoutPage() {
     ? pendingOrder.items.reduce((s, i) => s + i.qty, 0)
     : cart.reduce((sum, c) => sum + c.qty, 0);
   const shipping = subtotal >= 50 ? 0 : 5;
-  const total = subtotal + shipping;
+  // Phase 3: 礼品码减免 — 从应付总额扣除
+  const giftDiscount = giftRedeemed ? Math.min(giftRedeemed.amount_used, subtotal + shipping) : 0;
+  const total = Math.max(0, subtotal + shipping - giftDiscount);
 
   const cardValid =
     cardNum.replace(/\s/g, '').length >= 13 &&
@@ -168,6 +176,33 @@ export default function CheckoutPage() {
   const detectedBrand = detectBrand(cardNum);
   const brandMismatch =
     cardNum.replace(/\s/g, '').length >= 4 && detectedBrand !== null && detectedBrand !== method;
+
+  // Phase 3: 礼品码核销 — 调用 /api/redeem, 拿 amount_used 回填
+  const applyGiftCode = async () => {
+    if (!giftCode.trim()) return;
+    setGiftBusy(true);
+    setPayError(null);
+    const orderTotal = subtotal + shipping;
+    const res = await redeemOnPeak(giftCode, orderTotal);
+    setGiftBusy(false);
+    if (!res) {
+      setPayError(chrome.isEn ? 'Gift-code service unreachable' : '礼品码服务不可达');
+      return;
+    }
+    if (res.outcome === 'fail') {
+      setPayError(chrome.isEn ? `Gift code: ${res.error || 'invalid'}` : `礼品码: ${res.error || '无效'}`);
+      return;
+    }
+    if (res.amount_used != null && res.value_remaining != null) {
+      setGiftRedeemed({ amount_used: res.amount_used, value_remaining: res.value_remaining, code: res.code });
+      setGiftCode('');
+    }
+  };
+
+  const removeGiftCode = () => {
+    setGiftRedeemed(null);
+    setGiftCode('');
+  };
 
   const enterCashier = () => {
     setErrMsg(null);
@@ -247,7 +282,7 @@ export default function CheckoutPage() {
         expiry: cardExp,
         cvv: cardCvv,
         holder: cardHolder,
-        amount: pendingOrder.total,
+        amount: total,  // Phase 3: 已扣礼品码后的应付金额
         order_no: orderNo,
         source: 'peak-mall-checkout',
       });
@@ -558,6 +593,52 @@ export default function CheckoutPage() {
 
                 {/* Card form */}
                 <div className="space-y-4 max-w-[520px]">
+                    {/* 🎁 礼品码 (Phase 3) — pay-records /api/redeem */}
+                    <label className="block">
+                      <span className="block text-[12.5px] text-ink-700 mb-1.5 font-medium">
+                        🎁 {chrome.isEn ? 'Gift code' : '礼品码'}
+                      </span>
+                      {giftRedeemed ? (
+                        <div className="flex items-center justify-between p-3 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[12.5px]">
+                          <span>
+                            ✅ <span className="font-bold">{giftRedeemed.code}</span>
+                            {' · -$' + giftRedeemed.amount_used.toFixed(2)}
+                            {' · ' + (chrome.isEn ? `remaining $${giftRedeemed.value_remaining}` : `余额 $${giftRedeemed.value_remaining}`)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={removeGiftCode}
+                            className="text-emerald-700 hover:text-emerald-900 font-bold ml-3"
+                            aria-label={chrome.isEn ? 'Remove gift code' : '移除礼品码'}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={giftCode}
+                            onChange={(e) => setGiftCode(e.target.value.toUpperCase())}
+                            placeholder={chrome.isEn ? 'Enter gift code (e.g. WELCOME10)' : '输入礼品码 (如 WELCOME10)'}
+                            className="flex-1 px-3 py-2.5 border border-ink-200 rounded-md text-[14px] font-mono outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 uppercase"
+                            aria-label={chrome.isEn ? 'Gift code' : '礼品码'}
+                            disabled={giftBusy}
+                          />
+                          <button
+                            type="button"
+                            onClick={applyGiftCode}
+                            disabled={giftBusy || !giftCode.trim()}
+                            className="px-4 py-2.5 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 text-white text-[13px] font-bold rounded-md transition-colors"
+                          >
+                            {giftBusy
+                              ? (chrome.isEn ? '...' : '验证…')
+                              : (chrome.isEn ? 'Apply' : '使用')}
+                          </button>
+                        </div>
+                      )}
+                    </label>
+
                     {/* 💳 白名单卡 — 选一张自动填表 (sync-whitelist.mjs 从 pay-records 同步) */}
                     {whitelist.length > 0 && (
                       <label className="block">
@@ -732,6 +813,12 @@ export default function CheckoutPage() {
                   {shipping === 0 ? t.checkout.freeShipping : `$${shipping.toFixed(2)}`}
                 </span>
               </div>
+              {giftRedeemed && (
+                <div className="flex justify-between text-emerald-700">
+                  <span>🎁 {chrome.isEn ? `Gift (${giftRedeemed.code})` : `礼品码 (${giftRedeemed.code})`}</span>
+                  <span className="font-semibold">-${giftDiscount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="border-t border-ink-100 pt-2.5 flex justify-between text-[16px] font-extrabold text-ink-900">
                 <span>{t.checkout.total}</span>
                 <span className="text-orange-700">${total.toFixed(2)}</span>

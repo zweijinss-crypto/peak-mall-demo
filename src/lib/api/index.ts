@@ -69,8 +69,10 @@ export { isStripeBrowserConfigured } from './stripe-browser';
 
 export {
   chargeOnPeak,
+  redeemOnPeak,
   getPayRecordsBase,
   isPayRecordsReachable,
   type ChargeInput,
   type ChargeResult,
+  type RedeemResult,
 } from './charge-api';

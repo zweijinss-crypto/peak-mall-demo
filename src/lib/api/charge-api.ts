@@ -31,6 +31,58 @@ export interface ChargeResult {
   error?: string;
 }
 
+/**
+ * 礼品码输入 / 核销 (Phase 3)
+ * peak-mall checkout 给一个「使用礼品码」输入框
+ * 预检: redeemOnPeak('preview', code, orderTotal) — 看礼品码是否可用 + 能减多少
+ * 提交: redeemOnPeak('redeem', code, amount, orderNo) — 真核销,落 gift_redemptions
+ */
+export interface RedeemResult {
+  outcome: 'success' | 'fail';
+  code: string;
+  /** 实际减免金额 (request amount 与卡余额的 min) */
+  amount_used?: number;
+  /** 礼品码剩余可用金额 */
+  value_remaining?: number;
+  /** 后端生成的订单号 (redeem mode) */
+  order_no?: string;
+  error?: string;
+  expires_at?: string;
+}
+
+export async function redeemOnPeak(
+  code: string,
+  amount: number,
+  order_no?: string,
+): Promise<RedeemResult | null> {
+  const base = getPayRecordsBase();
+  try {
+    const res = await fetch(`${base}/api/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: code.trim().toUpperCase(),
+        amount: Number(amount),
+        order_no: order_no || null,
+        source: 'peak-mall-checkout',
+      }),
+    });
+    if (!res.ok) {
+      return {
+        outcome: 'fail',
+        code: code.toUpperCase(),
+        error: `HTTP ${res.status}`,
+      };
+    }
+    return (await res.json()) as RedeemResult;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    // eslint-disable-next-line no-console
+    console.warn('[redeem-api] unreachable:', msg);
+    return null;
+  }
+}
+
 const DEFAULT_BASE = 'http://127.0.0.1:3010';
 
 export function getPayRecordsBase(): string {
