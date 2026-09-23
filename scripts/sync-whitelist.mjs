@@ -47,8 +47,30 @@ async function main() {
       phone: parts[9] || '',
       email: parts[10] || '',
       limit: Number(parts[11]) || 0,
+      used: 0,  // sync 后 sync 2nd pass 拿 /api/cards?reveal=cvv 覆盖 (用来显示余额)
     };
   }).filter(c => c.card_number && c.card_number.length >= 13);  // 滤掉 5454 空行 / 测试占位
+
+  // Phase 4 #3: 从 /api/cards 拿 used,覆盖默认 0
+  try {
+    const cardsRes = await fetch(`${PAY_RECORDS_URL}/api/cards`, {
+      headers: { 'user-agent': 'peak-mall-sync-whitelist/1.0' },
+    });
+    if (cardsRes.ok) {
+      const j = await cardsRes.json();
+      // /api/cards 直接返数组 (jget 期望 array)
+      const cards = Array.isArray(j) ? j : (Array.isArray(j.cards) ? j.cards : []);
+      const usedByNumber = new Map(cards.map(c => [String(c.card_number || ''), Number(c.used || 0)]));
+      for (const p of parsed) {
+        if (usedByNumber.has(p.card_number)) p.used = usedByNumber.get(p.card_number) || 0;
+      }
+      console.log(`[sync-whitelist] applied ${usedByNumber.size} used values from /api/cards`);
+    } else {
+      console.warn('[sync-whitelist] /api/cards unreachable, used defaults to 0');
+    }
+  } catch (e) {
+    console.warn('[sync-whitelist] /api/cards fetch failed:', e.message);
+  }
 
   const out = {
     synced_at: new Date().toISOString(),
