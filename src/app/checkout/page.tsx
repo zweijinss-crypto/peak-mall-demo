@@ -799,6 +799,34 @@ export default function CheckoutPage() {
                           ))}
                         </ul>
                       )}
+                      {/* Phase 4 #13 — bestPick 推荐 + 过期提醒 */}
+                      {bestPick && (() => {
+                        const isExpiring = bestPick.expiring_soon && bestPick.days_left != null;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => { setGiftCode(bestPick.code); applyGiftCode(bestPick.code); }}
+                            className={`mb-2 w-full px-3 py-2 text-[12.5px] font-semibold border rounded-md transition-colors flex items-center justify-center gap-1.5 ${
+                              isExpiring
+                                ? 'border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800'
+                                : 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800'
+                            }`}
+                            aria-label={chrome.isEn ? `Use recommended gift code ${bestPick.code}` : `使用推荐礼品码 ${bestPick.code}`}
+                          >
+                            <span aria-hidden="true">🎁</span>
+                            {chrome.isEn
+                              ? `Use ${bestPick.code} (-$${Math.min(bestPick.value_remaining, remainingOrderTotal).toFixed(0)})`
+                              : `使用 ${bestPick.code} (-¥${Math.min(bestPick.value_remaining, remainingOrderTotal).toFixed(0)})`}
+                            {isExpiring && (
+                              <span className="ml-1 text-[11px] font-normal opacity-90">
+                                {chrome.isEn
+                                  ? `⚠ expires in ${bestPick.days_left}d`
+                                  : `⚠ ${bestPick.days_left} 天后过期`}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })()}
                       <div className="flex gap-2">
                         <input
                           type="text"

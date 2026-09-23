@@ -144,6 +144,9 @@ export interface GiftCodeInfo {
   value_remaining: number;
   expires_at: string | null;
   note: string | null;
+  /** Phase 4 #13 — 过期提示 (返 only_active=true 时后端计算) */
+  days_left?: number | null;
+  expiring_soon?: boolean;
 }
 
 export async function listGiftCodes(): Promise<GiftCodeInfo[]> {
