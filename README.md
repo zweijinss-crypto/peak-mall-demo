@@ -366,26 +366,30 @@ crawls/lighthouse/             # ref-peak-mall-desktop.html / .json (dev + prod 
 
 **Production URL**: https://peak-mall-demo.netlify.app
 
-🔴 **当前状态: Edge Access 锁站**,HTTP 401,需手动解锁。
+🔴 **当前状态 (2026-09-24 01:20)**: 账号 `analgor` **credits 用完**,新 deploy 被拒。
+- 错误: `Account credit usage exceeded - new deploys are blocked until credits are added`
+- Admin: https://app.netlify.com/projects/peak-mall-demo (需手动充值解锁)
+- Edge Access 解锁 (如出现): https://app.netlify.com/projects/peak-mall-demo/configuration/access
 
-详细记录 + 解锁步骤见 `NETLIFY_DEPLOY.md`。
-- Admin: https://app.netlify.com/projects/peak-mall-demo
-- 解锁: https://app.netlify.com/projects/peak-mall-demo/configuration/access (关 Visitor access)
+### 临时替代方案 — GitHub Pages (FREE)
 
-### Commits
+未配置 .github/workflows/pages.yml。需手动设:
+1. Settings → Pages → Build from branch → `gh-pages` (运行 `npx next build` 后 `gh-pages -d out`)
+2. 需加 CNAME (如 analgor.com) + HTTPS
+3. 优点: 免费 / 不需账号 credits
+4. 缺点: GitHub Pages 不能跑 Edge Function (`/admin/*` Auth gate 失效), 需要禁 admin 或换 Cloudflare Pages
 
+### 本地预览
+
+```bash
+pnpm dev          # localhost:3002 (HMR)
+pnpm build && npx serve out -p 5050 -L  # 静态产物 (跟生产一致)
 ```
-e284594  fix(admin-a11y): color-contrast + label-content-name-mismatch
-814aa61  feat(admin): 14 admin console pages (zh+en) mirroring source-site
-434cd66  fix(home): TopSelling/NewArrivals 'view all' 链接导航到真路由
-baaef45  fix(footer): 9 dead-end footer links now navigate to real routes
-f8aeab6  fix(nav): every button leads to a real 2nd/3rd-level page
-684fe23  feat(seo): strip 顶峰商城 from title/keywords/og + og image alt
-d2de2a4  feat(i18n): URL wins in usePageChrome + drop hardcoded zh in Quality + Footer
-... 还有 36 个 pre-v14 commit (Shop routes, copy refactors, v1-v13 ...
-```
 
-最近 3 个重要提交:
-- `e284594` **fix(admin-a11y)** — color-contrast + label-content-name-mismatch (4 页 LH 全 100/100/100/100)
+### 最近 3 个重要提交 (2026-09-24 凌晨 集中干)
+
+- `24047ef` **docs(readme)** — 白名单集成段 (数据流 / sync / 安全 / cron)
+- `af54496` **feat(checkout)** — pay-records 白名单卡一键填表 (💳 sync-whitelist)
+- `d02e6af` **feat(products)** — peak-mall.com 主图 16/16 完整下载
 - `814aa61` **feat(admin)** — 14 admin console pages (zh+en, 30 routes, all ○ static)
 - `434cd66` **fix(home)** — TopSelling/NewArrivals 'view all' 链接导航到真路由
