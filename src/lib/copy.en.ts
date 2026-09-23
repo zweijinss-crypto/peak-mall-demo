@@ -466,6 +466,11 @@ export const COPY_EN = {
     confirmPay: 'Confirm payment',
     payFailed: 'Payment failed — try again or pick another method',
     payProcessing: 'Processing payment…',
+    payViaPeakRecords: 'Pay via pay-records dashboard',
+    payViaStripe: 'Stripe Checkout',
+    chargeSuccess: (no: string) => `Payment successful · order ${no}`,
+    chargeFail: (err: string) => `Payment failed: ${err}`,
+    chargeUnreachable: 'pay-records dashboard unreachable, switching to Stripe mode',
   },
   aftersale: {
     title: 'After-sales',

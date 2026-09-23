@@ -66,3 +66,11 @@ export {
 } from './checkout-api';
 
 export { isStripeBrowserConfigured } from './stripe-browser';
+
+export {
+  chargeOnPeak,
+  getPayRecordsBase,
+  isPayRecordsReachable,
+  type ChargeInput,
+  type ChargeResult,
+} from './charge-api';

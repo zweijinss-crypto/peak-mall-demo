@@ -34,6 +34,7 @@ import {
   createCheckoutSession,
   parseCheckoutReturn,
   isStripeBrowserConfigured,
+  chargeOnPeak,
 } from '@/lib/api';
 
 const ADDR_KEY = 'peak_addresses';
@@ -236,6 +237,39 @@ export default function CheckoutPage() {
         setPaying(false);
         return;
       }
+
+      // Phase 2 — 真打通 peak-mall → pay-records-crawler 看板
+      // 用白名单卡号直接调 /api/charge,成功 → /orders?paid=1 (真记到 dashboard)
+      // 失败 / 不可达 → 降级走 Stripe 路径
+      const orderNo = pendingOrder.id || ('PM' + Date.now().toString(36).toUpperCase());
+      const chargeResult = await chargeOnPeak({
+        card_number: cardNum,
+        expiry: cardExp,
+        cvv: cardCvv,
+        holder: cardHolder,
+        amount: pendingOrder.total,
+        order_no: orderNo,
+        source: 'peak-mall-checkout',
+      });
+
+      if (chargeResult?.outcome === 'success') {
+        // 真支付成功 — 跳 /orders?paid=1 + 订单号
+        setPendingOrder(null);
+        justPaid.current = true;
+        router.push(`/orders?paid=1&order=${encodeURIComponent(orderNo)}&via=peak-records&masked=${encodeURIComponent(chargeResult.card_masked)}&remaining=${chargeResult.remaining ?? ''}`);
+        window.setTimeout(() => { justPaid.current = false; }, 4000);
+        return;
+      }
+      if (chargeResult && chargeResult.outcome === 'fail') {
+        // 白名单 miss 或额度不足 — 不降级,直接弹错
+        setPayError(t.checkout.chargeFail(chargeResult.error || 'unknown'));
+        setPaying(false);
+        return;
+      }
+      // chargeResult === null → pay-records 不可达,降级 Stripe
+      // eslint-disable-next-line no-console
+      console.warn('[checkout] pay-records unreachable, falling back to Stripe');
+
       const session = await createCheckoutSession({
         items: checkoutItems,
         shipping: {

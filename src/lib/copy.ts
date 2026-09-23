@@ -681,6 +681,11 @@ export const COPY = {
     confirmPay: '确认支付',
     payFailed: '支付失败,请重试或换其他方式',
     payProcessing: '支付处理中…',
+    payViaPeakRecords: 'pay-records 真实扣款',
+    payViaStripe: 'Stripe 支付',
+    chargeSuccess: (no: string) => `支付成功 · 订单号 ${no}`,
+    chargeFail: (err: string) => `支付失败: ${err}`,
+    chargeUnreachable: 'pay-records 看板不可达,已切换 Stripe 模式',
   },
   aftersale: {
     title: '我的售后',
