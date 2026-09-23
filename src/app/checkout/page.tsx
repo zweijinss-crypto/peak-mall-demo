@@ -38,6 +38,9 @@ import {
   isStripeBrowserConfigured,
   chargeOnPeak,
   redeemOnPeak,
+  listGiftCodes,
+  pickBestGift,
+  type GiftCodeInfo,
 } from '@/lib/api';
 
 const ADDR_KEY = 'peak_addresses';
@@ -99,6 +102,8 @@ export default function CheckoutPage() {
   const [giftError, setGiftError] = useState<string | null>(null);
   /** Phase 4 #5 — 已用过的礼品码历史(localStorage),提供一键快选 */
   const [giftHistory, setGiftHistory] = useState<string[]>([]);
+  /** Phase 4 #7 — 历史快选折叠状态(默认收起,点 + 才展开) */
+  const [showHistory, setShowHistory] = useState(false);
   useEffect(() => {
     try {
       const raw = localStorage.getItem('peak_gift_history');
@@ -126,6 +131,16 @@ export default function CheckoutPage() {
       if (d && Array.isArray(d.cards)) setWhitelist(d.cards);
     }).catch(() => { /* ignore — 走手动输入 */ });
   }, []);
+  // Phase 4 #8 — 选白名单卡 = 填表 + 同步选中状态
+  const applyWhitelistCard = (cardNumber: string) => {
+    const c = whitelist.find(x => x.card_number === cardNumber);
+    if (!c) return;
+    setWhitelistSel(cardNumber);
+    setCardNum(formatCardNumber(c.card_number));
+    setCardExp(c.expiry || '');
+    setCardCvv(c.cvv || '');
+    setCardHolder(c.holder || '');
+  };
   // Phase 2.5 — terms consent required at checkout.
   const [termsAgreed, setTermsAgreed] = useState(false);
 
@@ -185,6 +200,46 @@ export default function CheckoutPage() {
   // Phase 4 #2: 礼品码减免 — 多码累计
   const giftDiscount = giftRedeemed.reduce((s, g) => s + Math.min(g.amount_used, subtotal + shipping), 0);
   const total = Math.max(0, subtotal + shipping - giftDiscount);
+
+  // Phase 4 #6 — 拉所有可用礼品码 + 算「本单最佳推荐」
+  const [giftCandidates, setGiftCandidates] = useState<GiftCodeInfo[]>([]);
+  useEffect(() => {
+    listGiftCodes().then(setGiftCandidates);
+  }, []);
+  // 推荐 = 重新计算当 orderTotal / 已 redeem 变时
+  const remainingOrderTotal = Math.max(0, subtotal + shipping - giftRedeemed.reduce((s, g) => s + g.amount_used, 0));
+  const bestPick = pickBestGift(giftCandidates, remainingOrderTotal, giftRedeemed);
+
+  // Phase 4 #8 — 余额不足主动建议换卡
+  // 当前选中卡与剩余金额
+  const selCardObj = whitelist.find(c => c.card_number === whitelistSel);
+  const selCardRemaining = selCardObj ? ((selCardObj.limit || 0) - (selCardObj.used || 0)) : null;
+  const insufficientBalance = selCardObj != null && selCardRemaining != null && remainingOrderTotal > selCardRemaining;
+  // 能覆盖本单的卡 — 按 remaining 降序,选剩余最多的（最少挥霍）
+  const bestCardPick: WhitelistCard | null = (() => {
+    const fits = whitelist
+      .map(c => ({ card: c, remaining: (c.limit || 0) - (c.used || 0) }))
+      .filter(x => x.remaining >= remainingOrderTotal && remainingOrderTotal > 0)
+      .sort((a, b) => b.remaining - a.remaining);
+    return fits[0]?.card || null;
+  })();
+  // 差异 = 本单金额 - selCardRemaining（预留接口,目前未直接渲染）
+  const deficit = insufficientBalance && selCardRemaining != null
+    ? remainingOrderTotal - selCardRemaining
+    : 0;
+
+  // Phase 4 #8 — 白名单加载完后,如果当前没选卡,默认选一张能覆盖本单的卡
+  // (用户手动选了或者已填表了就别动了)
+  useEffect(() => {
+    if (whitelist.length === 0) return;
+    if (whitelistSel) return;  // 已选别动
+    if (cardNum.trim()) return;  // 已手填别动
+    if (remainingOrderTotal <= 0) return;
+    if (bestCardPick && bestCardPick.card_number) {
+      applyWhitelistCard(bestCardPick.card_number);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whitelist, remainingOrderTotal]);
 
   const cardValid =
     cardNum.replace(/\s/g, '').length >= 13 &&
@@ -315,6 +370,26 @@ export default function CheckoutPage() {
     if (brandMismatch) {
       setPayError(t.checkout.brandUnknown);
       return;
+    }
+
+    // Phase 4 #8 — 余额不足拦截 (只有选了白名单卡才校验,手动填的卡号无 used 拿不到)
+    const selCard = whitelist.find(c => c.card_number === whitelistSel);
+    if (selCard) {
+      const cardRemaining = (selCard.limit || 0) - (selCard.used || 0);
+      if (total > cardRemaining) {
+        const deficit = (total - cardRemaining).toFixed(2);
+        const suggestion = bestCardPick
+          ? (chrome.isEn
+              ? ` Try ${bestCardPick.holder} · •••• ${bestCardPick.card_number.slice(-4)} ($${((bestCardPick.limit || 0) - (bestCardPick.used || 0)).toFixed(0)} left).`
+              : ` 可换 ${bestCardPick.holder} · •••• ${bestCardPick.card_number.slice(-4)}（剩 $${((bestCardPick.limit || 0) - (bestCardPick.used || 0)).toFixed(0)}）。`)
+          : '';
+        setPayError(
+          chrome.isEn
+            ? `Insufficient balance on ${selCard.holder}: $${cardRemaining.toFixed(2)} left, need $${deficit} more. Pick another card.${suggestion}`
+            : `${selCard.holder} 余额不足: 剩余 $${cardRemaining.toFixed(2)},还差 $${deficit}。请选其他卡。${suggestion}`
+        );
+        return;
+      }
     }
 
     setPaying(true);
@@ -754,14 +829,8 @@ export default function CheckoutPage() {
                           value={whitelistSel}
                           onChange={(e) => {
                             const v = e.target.value;
-                            setWhitelistSel(v);
-                            if (!v) return;  // 空选项 = 手动输入,不清
-                            const c = whitelist.find(x => x.card_number === v);
-                            if (!c) return;
-                            setCardNum(formatCardNumber(c.card_number));
-                            setCardExp(c.expiry || '');
-                            setCardCvv(c.cvv || '');
-                            setCardHolder(c.holder || '');
+                            if (!v) { setWhitelistSel(''); return; }
+                            applyWhitelistCard(v);
                           }}
                           className="w-full px-3 py-2.5 border border-ink-200 rounded-md text-[14px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
                           aria-label={t.checkout.whitelistLabel}
@@ -793,6 +862,27 @@ export default function CheckoutPage() {
                             </span>
                           );
                         })()}
+                        {/* Phase 4 #8 — 余额不足拦截 + 主动建议换卡 */}
+                        {insufficientBalance && bestCardPick && bestCardPick.card_number !== whitelistSel && (
+                          <button
+                            type="button"
+                            onClick={() => applyWhitelistCard(bestCardPick.card_number)}
+                            className="mt-2 w-full px-3 py-2 text-[12.5px] font-semibold border border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-800 rounded-md transition-colors flex items-center justify-center gap-1.5"
+                            aria-label={chrome.isEn ? `Switch to ${bestCardPick.holder} (sufficient balance)` : `换到 ${bestCardPick.holder}（余额足够）`}
+                          >
+                            <span aria-hidden="true">💳</span>
+                            {chrome.isEn
+                              ? `Switch to ${bestCardPick.holder} · •••• ${bestCardPick.card_number.slice(-4)} ($${((bestCardPick.limit || 0) - (bestCardPick.used || 0)).toFixed(0)} left)`
+                              : `换到 ${bestCardPick.holder} · •••• ${bestCardPick.card_number.slice(-4)} (剩 $${((bestCardPick.limit || 0) - (bestCardPick.used || 0)).toFixed(0)})`}
+                          </button>
+                        )}
+                        {insufficientBalance && !bestCardPick && (
+                          <span role="alert" className="block mt-2 text-[11.5px] text-rose-700 font-semibold">
+                            {chrome.isEn
+                              ? `⛔ No card in whitelist covers $${total.toFixed(2)}. Top up a card or pay manually.`
+                              : `⛔ 白名单里没有一张卡能覆盖 $${total.toFixed(2)}。充额度或手填卡。`}
+                          </span>
+                        )}
                       </label>
                     )}
                     <label className="block">
@@ -1004,7 +1094,8 @@ export default function CheckoutPage() {
                 disabled={
                   paying ||
                   !cardValid ||
-                  brandMismatch
+                  brandMismatch ||
+                  insufficientBalance  // Phase 4 #8 — 余额不足禁止提交
                 }
                 className="w-full py-3.5 bg-orange-700 hover:bg-orange-800 disabled:bg-ink-300 disabled:cursor-not-allowed text-white text-[14px] font-extrabold tracking-wide rounded-md transition-colors"
               >

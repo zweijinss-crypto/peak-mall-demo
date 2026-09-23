@@ -20,6 +20,8 @@ export interface ChargeInput {
   amount: number;        // dollars (peak-mall 用 dollar,跟 pay-records 对齐)
   order_no?: string;     // 自定义订单号(可选)
   source?: string;       // 标识调用方,默认 'peak-mall'
+  /** Phase 4 #9 — charge 失败时回滚的礼品码列表 */
+  gift_codes?: string[];
 }
 
 export interface ChargeResult {
@@ -115,6 +117,7 @@ export async function chargeOnPeak(input: ChargeInput): Promise<ChargeResult | n
         amount: Number(input.amount),
         order_no: input.order_no,
         source: input.source || 'peak-mall-checkout',
+        gift_codes: input.gift_codes || [],  // Phase 4 #9: 失败回滚依据
       }),
     });
     if (!res.ok) {
@@ -129,4 +132,46 @@ export async function chargeOnPeak(input: ChargeInput): Promise<ChargeResult | n
     console.warn('[charge-api] unreachable, falling back to Stripe:', msg);
     return null;
   }
+}
+/**
+ * 礼品码推荐 (Phase 4 #6)
+ * peak-mall checkout 拿 /api/gift-codes 后,在客户端算「本单最佳推荐」:
+ *   1. 剩余 >= orderTotal 的码中,选择 value_remaining 最小的(刚好够用,不浪费)
+ *   2. 都不够的,选择 value_remaining 最大的(本单减最多)
+ */
+export interface GiftCodeInfo {
+  code: string;
+  value_remaining: number;
+  expires_at: string | null;
+  note: string | null;
+}
+
+export async function listGiftCodes(): Promise<GiftCodeInfo[]> {
+  const base = getPayRecordsBase();
+  try {
+    const res = await fetch(`${base}/api/gift-codes?only_active=true`);
+    if (!res.ok) return [];
+    const j = (await res.json()) as { count: number; codes: GiftCodeInfo[] };
+    return j.codes || [];
+  } catch {
+    return [];
+  }
+}
+
+/** 计算「本单最佳推荐」:扣过已有 giftRedeemed 后还剩多少要付 */
+export function pickBestGift(
+  candidates: GiftCodeInfo[],
+  orderTotal: number,
+  alreadyRedeemed: Array<{ code: string }>,
+): GiftCodeInfo | null {
+  const usedSet = new Set(alreadyRedeemed.map(g => g.code));
+  const available = candidates.filter(c => !usedSet.has(c.code) && c.value_remaining > 0);
+  if (available.length === 0) return null;
+  // 1. 能完全覆盖本单的码:remaining >= orderTotal
+  const cover = available.filter(c => c.value_remaining >= orderTotal);
+  if (cover.length > 0) {
+    return cover.reduce((a, b) => a.value_remaining <= b.value_remaining ? a : b);
+  }
+  // 2. 没有能全覆盖的:选 remaining 最大的 (本单减最多)
+  return available.reduce((a, b) => a.value_remaining >= b.value_remaining ? a : b);
 }

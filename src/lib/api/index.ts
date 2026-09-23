@@ -72,7 +72,10 @@ export {
   redeemOnPeak,
   getPayRecordsBase,
   isPayRecordsReachable,
+  listGiftCodes,
+  pickBestGift,
   type ChargeInput,
   type ChargeResult,
   type RedeemResult,
+  type GiftCodeInfo,
 } from './charge-api';
