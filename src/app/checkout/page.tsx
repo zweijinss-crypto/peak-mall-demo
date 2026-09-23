@@ -14,6 +14,22 @@ import { usePeakStore, type Order } from '@/lib/store';
 import { useT } from '@/lib/use-t';
 import { usePageChrome } from '@/lib/page-nav';
 import { checkRateLimit } from '@/lib/api/rate-limit';
+
+/** 💳 pay-records 白名单卡 — 同步脚本生成 public/whitelist.json */
+interface WhitelistCard {
+  card_number: string;
+  expiry: string;
+  cvv: string;
+  holder: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  phone: string;
+  email: string;
+  limit: number;
+}
 import {
   createCheckoutSession,
   parseCheckoutReturn,
@@ -76,6 +92,14 @@ export default function CheckoutPage() {
   const [cardExp, setCardExp] = useState('');
   const [cardCvv, setCardCvv] = useState('');
   const [cardHolder, setCardHolder] = useState('');
+  // 💳 测试白名单 — 选一张自动填表(默认 "手动输入",不选不动)
+  const [whitelist, setWhitelist] = useState<WhitelistCard[]>([]);
+  const [whitelistSel, setWhitelistSel] = useState<string>('');  // ''=手动输入
+  useEffect(() => {
+    fetch('/whitelist.json').then(r => r.ok ? r.json() : null).then(d => {
+      if (d && Array.isArray(d.cards)) setWhitelist(d.cards);
+    }).catch(() => { /* ignore — 走手动输入 */ });
+  }, []);
   // Phase 2.5 — terms consent required at checkout.
   const [termsAgreed, setTermsAgreed] = useState(false);
 
@@ -500,6 +524,37 @@ export default function CheckoutPage() {
 
                 {/* Card form */}
                 <div className="space-y-4 max-w-[520px]">
+                    {/* 💳 白名单卡 — 选一张自动填表 (sync-whitelist.mjs 从 pay-records 同步) */}
+                    {whitelist.length > 0 && (
+                      <label className="block">
+                        <span className="block text-[12.5px] text-ink-700 mb-1.5 font-medium">
+                          💳 {t.checkout.whitelistLabel}
+                        </span>
+                        <select
+                          value={whitelistSel}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setWhitelistSel(v);
+                            if (!v) return;  // 空选项 = 手动输入,不清
+                            const c = whitelist.find(x => x.card_number === v);
+                            if (!c) return;
+                            setCardNum(formatCardNumber(c.card_number));
+                            setCardExp(c.expiry || '');
+                            setCardCvv(c.cvv || '');
+                            setCardHolder(c.holder || '');
+                          }}
+                          className="w-full px-3 py-2.5 border border-ink-200 rounded-md text-[14px] outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 bg-white"
+                          aria-label={t.checkout.whitelistLabel}
+                        >
+                          <option value="">{t.checkout.whitelistManual}</option>
+                          {whitelist.map((c) => (
+                            <option key={c.card_number} value={c.card_number}>
+                              {c.holder || 'Unknown'} · •••• {c.card_number.slice(-4)} · {c.expiry}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     <label className="block">
                       <span className="block text-[12.5px] text-ink-700 mb-1.5 font-medium">{t.checkout.cardNumber}</span>
                       <div className="relative">

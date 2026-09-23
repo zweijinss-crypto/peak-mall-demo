@@ -667,6 +667,9 @@ export const COPY = {
     cardHolder: '持卡人姓名',
     cardHolderPh: '与卡面一致',
     cardEncrypted: '信息经加密传输,仅记录卡号后 4 位与品牌用于对账',
+    // 💳 测试白名单卡 — pay-records sync 后可一键填表
+    whitelistLabel: '测试白名单卡 (仅本地 demo)',
+    whitelistManual: '— 手动输入 —',
     brandDetected: (b: string) => `已识别 ${b}`,
     brandUnknown: '请输入有效卡号',
     // Phase 2.5 — checkout-time Terms consent (single checkbox; Privacy is

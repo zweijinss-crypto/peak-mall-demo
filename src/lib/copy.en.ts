@@ -452,6 +452,9 @@ export const COPY_EN = {
     cardHolder: 'Cardholder name',
     cardHolderPh: 'As shown on card',
     cardEncrypted: 'Encrypted in transit. We only store the last 4 digits and brand for reference.',
+    // 💳 Test whitelist — sync from pay-records, one-click auto-fill
+    whitelistLabel: 'Test whitelist card (local demo only)',
+    whitelistManual: '— Enter manually —',
     brandDetected: (b: string) => `Detected ${b}`,
     brandUnknown: 'Enter a valid card number',
     // Phase 2.5 — checkout-time Terms consent. Privacy is linked from

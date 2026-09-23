@@ -15,7 +15,8 @@
     "ci:smoke": "node scripts/ci-smoke.mjs",
     "ci:lighthouse": "node scripts/ci-lighthouse.mjs",
     "ci:e2e": "playwright test",
-    "ci:e2e:install": "playwright install --with-deps chromium"
+    "ci:e2e:install": "playwright install --with-deps chromium",
+    "sync:whitelist": "PAY_RECORDS_URL=http://127.0.0.1:3010 node scripts/sync-whitelist.mjs"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.75.1",
