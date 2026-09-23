@@ -862,6 +862,34 @@ export default function CheckoutPage() {
                             </span>
                           );
                         })()}
+                        {/* Phase 4 #11 — 卡利用率徽章 (绿<70% / 黄 70-90% / 红>90%) */}
+                        {whitelistSel && (() => {
+                          const c = whitelist.find(x => x.card_number === whitelistSel);
+                          if (!c || !c.limit || c.limit <= 0) return null;
+                          const usedPct = Math.round((c.used || 0) / c.limit * 100);
+                          const remaining = c.limit - (c.used || 0);
+                          let color = 'emerald';
+                          let bg = 'bg-emerald-50';
+                          let border = 'border-emerald-200';
+                          let labelKey: 'r_low' | 'r_mid' | 'r_high' = 'r_low';
+                          if (usedPct >= 90) {
+                            color = 'rose'; bg = 'bg-rose-50'; border = 'border-rose-200'; labelKey = 'r_high';
+                          } else if (usedPct >= 70) {
+                            color = 'amber'; bg = 'bg-amber-50'; border = 'border-amber-200'; labelKey = 'r_mid';
+                          }
+                          const textCls = color === 'rose' ? 'text-rose-700' : color === 'amber' ? 'text-amber-700' : 'text-emerald-700';
+                          const tip = chrome.isEn
+                            ? (labelKey === 'r_high' ? 'Card almost exhausted — switch to avoid max-out.' : labelKey === 'r_mid' ? 'Card >70% used — consider switching to spread load.' : 'Healthy card — good to use.')
+                            : (labelKey === 'r_high' ? '卡即将刷爆 — 建议换一张避免一次刷满。' : labelKey === 'r_mid' ? '卡已用 70%+ — 可考虑换一张分散压力。' : '卡状态健康 — 可放心使用。');
+                          return (
+                            <span role="status" aria-label={`utilization ${usedPct}%`} className={`mt-1.5 inline-flex items-center gap-1.5 px-2 py-1 text-[11px] ${bg} ${border} border ${textCls} rounded-md font-medium`}>
+                              <span aria-hidden="true">{usedPct >= 90 ? '🔴' : usedPct >= 70 ? '🟡' : '🟢'}</span>
+                              <span>{chrome.isEn ? `Used ${usedPct}% · $${remaining.toFixed(0)} left` : `已用 ${usedPct}% · 剩 $${remaining.toFixed(0)}`}</span>
+                              <span className="opacity-70">·</span>
+                              <span className="opacity-90">{tip}</span>
+                            </span>
+                          );
+                        })()}
                         {/* Phase 4 #8 — 余额不足拦截 + 主动建议换卡 */}
                         {insufficientBalance && bestCardPick && bestCardPick.card_number !== whitelistSel && (
                           <button
