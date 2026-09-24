@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "node scripts/dev-with-sync.mjs",
     "build": "next build",
     "start": "next start -p 3002",
     "lint": "next lint",
@@ -16,7 +16,9 @@
     "ci:lighthouse": "node scripts/ci-lighthouse.mjs",
     "ci:e2e": "playwright test",
     "ci:e2e:install": "playwright install --with-deps chromium",
-    "sync:whitelist": "PAY_RECORDS_URL=http://127.0.0.1:3010 node scripts/sync-whitelist.mjs"
+    "sync:whitelist": "PAY_RECORDS_URL=http://127.0.0.1:3010 node scripts/sync-whitelist.mjs",
+    "dev:sync": "node scripts/dev-with-sync.mjs",
+    "dev:raw": "next dev -p 3002"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.75.1",
