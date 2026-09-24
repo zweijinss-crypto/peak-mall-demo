@@ -50,3 +50,7 @@ crawls/
 
 # 💳 pay-records-crawler 白名单 sync 产物 — 含 CVV 不入库
 public/whitelist.json
+
+# Netlify edge runtime auto-generated
+deno.lock
+
