@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PAY_RECORDS_URL = process.env.PAY_RECORDS_URL || 'http://127.0.0.1:3010';
-const POLL_MS = 60_000;
+const POLL_MS = 10_000;  // 10s 轮询 — pay-records 加白名单后 peak-mall checkout 10s 内可用
 
 async function syncOnce() {
   const url = `${PAY_RECORDS_URL}/api/whitelist?reveal=cvv`;
