@@ -20,13 +20,15 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PAY_RECORDS_URL = process.env.PAY_RECORDS_URL || 'http://127.0.0.1:3010';
+const PAY_RECORDS_TOKEN = process.env.PAY_RECORDS_TOKEN || '';  // service token bypass (when AUTH_REQUIRED=true)
 const POLL_MS = 10_000;  // 10s 轮询 — pay-records 加白名单后 peak-mall checkout 10s 内可用
 
 async function syncOnce() {
   const url = `${PAY_RECORDS_URL}/api/whitelist?reveal=cvv`;
   const t0 = Date.now();
   try {
-    const res = await fetch(url);
+    const headers = PAY_RECORDS_TOKEN ? { 'x-sync-token': PAY_RECORDS_TOKEN } : {};
+    const res = await fetch(url, { headers });
     if (!res.ok) {
       console.warn(`[dev-sync] HTTP ${res.status} from ${url} — keep current whitelist.json`);
       return false;
@@ -55,7 +57,7 @@ async function syncOnce() {
 
     // 第二轮: 拿 /api/cards 补 used
     try {
-      const cardsRes = await fetch(`${PAY_RECORDS_URL}/api/cards`);
+      const cardsRes = await fetch(`${PAY_RECORDS_URL}/api/cards`, { headers });
       if (cardsRes.ok) {
         const j = await cardsRes.json();
         const cards = Array.isArray(j) ? j : (Array.isArray(j.cards) ? j.cards : []);
