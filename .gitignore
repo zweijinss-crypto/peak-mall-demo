@@ -54,3 +54,7 @@ public/whitelist.json
 # Netlify edge runtime auto-generated
 deno.lock
 
+# 2026-10-09: 个人玩具 (赛博跑酷) — 不入 peak-mall 仓库
+subway-runner.html
+subway-runner-NOTES.md
+
