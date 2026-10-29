@@ -19,6 +19,10 @@ interface RemoteUser {
   status: string;
   invite_code: string | null;
   created_at: string;
+  /** Phase 1.4 — added by migration 0014. Optional because the column
+   *  does not exist until that migration is applied; a missing column
+   *  makes the whole select() fail, so we degrade gracefully. */
+  balance?: number | null;
 }
 
 function mapJoined(r: RemoteUser): AdminUser {
@@ -33,24 +37,48 @@ function mapJoined(r: RemoteUser): AdminUser {
     teamCount: 0,
     status,
     created_at: r.created_at.slice(0, 10),
-    balance: 0,
+    // Phase 1.4 — was hardcoded 0, which made every user's "available
+    // balance" show $0.00 in the admin console.
+    balance: Number(r.balance ?? 0),
     uuid: r.id,
   };
 }
 
-/** Fetch all users for the admin (phase 1.1.8). */
+/**
+ * Fetch all users for the admin (phase 1.1.8).
+ *
+ * Phase 1.4 — selects `balance` too. If the column does not exist yet
+ * (migration 0014 not applied), PostgREST rejects the whole select
+ * with a 42703 error, so we retry without it.
+ */
 export async function fetchAllUsers(): Promise<AdminUser[] | null> {
   const sb = getSupabase();
   if (!sb) return null;
-  const { data, error } = await sb
-    .from('users')
-    .select('id, email, nickname, role, status, invite_code, created_at')
-    .order('created_at', { ascending: false })
-    .limit(500);
-  if (error) {
-    // eslint-disable-next-line no-console
-    console.error('[admin-users-api] fetchAllUsers:', error);
-    return null;
+  const withBalance = 'id, email, nickname, role, status, invite_code, created_at, balance';
+  const withoutBalance = 'id, email, nickname, role, status, invite_code, created_at';
+
+  let data: unknown = null;
+  {
+    const res = await sb
+      .from('users')
+      .select(withBalance)
+      .order('created_at', { ascending: false })
+      .limit(500);
+    data = res.data;
+    if (res.error) {
+      // Missing `balance` column — migration 0014 not applied yet.
+      const retry = await sb
+        .from('users')
+        .select(withoutBalance)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (retry.error) {
+        // eslint-disable-next-line no-console
+        console.error('[admin-users-api] fetchAllUsers:', retry.error);
+        return null;
+      }
+      data = retry.data;
+    }
   }
   return ((data ?? []) as unknown as RemoteUser[]).map((r) => mapJoined(r));
 }

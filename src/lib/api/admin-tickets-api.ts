@@ -17,6 +17,7 @@ interface JoinedTicket {
   status: 'open' | 'replied' | 'closed';
   created_at: string;
   updated_at: string;
+  reply: string | null;
   orders: { order_no: string } | null;
   users: { email: string; nickname: string | null } | null;
 }
@@ -29,6 +30,8 @@ function mapJoined(r: JoinedTicket): AdminTicket {
     reason: r.reason,
     status: r.status,
     created_at: r.created_at.slice(0, 19),
+    updated_at: r.updated_at?.slice(0, 19),
+    reply: r.reply ?? undefined,
     uuid: r.id,
   };
 }
@@ -40,7 +43,7 @@ export async function fetchAllTickets(): Promise<AdminTicket[] | null> {
   const { data, error } = await sb
     .from('after_sales')
     .select(`
-      id, order_id, user_id, reason, status, created_at, updated_at,
+      id, order_id, user_id, reason, status, created_at, updated_at, reply,
       orders:order_id ( order_no ),
       users:user_id ( email, nickname )
     `)
@@ -76,6 +79,38 @@ export async function setTicketStatus(
   if (error) {
     // eslint-disable-next-line no-console
     console.error('[admin-tickets-api] setTicketStatus:', error);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Save an agent reply on a ticket.
+ *
+ * Saves the reply text and moves the ticket to 'replied' in one write.
+ * The `reply` column is added by migration 0013.
+ */
+export async function setTicketReply(
+  id: AdminId,
+  reply: string,
+): Promise<boolean> {
+  // 1. Always update the local store first (instant feedback).
+  const all = adminStore.tickets.read();
+  const next = all.map((t) =>
+    t.id === id ? { ...t, reply, status: 'replied' as const } : t,
+  );
+  adminStore.tickets.write(next);
+
+  const sb = getSupabase();
+  if (!sb) return true;
+
+  const { error } = await sb
+    .from('after_sales')
+    .update({ reply, status: 'replied', updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error('[admin-tickets-api] setTicketReply:', error);
     return false;
   }
   return true;

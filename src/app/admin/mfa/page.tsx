@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { isAuthed } from '@/lib/admin/auth';
 import { getCurrentUser } from '@/lib/auth';
 import { enrollAdminMfa, verifyAdminMfa } from '@/lib/admin/mfa-api';
@@ -23,6 +23,7 @@ export const dynamic = 'force-static';
  */
 export default function MfaPage() {
   const router = useRouter();
+  const pathname = usePathname() ?? '';
   const t = useT();
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
@@ -32,21 +33,26 @@ export default function MfaPage() {
   const [err, setErr] = useState<string | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Stay in the user's language on every redirect below.
+  const isEn = pathname.startsWith('/en/') || pathname === '/en';
+  const loginHref = isEn ? '/en/login?tab=admin' : '/admin/login';
+  const dashboardHref = isEn ? '/en/admin/dashboard' : '/admin/dashboard';
+
   useEffect(() => {
     setMounted(true);
     if (!isAuthed()) {
-      router.replace('/admin/login');
+      router.replace(loginHref);
       return;
     }
     // Demo mode (no Supabase env) — 2FA enrollment isn't available
     // without a real backend. Send the user to the dashboard.
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      router.replace('/admin/dashboard');
+      router.replace(dashboardHref);
       return;
     }
     const u = getCurrentUser();
     if (u?.email) setEmail(u.email);
-  }, [router]);
+  }, [router, loginHref, dashboardHref]);
 
   const onEnroll = async () => {
     if (!email) return;
@@ -78,7 +84,7 @@ export default function MfaPage() {
       setBusy(false);
       return;
     }
-    router.replace('/admin/dashboard');
+    router.replace(dashboardHref);
   };
 
   return (

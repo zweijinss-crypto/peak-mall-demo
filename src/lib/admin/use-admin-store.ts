@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { adminStore, SEED_PRODUCTS, type AdminOrder, type AdminProduct, type AdminUser, type AdminAgent, type AdminInvite, type AdminTicket, type AdminCommLog, type AdminWd, type AdminRules, type AdminHomeCfg, type AdminSupportCfg } from './fixtures';
 import type { Locale } from '../store';
@@ -40,9 +40,15 @@ export function useAdminStore<K extends AdminStoreKey>(
   const initial = (key === 'products' ? migrateProducts(adminStore.products.read() as any) : adminStore[key].read()) as any;
   const [data, setData] = useState<any>(transform ? transform(initial) : initial);
   const [mounted, setMounted] = useState(false);
+  // Keep `transform` in a ref so the mount effect does not need it as a
+  // dependency. Every caller passes a fresh inline closure, so putting it
+  // in the dep array would re-run the effect on every render.
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
   useEffect(() => {
     const fresh = (key === 'products' ? migrateProducts(adminStore.products.read() as any) : adminStore[key].read()) as any;
-    setData(transform ? transform(fresh) : fresh);
+    const tf = transformRef.current;
+    setData(tf ? tf(fresh) : fresh);
     setMounted(true);
     // If products were migrated, write the upgraded shape back so subsequent
     // reads are stable.
@@ -50,10 +56,13 @@ export function useAdminStore<K extends AdminStoreKey>(
       adminStore.products.write(fresh);
     }
   }, [key]);
-  const update = (v: any) => {
+  // Memoized so the returned setter identity is stable across renders —
+  // callers put it in useEffect dependency arrays, and an unstable
+  // identity would re-run those effects on every render.
+  const update = useCallback((v: any) => {
     setData(v);
     (adminStore[key].write as any)(v);
-  };
+  }, [key]);
   return [data, update, mounted, isEn];
 }
 

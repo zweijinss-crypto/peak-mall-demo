@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { isAuthed, logout, verifyAdmin, getAdminMfaStatus } from '@/lib/admin/auth';
 import { getSupabase, isSupabaseConfigured } from '@/lib/api/supabase-client';
 import { useT } from '@/lib/use-t';
+import { stripLocale } from '@/lib/locale';
 
 /**
  * AdminGate — client-side guard for every /admin/* page.
@@ -24,8 +25,21 @@ import { useT } from '@/lib/use-t';
  */
 export function AdminGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname() ?? '';
   const t = useT();
   const [ok, setOk] = useState<boolean | null>(null);
+
+  // Keep the user inside their language when we bounce them to
+  // login or to the 2FA page. Without this, an EN admin whose session
+  // expired was thrown back to the Chinese /admin/login.
+  const isEn = pathname.startsWith('/en/') || pathname === '/en';
+  const adminLoginHref = isEn ? '/en/login?tab=admin' : '/admin/login';
+  const mfaHref = isEn ? '/en/admin/mfa' : '/admin/mfa';
+  // The login URL may or may not already carry a query string
+  // (?tab=admin on EN, none on zh) — pick the right separator.
+  const adminLoginWithReason = adminLoginHref.includes('?')
+    ? `${adminLoginHref}&reason=not_admin`
+    : `${adminLoginHref}?reason=not_admin`;
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +73,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         if (!verified) {
           await logout();
-          router.replace('/admin/login?reason=not_admin');
+          router.replace(adminLoginWithReason);
           return;
         }
         setOk(true);
@@ -71,7 +85,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
       if (!verified) {
         await logout();
-        router.replace('/admin/login?reason=not_admin');
+        router.replace(adminLoginWithReason);
         return;
       }
       // Phase 3.2 — 2FA gate. If the admin has TOTP enabled and
@@ -80,7 +94,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
       const mfa = await getAdminMfaStatus();
       if (cancelled) return;
       if (mfa.totpEnabled && mfa.needsReverify) {
-        router.replace('/admin/mfa');
+        router.replace(mfaHref);
         return;
       }
       setOk(true);
@@ -88,7 +102,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, adminLoginWithReason, mfaHref]);
 
   if (ok !== true) {
     // Either verifying or genuinely unauthenticated. When genuinely

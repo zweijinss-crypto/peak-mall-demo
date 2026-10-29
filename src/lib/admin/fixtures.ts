@@ -140,6 +140,10 @@ export interface AdminTicket {
   /** Phase 1.1.8 — Supabase after_sales uuid, set when the row comes
    * from the DB; undefined for localStorage-only seed rows. */
   uuid?: string;
+  /** Agent reply text (migration 0013 adds the `reply` column). */
+  reply?: string;
+  /** Last update timestamp; set when the row comes from the DB. */
+  updated_at?: string;
 }
 
 export interface AdminCommLog {

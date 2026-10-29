@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useT } from '@/lib/use-t';
 import { getSupabase } from '@/lib/api/supabase-client';
+import { isSupabaseConfigured } from '@/lib/api';
 import { hasRole } from '@/lib/admin/rbac';
+import { AdminToolbar, slicePage } from '@/components/admin/AdminToolbar';
+import { toAdminCSV, downloadAdminCSV, csvFilename } from '@/lib/admin/admin-csv';
 
 /**
  * /admin/audit — super_admin only.
  *
  * Reads public.audit_log via Supabase (RLS gated to super_admin).
  * Shows latest 100 entries; client-side filter by resource + actor.
+ *
+ * Phase 1.4 — the two filters were plain inputs with no result count,
+ * no pagination and no export. With 100 rows loaded the admin had to
+ * scroll blind. Now it uses the shared AdminToolbar (search + count +
+ * pagination) and can export the filtered view as CSV.
  */
+
+const PAGE_SIZE = 25;
 
 interface AuditRow {
   id: number;
@@ -26,6 +36,84 @@ interface AuditRow {
   created_at: string;
 }
 
+/**
+ * Seed audit rows for demo mode (no Supabase).
+ *
+ * The audit page is the only admin page that had NO localStorage
+ * fixture — every other one is backed by adminStore.<key>.read().
+ * Without these, the static build shows an empty table and the
+ * pagination controls never appear (1 page of 0 rows).
+ *
+ * `before` / `after` mirror the DB shape (JSONB snapshot).
+ */
+const SEED_AUDIT: AuditRow[] = [
+  {
+    id: 1,
+    actor_id: null,
+    actor_email: 'admin@peakmall.com',
+    actor_role: 'super_admin',
+    action: 'update',
+    resource: 'products',
+    resource_id: 'legacy-1',
+    before: { status: false, price: 1299 },
+    after: { status: true, price: 1299 },
+    metadata: null,
+    created_at: '2026-09-20 11:24:12',
+  },
+  {
+    id: 2,
+    actor_id: null,
+    actor_email: 'ops@peakmall.com',
+    actor_role: 'ops',
+    action: 'update',
+    resource: 'orders',
+    resource_id: 'legacy-2',
+    before: { status: 'paid' },
+    after: { status: 'shipped' },
+    metadata: null,
+    created_at: '2026-09-20 13:48:40',
+  },
+  {
+    id: 3,
+    actor_id: null,
+    actor_email: 'finance@peakmall.com',
+    actor_role: 'finance',
+    action: 'payout',
+    resource: 'withdrawals',
+    resource_id: 'legacy-3',
+    before: { status: 'approved' },
+    after: { status: 'paid' },
+    metadata: null,
+    created_at: '2026-09-20 15:02:05',
+  },
+  {
+    id: 4,
+    actor_id: null,
+    actor_email: 'cs@peakmall.com',
+    actor_role: 'cs',
+    action: 'create',
+    resource: 'tickets',
+    resource_id: 'legacy-4',
+    before: null,
+    after: { status: 'open' },
+    metadata: null,
+    created_at: '2026-09-19 09:15:22',
+  },
+  {
+    id: 5,
+    actor_id: null,
+    actor_email: 'admin@peakmall.com',
+    actor_role: 'super_admin',
+    action: 'update',
+    resource: 'rules',
+    resource_id: 'legacy-5',
+    before: { rates: [8] },
+    after: { rates: [10] },
+    metadata: null,
+    created_at: '2026-09-18 17:44:59',
+  },
+];
+
 export function AuditClient() {
   const t = useT();
   const [rows, setRows] = useState<AuditRow[] | null>(null);
@@ -33,9 +121,20 @@ export function AuditClient() {
   const [resourceFilter, setResourceFilter] = useState<string>('');
   const [actorFilter, setActorFilter] = useState<string>('');
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     void (async () => {
+      // Demo mode (no Supabase) — there is no role to look up, so
+      // hasRole() always returns false and the page would show a
+      // "no permission" card to everyone reviewing the static build.
+      // AdminGateLayout already grants demo super_admin, so mirror
+      // that here and show the seeded log instead.
+      if (!isSupabaseConfigured()) {
+        setAllowed(true);
+        setRows(SEED_AUDIT);
+        return;
+      }
       const ok = await hasRole(['super_admin']);
       setAllowed(ok);
       if (!ok) {
@@ -44,7 +143,7 @@ export function AuditClient() {
       }
       const supabase = getSupabase();
       if (!supabase) {
-        setRows([]);
+        setRows(SEED_AUDIT);
         return;
       }
       const { data, error } = await supabase
@@ -60,6 +159,22 @@ export function AuditClient() {
     })();
   }, [t.admin.forbiddenReason]);
 
+  const filtered = useMemo(() => {
+    return (rows ?? []).filter((r) => {
+      if (resourceFilter && !r.resource.includes(resourceFilter)) return false;
+      if (actorFilter && !(r.actor_email ?? '').includes(actorFilter)) return false;
+      return true;
+    });
+  }, [rows, resourceFilter, actorFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const visible = slicePage(filtered, safePage, PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [resourceFilter, actorFilter]);
+
   if (allowed === false) {
     return (
       <div className="px-5 py-8">
@@ -70,11 +185,23 @@ export function AuditClient() {
     );
   }
 
-  const filtered = (rows ?? []).filter((r) => {
-    if (resourceFilter && !r.resource.includes(resourceFilter)) return false;
-    if (actorFilter && !(r.actor_email ?? '').includes(actorFilter)) return false;
-    return true;
-  });
+  const exportCsv = () => {
+    const headers = [
+      t.admin.auditColTime ?? 'Time',
+      t.admin.auditColActor ?? 'Actor',
+      t.admin.auditColAction ?? 'Action',
+      t.admin.auditColResource ?? 'Resource',
+      t.admin.auditColDiff ?? 'Diff',
+    ];
+    const body = filtered.map((r) => [
+      new Date(r.created_at).toLocaleString(),
+      r.actor_email ?? '',
+      r.action,
+      r.resource_id ? `${r.resource}#${r.resource_id}` : r.resource,
+      summarize(r.before, r.after),
+    ]);
+    downloadAdminCSV(csvFilename('admin-audit'), toAdminCSV(headers, body));
+  };
 
   return (
     <div className="px-5 py-6">
@@ -82,27 +209,41 @@ export function AuditClient() {
         <h1 className="text-[20px] font-bold text-neutral-800 mb-1">{t.admin.auditTitle ?? 'Audit log'}</h1>
         <p className="text-[12.5px] text-neutral-500 mb-5">{t.admin.auditSubtitle ?? 'Last 100 admin actions. Super admin only.'}</p>
 
-        <div className="flex gap-3 mb-4 flex-wrap">
-          <input
-            type="text"
-            value={resourceFilter}
-            onChange={(e) => setResourceFilter(e.target.value)}
-            placeholder={t.admin.auditFilterResource ?? 'Filter by resource (orders/products/...)'}
-            className="px-3 py-2 border border-neutral-200 rounded-md text-[13px] w-[260px] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-            aria-label={t.admin.auditFilterResource ?? 'Filter by resource'}
-          />
-          <input
-            type="text"
-            value={actorFilter}
-            onChange={(e) => setActorFilter(e.target.value)}
-            placeholder={t.admin.auditFilterActor ?? 'Filter by actor email'}
-            className="px-3 py-2 border border-neutral-200 rounded-md text-[13px] w-[240px] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-            aria-label={t.admin.auditFilterActor ?? 'Filter by actor'}
-          />
-          <div className="ml-auto text-[12.5px] text-neutral-500 self-center">
-            {filtered.length} / {rows?.length ?? 0}
+        <AdminToolbar
+          label={t.admin.auditTitle ?? 'Audit log'}
+          searchPlaceholder={t.admin.auditFilterResource ?? 'Filter by resource (orders/products/...)'}
+          searchAriaLabel={t.admin.auditFilterResource ?? 'Filter by resource'}
+          search={resourceFilter}
+          onSearchChange={setResourceFilter}
+          resultCount={filtered.length}
+          totalCount={rows?.length ?? 0}
+          onExport={exportCsv}
+          exportLabel={t.admin.exportCsv ?? 'Export CSV'}
+          page={safePage}
+          pageCount={pageCount}
+          onPageChange={setPage}
+          paginationLabels={{
+            prev: t.admin.pagePrev ?? 'Prev',
+            next: t.admin.pageNext ?? 'Next',
+            page: t.admin.pageIndicator ?? 'Page {current} of {total}',
+            current: safePage,
+            total: pageCount,
+          }}
+        >
+          <div className="flex items-center gap-1.5">
+            <label htmlFor="audit-actor-filter" className="text-[12px] text-neutral-500 whitespace-nowrap">
+              {t.admin.auditFilterActor ?? 'Filter by actor email'}
+            </label>
+            <input
+              id="audit-actor-filter"
+              type="search"
+              value={actorFilter}
+              onChange={(e) => setActorFilter(e.target.value)}
+              placeholder={t.admin.auditFilterActor ?? 'Filter by actor email'}
+              className="w-[220px] px-3 py-1.5 border border-neutral-200 rounded-md text-[13px] focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+            />
           </div>
-        </div>
+        </AdminToolbar>
 
         {rows === null ? (
           <div className="text-neutral-500 text-[13px]">Loading…</div>
@@ -123,7 +264,7 @@ export function AuditClient() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {visible.map((r) => (
                   <tr key={r.id} className="border-t border-neutral-100 hover:bg-neutral-50/60">
                     <td className="px-3 py-2 text-neutral-600 whitespace-nowrap font-mono">
                       {new Date(r.created_at).toLocaleString()}

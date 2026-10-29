@@ -10,7 +10,7 @@ import { useAdminStore } from '@/lib/admin/use-admin-store';
 import { usd, wdStatusLabel, type WdStatus } from '@/lib/admin/fixtures';
 import { Modal } from '@/components/admin/Modal';
 import { isSupabaseConfigured } from '@/lib/api';
-import { fetchAllWd, setWdStatus } from '@/lib/api/admin-wd-api';
+import { fetchAllWd, setWdStatus, setWdPaid } from '@/lib/api/admin-wd-api';
 
 // Shared button classes — admin-wide emerald/rose + ghost + focus rings.
 const BTN_APPROVE = 'px-2 py-0.5 text-[11px] font-medium rounded bg-emerald-700 text-white hover:bg-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1 transition-colors mr-1';
@@ -127,7 +127,7 @@ export function WdClient() {
     showToast('danger', t.admin.wd.rejectedToast(id));
   };
 
-  const handleConfirmPay = () => {
+  const handleConfirmPay = async () => {
     if (payingId === null) return;
     const target = wd.find((w: any) => w.id === payingId);
     if (!target) {
@@ -149,8 +149,23 @@ export function WdClient() {
           : w,
       ),
     );
-    if (isSupabaseConfigured()) void setWdStatus(id, 'paid');
     setPayingId(null);
+
+    // Phase 1.4 — the authoritative balance debit happens in Postgres
+    // (mark_withdrawal_paid RPC, migration 0014), not in this optimistic
+    // local update. The RPC locks the user row, refuses to over-draw
+    // and is idempotent, so a retry can't double-debit.
+    if (isSupabaseConfigured()) {
+      const r = await setWdPaid(id);
+      if (!r.ok) {
+        showToast('danger', t.admin.wd.paidFailedToast);
+        return;
+      }
+      if (!r.balanceDebited) {
+        showToast('info', t.admin.wd.paidNoDebitToast);
+        return;
+      }
+    }
     showToast('success', t.admin.wd.paidToast(id));
   };
 

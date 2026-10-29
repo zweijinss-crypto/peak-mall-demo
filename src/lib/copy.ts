@@ -1137,6 +1137,16 @@ export const COPY = {
     loginChecking: '正在校验…',
     logout: '退出登录',
     gateChecking: '正在校验登录态…',
+    // Phase 3.7.3 — admin gate card (AdminGateLayout). These were
+    // missing and fell back to the English defaults, so the Chinese
+    // UI showed an English denial card.
+    gateTitle: '需要管理员权限',
+    gateNoSession: '请先登录后再访问后台。',
+    gateNoRole: '当前账号没有管理员权限。',
+    gateNoResource: '当前角色无权访问此页面。',
+    gateSignedInAs: '当前登录账号',
+    gateSignIn: '去登录',
+    gateBackHome: '返回商城',
     // Phase 3.7 — admin RBAC (super_admin / ops / cs / finance)
     checkingPerms: '校验权限中…',
     noPermission: '没有访问权限',
@@ -1171,6 +1181,11 @@ export const COPY = {
     brandName: '顶峰商城',
     leaveConfirm: '确认离开管理后台,返回前台商城?',
     saved: '已保存',
+    // 通用工具条分页文案（admin 公共）
+    pagePrev: '上一页',
+    pageNext: '下一页',
+    pageIndicator: '第 {current} / {total} 页',
+    exportCsv: '导出 CSV',
     dashboard: {
       title: '数据看板',
       kpiMembers: '分销商/代理总数',
@@ -1443,6 +1458,16 @@ export const COPY = {
       bulkReply: '批量标记已回复',
       bulkClose: '批量关闭',
       bulkClear: '取消选择',
+      // 工具条（搜索 / 筛选 / 分页 / 导出）
+      searchPlaceholder: '搜索订单号、用户、诉求…',
+      searchAriaLabel: '搜索售后工单',
+      filterStatus: '状态',
+      filterAll: '全部',
+      exportCsv: '导出 CSV',
+      toolbarLabel: '售后工单工具条',
+      savedToast: '已保存回复',
+      saveReply: '保存回复',
+      cancel: '取消',
     },
     rules: {
       title: '佣金规则设置',
@@ -1474,6 +1499,34 @@ export const COPY = {
       settled: '已结算',
       pending: '待结算',
       empty: '暂无流水',
+      // 工具条（搜索 / 筛选 / 排序 / 分页 / 导出）
+      searchPlaceholder: '搜索用户、订单号、来源…',
+      searchAriaLabel: '搜索佣金流水',
+      filterStatus: '状态',
+      filterAll: '全部',
+      sortBy: '排序',
+      sortNewest: '最新优先',
+      sortOldest: '最早优先',
+      sortAmountDesc: '金额从高到低',
+      sortAmountAsc: '金额从低到高',
+      exportCsv: '导出 CSV',
+      toolbarLabel: '佣金流水工具条',
+      settle: '结算',
+      settleConfirmTitle: '确认结算',
+      settleConfirmBody: '将把这条佣金流水标记为「已结算」,金额 {amount} 将计入该用户的可用余额。',
+      settledToast: '已结算 {id}',
+      settledNoCreditToast: '已标记结算（未计入余额：数据库结算函数未启用）',
+      settleFailedToast: '结算失败',
+      // 批量结算
+      selectAll: '全选',
+      bulkSelected: (n: number) => `已选 ${n} 条`,
+      bulkSettle: '批量结算',
+      bulkClear: '取消选择',
+      bulkSettledToast: (total: number, credited: number) =>
+        credited === total
+          ? `已结算 ${total} 条`
+          : `已标记结算 ${total} 条（${credited} 条已计入余额）`,
+      colAction: '操作',
     },
     wd: {
       title: '提现审核',
@@ -1515,6 +1568,8 @@ export const COPY = {
       approvedToast: (id: number) => `已通过提现 #${id}`,
       rejectedToast: (id: number) => `已驳回提现 #${id}`,
       paidToast: (id: number) => `已到账 #${id}`,
+      paidNoDebitToast: '已标记到账（未扣余额：数据库结算函数未启用）',
+      paidFailedToast: '标记到账失败',
     },
     wdCenter: {
       title: '提现中心',

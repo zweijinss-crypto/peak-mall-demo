@@ -1162,6 +1162,14 @@ export const COPY_EN = {
     loginChecking: 'Checking…',
     logout: 'Sign out',
     gateChecking: 'Checking sign-in…',
+    // Phase 3.7.3 — admin gate card (AdminGateLayout).
+    gateTitle: 'Admin access required',
+    gateNoSession: 'Please sign in to access the admin area.',
+    gateNoRole: 'This account does not have admin access.',
+    gateNoResource: 'Your role cannot access this page.',
+    gateSignedInAs: 'Signed in as',
+    gateSignIn: 'Sign in',
+    gateBackHome: 'Back to the shop',
     // Phase 3.7 — admin RBAC (super_admin / ops / cs / finance)
     checkingPerms: 'Checking permissions…',
     noPermission: 'No permission',
@@ -1196,6 +1204,11 @@ export const COPY_EN = {
     brandName: 'Peak Mall',
     leaveConfirm: 'Leave the admin and go back to the shop?',
     saved: 'Saved',
+    // Shared toolbar pagination copy (admin common)
+    pagePrev: 'Prev',
+    pageNext: 'Next',
+    pageIndicator: 'Page {current} of {total}',
+    exportCsv: 'Export CSV',
     dashboard: {
       title: 'Dashboard',
       kpiMembers: 'Members (affiliates + agents)',
@@ -1468,6 +1481,16 @@ export const COPY_EN = {
       bulkReply: 'Bulk reply',
       bulkClose: 'Bulk close',
       bulkClear: 'Clear',
+      // Toolbar (search / filter / pagination / export)
+      searchPlaceholder: 'Search order #, user, reason…',
+      searchAriaLabel: 'Search after-sales tickets',
+      filterStatus: 'Status',
+      filterAll: 'All',
+      exportCsv: 'Export CSV',
+      toolbarLabel: 'After-sales toolbar',
+      savedToast: 'Reply saved',
+      saveReply: 'Save reply',
+      cancel: 'Cancel',
     },
     rules: {
       title: 'Commission rules',
@@ -1499,6 +1522,34 @@ export const COPY_EN = {
       settled: 'Settled',
       pending: 'Pending',
       empty: 'No ledger entries yet.',
+      // Toolbar (search / filter / sort / pagination / export)
+      searchPlaceholder: 'Search user, order #, source…',
+      searchAriaLabel: 'Search commission ledger',
+      filterStatus: 'Status',
+      filterAll: 'All',
+      sortBy: 'Sort',
+      sortNewest: 'Newest first',
+      sortOldest: 'Oldest first',
+      sortAmountDesc: 'Amount high to low',
+      sortAmountAsc: 'Amount low to high',
+      exportCsv: 'Export CSV',
+      toolbarLabel: 'Commission ledger toolbar',
+      settle: 'Settle',
+      settleConfirmTitle: 'Confirm settlement',
+      settleConfirmBody: 'Mark this commission as settled? {amount} will be added to the user’s available balance.',
+      settledToast: 'Settled {id}',
+      settledNoCreditToast: 'Marked as settled (balance not credited — the settlement function is not enabled in the database)',
+      settleFailedToast: 'Settlement failed',
+      colAction: 'Action',
+      // 批量结算
+      selectAll: 'Select all',
+      bulkSelected: (n: number) => `${n} selected`,
+      bulkSettle: 'Settle selected',
+      bulkClear: 'Clear selection',
+      bulkSettledToast: (total: number, credited: number) =>
+        credited === total
+          ? `Settled ${total} entr${total === 1 ? 'y' : 'ies'}`
+          : `Marked ${total} settled (${credited} credited to balance)`,
     },
     wd: {
       title: 'Withdrawal review',
@@ -1539,6 +1590,8 @@ export const COPY_EN = {
       approvedToast: (id: number) => `Approved withdrawal #${id}`,
       rejectedToast: (id: number) => `Rejected withdrawal #${id}`,
       paidToast: (id: number) => `Marked paid #${id}`,
+      paidNoDebitToast: 'Marked as paid (balance not debited — the payout function is not enabled in the database)',
+      paidFailedToast: 'Failed to mark as paid',
     },
     wdCenter: {
       title: 'Withdrawals',
